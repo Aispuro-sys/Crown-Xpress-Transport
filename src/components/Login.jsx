@@ -22,120 +22,142 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Deep premium background gradients matching Crown identity */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-crown-navy-dark via-slate-900 to-crown-navy" />
-      <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-crown-gold/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-crown-navy/40 rounded-full blur-[140px] pointer-events-none" />
-
-      {/* Main Container - Scaled up for premium layout */}
-      <div className="w-full max-w-lg relative z-10 my-4">
-        {/* White Card - Spacious and high contrast */}
-        <div className="bg-white rounded-3xl shadow-2xl shadow-black/50 overflow-hidden border border-slate-100">
-          {/* Top Elegant Accent Strip in Crown Gold */}
-          <div className="h-2 bg-gradient-to-r from-crown-gold via-crown-gold-dark to-crown-gold" />
-
-          <div className="px-8 sm:px-12 py-12">
-            {/* Header / Logo integration with optimal spacing */}
-            <div className="flex flex-col items-center text-center mb-10">
-              <div className="w-36 h-36 p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center mb-5">
-                <img src="/crown-logo.png" alt="Crown Xpress Logo" className="w-full h-full object-contain" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-crown-navy-dark tracking-tight">
-                {language === 'es' ? 'Portal de Inspección' : 'Inspection Portal'}
-              </h1>
-              <p className="text-xs sm:text-sm font-semibold tracking-[0.25em] text-crown-gold-dark uppercase mt-1">
-                {language === 'es' ? 'Lista de 20 Puntos' : '20 Point Checklist'}
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Username Input - Big and highly touch-accessible */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  {language === 'es' ? 'Usuario' : 'Username'}
-                </label>
-                <div className="relative group">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-crown-navy transition-colors" />
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-200/80 rounded-xl text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-crown-navy focus:ring-4 focus:ring-crown-navy/5 transition-all font-medium"
-                    placeholder={language === 'es' ? 'Ingrese su usuario' : 'Enter username'}
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
-
-              {/* Password Input - Big and highly touch-accessible */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  {language === 'es' ? 'Contraseña' : 'Password'}
-                </label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-crown-navy transition-colors" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-200/80 rounded-xl text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-crown-navy focus:ring-4 focus:ring-crown-navy/5 transition-all font-medium"
-                    placeholder={language === 'es' ? 'Ingrese su contraseña' : 'Enter password'}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-sm text-rose-700 flex items-start gap-3">
-                  <span className="w-2 h-2 bg-rose-500 rounded-full mt-1.5 flex-shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {/* Submit Button - Heavy premium button with brand color */}
-              <button
-                type="submit"
-                disabled={loading || !username || !password}
-                className="w-full py-4.5 bg-gradient-to-r from-crown-navy to-crown-navy-dark text-white font-bold rounded-xl hover:shadow-xl hover:shadow-crown-navy/20 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 mt-8 text-base tracking-wide border-b-4 border-crown-gold"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <span>{language === 'es' ? 'Iniciar Sesión' : 'Sign In'}</span>
-                )}
-              </button>
-            </form>
-
-            {/* Translation Button */}
-            <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-              <button
-                type="button"
-                onClick={toggleLanguage}
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-crown-navy transition-colors py-1 px-3 rounded-lg hover:bg-slate-50"
-              >
-                <Languages className="w-4 h-4 text-crown-gold-dark" />
-                {language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
-              </button>
-            </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-white flex items-center justify-center p-5 font-sans">
+      <div className="w-full max-w-[450px] bg-white rounded-3xl border border-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.12)] px-10 py-12 animate-slide-up">
+        
+        {/* Logo and Titles Section */}
+        <div className="text-center mb-10">
+          <div className="h-28 w-full flex items-center justify-center mb-6">
+            <img 
+              src="/crown-logo.png" 
+              alt="Crown Logo" 
+              className="max-h-full w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-125" 
+            />
+          </div>
+          <div className="text-xs font-semibold text-crown-gold-dark tracking-[0.15em] uppercase mb-1.5">
+            {language === 'es' ? 'Portal de Inspección' : 'Inspection Portal'}
+          </div>
+          <h1 className="text-3xl font-bold text-crown-navy-dark tracking-tight mb-2">
+            {language === 'es' ? 'Iniciar Sesión' : 'Sign In'}
+          </h1>
+          <div className="text-[11px] text-slate-400 font-medium tracking-[0.05em] uppercase">
+            {language === 'es' ? 'Lista de 20 puntos' : '20 Point Checklist'}
           </div>
         </div>
 
-        {/* Brand Copyright Footer */}
-        <p className="text-center text-xs tracking-wider text-slate-400 mt-8">
-          © {new Date().getFullYear()} Crown Xpress Transport · {language === 'es' ? 'Operaciones Seguras' : 'Secure Operations'}
-        </p>
+        {/* Input Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Username */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-crown-navy-dark tracking-[0.08em] uppercase">
+              {language === 'es' ? 'Usuario' : 'Username'}
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                <User className="w-[18px] h-[18px] text-crown-gold-dark" />
+              </span>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-crown-gold focus:ring-4 focus:ring-crown-gold/10 transition-all font-medium"
+                placeholder={language === 'es' ? 'Ingrese su usuario' : 'Enter your username'}
+                required
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-crown-navy-dark tracking-[0.08em] uppercase">
+              {language === 'es' ? 'Contraseña' : 'Password'}
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                <Lock className="w-[18px] h-[18px] text-crown-gold-dark" />
+              </span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full pl-11 pr-11 py-3.5 bg-slate-50/50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-crown-gold focus:ring-4 focus:ring-crown-gold/10 transition-all font-medium"
+                placeholder={language === 'es' ? 'Ingrese su contraseña' : 'Enter your password'}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-crown-gold-dark hover:text-crown-navy transition-colors p-1"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember me & Forgot Link */}
+          <div className="flex justify-between items-center text-sm my-1">
+            <label className="flex items-center text-slate-500 font-normal normal-case cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                className="mr-2 cursor-pointer w-4 h-4 accent-crown-gold text-white"
+              />
+              {language === 'es' ? 'Recuérdame' : 'Remember me'}
+            </label>
+            <button
+              type="button"
+              className="text-crown-gold-dark hover:text-crown-navy font-semibold transition-colors text-xs"
+              onClick={() => alert(language === 'es' ? 'Comuníquese con el administrador para restablecer su acceso.' : 'Please contact admin to reset your access.')}
+            >
+              {language === 'es' ? '¿Olvidó su contraseña?' : 'Forgot password?'}
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs text-rose-700 flex items-start gap-2.5">
+              <span className="w-1.5 h-1.5 bg-rose-500 rounded-full mt-1.5 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            disabled={loading || !username || !password}
+            className="w-full py-3.5 bg-gradient-to-r from-crown-navy to-crown-navy-dark text-white font-bold rounded-lg hover:shadow-lg hover:shadow-crown-navy/20 hover:-translate-y-[1px] active:translate-y-0 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none text-sm uppercase tracking-[0.08em]"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
+            ) : (
+              <span>{language === 'es' ? 'Iniciar Sesión' : 'Sign In'}</span>
+            )}
+          </button>
+
+          {/* Language Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="w-full py-3.5 bg-transparent border-2 border-slate-200/80 hover:border-crown-gold hover:bg-slate-50 text-crown-gold-dark hover:text-crown-navy font-bold rounded-lg text-xs transition-all flex items-center justify-center gap-2"
+          >
+            <Languages className="w-4 h-4" />
+            <span className="uppercase">{language === 'es' ? 'Switch to English' : 'Cambiar a Español'}</span>
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="text-center text-[10px] text-slate-400 mt-10 tracking-[0.03em]">
+          © {new Date().getFullYear()} Crown Express Transport - {language === 'es' ? 'Operaciones Seguras' : 'Secure Operations'}
+          <div className="mt-1 space-x-2">
+            <button type="button" className="hover:text-crown-navy-dark hover:underline">{language === 'es' ? 'Términos' : 'Terms'}</button>
+            <span>•</span>
+            <button type="button" className="hover:text-crown-navy-dark hover:underline">{language === 'es' ? 'Privacidad' : 'Privacy'}</button>
+          </div>
+        </div>
+
       </div>
     </div>
   )
