@@ -14,21 +14,18 @@ const YARDS = [
 
 export default function UnitInfoEnhanced() {
   const { t, language } = useLanguage()
-  const { unitInfo, setUnitInfo } = useInspection()
+  const { unitInfo, updateUnitInfo } = useInspection()
   const { user } = useAuth()
 
   // Auto-fill date and guard name on mount
   useEffect(() => {
-    setUnitInfo(prev => ({
-      ...prev,
-      inspection_date: new Date().toISOString().split('T')[0],
-      guard_name: user?.full_name || '',
-      location: user?.location_id ? YARDS.find(y => y.id === user.location_id)?.name || '' : '',
-    }))
-  }, [user, setUnitInfo])
+    updateUnitInfo('inspectionDate', new Date().toISOString().slice(0, 16))
+    updateUnitInfo('driverName', user?.full_name || '')
+    updateUnitInfo('location', user?.location_id ? YARDS.find(y => y.id === user.location_id)?.name || '' : '')
+  }, [user, updateUnitInfo])
 
   const update = (field, value) => {
-    setUnitInfo(prev => ({ ...prev, [field]: value }))
+    updateUnitInfo(field, value)
   }
 
   const validateField = (field) => {
@@ -53,9 +50,9 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="text"
-              value={unitInfo.trailer_number || ''}
-              onChange={e => update('trailer_number', e.target.value.toUpperCase())}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('trailer_number')}`}
+              value={unitInfo.trailerNumber || ''}
+              onChange={e => update('trailerNumber', e.target.value.toUpperCase())}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('trailerNumber')}`}
               placeholder={language === 'es' ? 'Ej: T-12345' : 'Ex: T-12345'}
               required
             />
@@ -69,9 +66,9 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="text"
-              value={unitInfo.seal_number || ''}
-              onChange={e => update('seal_number', e.target.value.toUpperCase())}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('seal_number')}`}
+              value={unitInfo.sealNumber || ''}
+              onChange={e => update('sealNumber', e.target.value.toUpperCase())}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('sealNumber')}`}
               placeholder={language === 'es' ? 'Ej: S-98765' : 'Ex: S-98765'}
               required
             />
@@ -85,8 +82,8 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="text"
-              value={unitInfo.lock_number || ''}
-              onChange={e => update('lock_number', e.target.value.toUpperCase())}
+              value={unitInfo.lockNumber || ''}
+              onChange={e => update('lockNumber', e.target.value.toUpperCase())}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20"
               placeholder={language === 'es' ? 'Ej: L-54321' : 'Ex: L-54321'}
             />
@@ -100,9 +97,9 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="text"
-              value={unitInfo.driver_name || ''}
-              onChange={e => update('driver_name', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('driver_name')}`}
+              value={unitInfo.driverName || ''}
+              onChange={e => update('driverName', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('driverName')}`}
               placeholder={language === 'es' ? 'Nombre completo del operador' : 'Operator full name'}
               required
             />
@@ -116,9 +113,9 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="date"
-              value={unitInfo.inspection_date || ''}
-              onChange={e => update('inspection_date', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('inspection_date')}`}
+              value={unitInfo.inspectionDate || ''}
+              onChange={e => update('inspectionDate', e.target.value)}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('inspectionDate')}`}
               required
             />
           </div>
@@ -142,6 +139,20 @@ export default function UnitInfoEnhanced() {
             </select>
           </div>
 
+          {/* Odometer */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              {language === 'es' ? 'Odómetro' : 'Odometer'}
+            </label>
+            <input
+              type="text"
+              value={unitInfo.odometer || ''}
+              onChange={e => update('odometer', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20"
+              placeholder={language === 'es' ? 'Ej: 123456' : 'Ex: 123456'}
+            />
+          </div>
+
           {/* Guard Name (readonly) */}
           <div className="col-span-1">
             <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
@@ -150,7 +161,7 @@ export default function UnitInfoEnhanced() {
             </label>
             <input
               type="text"
-              value={unitInfo.guard_name || ''}
+              value={unitInfo.guardName || ''}
               readOnly
               className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-700"
               placeholder={language === 'es' ? 'Asignado automáticamente' : 'Auto-assigned'}

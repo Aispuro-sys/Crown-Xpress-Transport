@@ -13,10 +13,13 @@ export function InspectionProvider({ children }) {
   const [unitInfo, setUnitInfo] = useState({
     trailerNumber: '',
     sealNumber: '',
+    lockNumber: '',
     driverName: '',
     odometer: '',
     location: '',
     inspectionDate: new Date().toISOString().slice(0, 16),
+    guardName: '',
+    notes: '',
     highSecuritySeal: 'yes',
     sealAffixed: 'yes',
   })
@@ -61,10 +64,13 @@ export function InspectionProvider({ children }) {
     setUnitInfo({
       trailerNumber: '',
       sealNumber: '',
+      lockNumber: '',
       driverName: '',
       odometer: '',
       location: '',
       inspectionDate: new Date().toISOString().slice(0, 16),
+      guardName: '',
+      notes: '',
       highSecuritySeal: 'yes',
       sealAffixed: 'yes',
     })

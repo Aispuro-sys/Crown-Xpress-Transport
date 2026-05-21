@@ -32,7 +32,7 @@ export default function Login() {
             <img 
               src="/crown-logo.png" 
               alt="Crown Logo" 
-              className="max-h-full w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-125" 
+              className="max-h-full w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.08)] scale-105" 
             />
           </div>
           <div className="text-xs font-semibold text-crown-gold-dark tracking-[0.15em] uppercase mb-1.5">
