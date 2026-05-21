@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
-  const { language, toggleLanguage } = useLanguage()
+  const { t, language, toggleLanguage } = useLanguage()
   const { login, loading } = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
