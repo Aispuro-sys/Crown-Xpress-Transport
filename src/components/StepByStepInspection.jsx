@@ -143,59 +143,73 @@ export default function StepByStepInspection() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between gap-4">
-          <button
-            onClick={goToPrevious}
-            disabled={isFirstStep}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-              isFirstStep
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
-          >
-            <ChevronLeft className="w-4 h-4" />
-            {language === 'es' ? 'Anterior' : 'Previous'}
-          </button>
-
-          {/* Step indicators */}
-          <div className="flex items-center gap-1">
-            {inspectionPoints.map((point, index) => {
-              const state = points[point.id]
-              const isActive = index === currentStep
-              const isCompleted = state?.status === 'good' || (state?.status === 'bad' && state?.issueId && state?.photo)
-              
-              return (
-                <button
-                  key={point.id}
-                  onClick={() => goToStep(index)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-crown-gold text-white ring-2 ring-crown-gold/50'
-                      : isCompleted
-                      ? state?.status === 'good'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-rose-600 text-white'
-                      : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
-                  }`}
-                >
-                  {point.id}
-                </button>
-              )
-            })}
+        <div className="space-y-4">
+          {/* Step indicators - scrollable on mobile */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-1 max-w-full overflow-x-auto py-2 px-1">
+              {inspectionPoints.map((point, index) => {
+                const state = points[point.id]
+                const isActive = index === currentStep
+                const isCompleted = state?.status === 'good' || (state?.status === 'bad' && state?.issueId && state?.photo)
+                
+                return (
+                  <button
+                    key={point.id}
+                    onClick={() => goToStep(index)}
+                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
+                      isActive
+                        ? 'bg-crown-gold text-white ring-2 ring-crown-gold/50 scale-110'
+                        : isCompleted
+                        ? state?.status === 'good'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-rose-600 text-white'
+                        : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                    }`}
+                    title={`${language === 'es' ? 'Punto' : 'Point'} ${point.id}: ${point[language]}`}
+                  >
+                    {point.id}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-          <button
-            onClick={goToNext}
-            disabled={isLastStep}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-              isLastStep
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'bg-crown-navy text-white hover:bg-crown-navy/90'
-            }`}
-          >
-            {language === 'es' ? 'Siguiente' : 'Next'}
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          {/* Navigation buttons */}
+          <div className="flex items-center justify-between gap-4">
+            <button
+              onClick={goToPrevious}
+              disabled={isFirstStep}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                isFirstStep
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                {language === 'es' ? 'Anterior' : 'Previous'}
+              </span>
+            </button>
+
+            <div className="text-center text-sm text-slate-600">
+              {currentStep + 1} / {totalPoints}
+            </div>
+
+            <button
+              onClick={goToNext}
+              disabled={isLastStep}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                isLastStep
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-crown-navy text-white hover:bg-crown-navy/90'
+              }`}
+            >
+              <span className="hidden sm:inline">
+                {language === 'es' ? 'Siguiente' : 'Next'}
+              </span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Quick jump buttons */}

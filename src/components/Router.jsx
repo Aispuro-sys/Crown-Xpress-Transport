@@ -19,7 +19,7 @@ export default function Router() {
   const { t, language } = useLanguage()
   const { resetInspection } = useInspection()
   const { user, canEdit, canViewAll } = useAuth()
-  const [page, setPage] = useState(canViewAll() && !canEdit() ? 'auditor' : 'guided')
+  const [page, setPage] = useState(canViewAll() && !canEdit() ? 'auditor' : 'form')
   const [success, setSuccess] = useState({ open: false, filename: null })
 
   const handleSuccess = (payload) => {
@@ -31,13 +31,13 @@ export default function Router() {
   const handleNewInspection = () => {
     resetInspection()
     setSuccess({ open: false, filename: null })
-    setPage('guided')
+    setPage('form')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const tabs = [
-    canEdit() && { id: 'guided', label: language === 'es' ? 'Inspección Guiada' : 'Guided Inspection', icon: Home },
-    canEdit() && { id: 'form', label: language === 'es' ? 'Vista Clásica' : 'Classic View', icon: FileText },
+    canEdit() && { id: 'form', label: 'v1 - Vista Clásica', icon: FileText },
+    canEdit() && { id: 'guided', label: 'v2 - Inspección Guiada', icon: Home },
     canEdit() && { id: 'my-history', label: language === 'es' ? 'Mi Historial' : 'My History', icon: History },
     canViewAll() && { id: 'auditor', label: language === 'es' ? 'Vista Auditor' : 'Auditor View', icon: ShieldCheck },
   ].filter(Boolean)
@@ -72,12 +72,6 @@ export default function Router() {
     <>
       <Nav />
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {page === 'guided' && canEdit() && (
-          <div className="space-y-5">
-            <GuidedInspection />
-            <SubmitBar onSuccess={handleSuccess} />
-          </div>
-        )}
         {page === 'form' && canEdit() && (
           <div className="space-y-5">
             <UnitInfo />
@@ -85,6 +79,12 @@ export default function Router() {
             <InspectionList />
             <SealPhoto />
             <SignaturesSection />
+            <SubmitBar onSuccess={handleSuccess} />
+          </div>
+        )}
+        {page === 'guided' && canEdit() && (
+          <div className="space-y-5">
+            <GuidedInspection />
             <SubmitBar onSuccess={handleSuccess} />
           </div>
         )}
