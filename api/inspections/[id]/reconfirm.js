@@ -107,11 +107,15 @@ export default async function handler(req, res) {
         )
       `
 
+      // Count modified points
+      const modifiedCount = points ? Object.values(points).filter(p => p.modified).length : 0
+
       return res.status(201).json({
         success: true,
         id: inspection.id,
         uuid: inspection.uuid,
         originalId,
+        modifications: modifiedCount,
         createdAt: inspection.created_at
       })
     }

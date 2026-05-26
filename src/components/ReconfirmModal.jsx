@@ -77,7 +77,16 @@ export default function ReconfirmModal({ open, originalInspection, onClose, onSu
   }
 
   const modifiedPoints = Object.entries(reconfirmPoints).filter(([_, p]) => p.modified)
-  const canSubmit = modifiedPoints.length > 0 && reason.trim().length >= 50
+  
+  // Validate: bad points must have issue and photo
+  const badPointsValid = modifiedPoints.every(([_, p]) => {
+    if (p.status === 'bad') {
+      return p.issueId && p.photo
+    }
+    return true
+  })
+  
+  const canSubmit = modifiedPoints.length > 0 && reason.trim().length >= 50 && badPointsValid
 
   const handleSubmit = () => {
     if (!canSubmit) return
@@ -235,7 +244,16 @@ export default function ReconfirmModal({ open, originalInspection, onClose, onSu
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
+          {/* Validation messages */}
+          {!badPointsValid && modifiedPoints.length > 0 && (
+            <div className="mb-3 px-3 py-2 bg-rose-100 border border-rose-300 rounded-lg text-sm text-rose-700">
+              ⚠️ {language === 'es' 
+                ? 'Los puntos marcados como MALO deben tener tipo de falla y foto' 
+                : 'Points marked as BAD must have issue type and photo'}
+            </div>
+          )}
+          <div className="flex items-center justify-between gap-3">
           <div className="text-sm text-slate-600">
             {modifiedPoints.length} {language === 'es' ? 'puntos modificados' : 'modified points'}
           </div>
@@ -254,6 +272,7 @@ export default function ReconfirmModal({ open, originalInspection, onClose, onSu
               <AlertTriangle className="w-4 h-4" />
               {language === 'es' ? 'Crear Reconfirmación' : 'Create Reconfirmation'}
             </button>
+          </div>
           </div>
         </div>
       </div>
