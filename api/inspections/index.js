@@ -24,7 +24,7 @@ export default async function handler(req, res) {
           guard_name, guard_signed_at,
           auditor_name, auditor_signed_at,
           good_count, bad_count, pending_count,
-          status, language, created_at
+          status, language, created_at, original_inspection_id
         FROM inspections
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
