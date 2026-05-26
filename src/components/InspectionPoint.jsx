@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Check, X, Camera, Eye, AlertTriangle, ChevronDown, ChevronUp, Edit2 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
-import { errorReports } from '../data/inspectionPoints'
+import { getIssuesForPoint } from '../data/inspectionPoints'
 import CameraModal from './CameraModal'
 import PhotoViewerModal from './PhotoViewerModal'
 import IssueSelectModal from './IssueSelectModal'
@@ -19,7 +19,8 @@ export default function InspectionPoint({ point }) {
 
   const isBad = state.status === 'bad'
   const isGood = state.status === 'good'
-  const issue = errorReports.find(e => e.id === state.issueId)
+  const pointIssues = getIssuesForPoint(point.id)
+  const issue = pointIssues.find(e => e.id === state.issueId)
   const isComplete = isGood || (isBad && state.issueId && state.photo)
 
   // Auto-collapse when point becomes complete
@@ -184,6 +185,17 @@ export default function InspectionPoint({ point }) {
         onClose={() => setCameraOpen(false)}
         onConfirm={(photo) => setPointPhoto(point.id, photo)}
         title={`${point.id}. ${point[language]}`}
+        point={point}
+        onAiSuggestion={(suggestedIssues) => {
+          // If AI suggests issues and no issue is selected yet, auto-select the first one
+          if (suggestedIssues.length > 0 && !state.issueId) {
+            const pointIssues = getIssuesForPoint(point.id)
+            const matchingIssue = pointIssues.find((_, idx) => suggestedIssues.includes(idx + 1))
+            if (matchingIssue) {
+              setPointIssue(point.id, matchingIssue.id)
+            }
+          }
+        }}
       />
       <PhotoViewerModal
         open={viewerOpen}
@@ -197,6 +209,8 @@ export default function InspectionPoint({ point }) {
         onClose={() => setIssueOpen(false)}
         onSelect={(id) => setPointIssue(point.id, id)}
         currentIssueId={state.issueId}
+        pointId={point.id}
+        pointName={`${point.id}. ${point[language]}`}
       />
     </>
   )

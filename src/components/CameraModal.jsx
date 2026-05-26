@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Camera, X, RotateCw, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { Camera, X, RotateCw, Check, AlertTriangle, Loader2, Sparkles } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { validatePhoto, validationReasons } from '../utils/photoValidator'
+import { verifyInspectionImage } from '../services/imageVerification'
 
-export default function CameraModal({ open, onClose, onConfirm, title }) {
+export default function CameraModal({ open, onClose, onConfirm, title, point, onAiSuggestion }) {
   const { t, language } = useLanguage()
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -13,6 +14,8 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
   const [captured, setCaptured] = useState(null)
   const [validating, setValidating] = useState(false)
   const [validation, setValidation] = useState(null)
+  const [aiValidation, setAiValidation] = useState(null)
+  const [aiValidating, setAiValidating] = useState(false)
   const [facingMode, setFacingMode] = useState('environment')
 
   useEffect(() => {
@@ -26,6 +29,7 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
     setError(null)
     setCaptured(null)
     setValidation(null)
+    setAiValidation(null)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
@@ -52,6 +56,40 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
     }
   }
 
+  const addTimestampToImage = (canvas, ctx) => {
+    const now = new Date()
+    const timestamp = now.toLocaleString(language === 'es' ? 'es-MX' : 'en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    })
+    
+    // Add timestamp overlay
+    const fontSize = Math.max(16, canvas.width * 0.02)
+    ctx.font = `bold ${fontSize}px Inter, sans-serif`
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'bottom'
+    
+    // Background for better readability
+    const textWidth = ctx.measureText(timestamp).width
+    const padding = 8
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+    ctx.fillRect(
+      canvas.width - textWidth - padding * 2 - 10,
+      canvas.height - fontSize - padding * 2 - 10,
+      textWidth + padding * 2,
+      fontSize + padding * 2
+    )
+    
+    // Text
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(timestamp, canvas.width - 10 - padding, canvas.height - 10 - padding)
+  }
+
   const handleCapture = async () => {
     const video = videoRef.current
     const canvas = canvasRef.current
@@ -61,19 +99,42 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
     canvas.height = video.videoHeight
     const ctx = canvas.getContext('2d')
     ctx.drawImage(video, 0, 0)
+    
+    // Add timestamp to image
+    addTimestampToImage(canvas, ctx)
+    
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
     setCaptured(dataUrl)
     
-    // Validate
+    // Basic validation
     setValidating(true)
     const result = await validatePhoto(dataUrl)
     setValidation(result)
     setValidating(false)
+    
+    // AI validation if point is provided and basic validation passed
+    if (point && result.valid) {
+      setAiValidating(true)
+      try {
+        const aiResult = await verifyInspectionImage(dataUrl, point, language)
+        setAiValidation(aiResult)
+        
+        // If AI detected issues, notify parent
+        if (aiResult.suggestedIssues?.length > 0 && onAiSuggestion) {
+          onAiSuggestion(aiResult.suggestedIssues)
+        }
+      } catch (err) {
+        console.error('AI validation error:', err)
+        setAiValidation({ valid: true, confidence: 0, message: '' })
+      }
+      setAiValidating(false)
+    }
   }
 
   const handleRetake = () => {
     setCaptured(null)
     setValidation(null)
+    setAiValidation(null)
   }
 
   const handleConfirm = () => {
@@ -86,6 +147,7 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
     stopCamera()
     setCaptured(null)
     setValidation(null)
+    setAiValidation(null)
     onClose()
   }
 
@@ -159,7 +221,8 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
 
         {/* Validation feedback */}
         {captured && (
-          <div className="px-5 py-3 border-t border-slate-100">
+          <div className="px-5 py-3 border-t border-slate-100 space-y-2">
+            {/* Basic validation */}
             {validating ? (
               <div className="flex items-center gap-2 text-crown-navy">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -186,6 +249,50 @@ export default function CameraModal({ open, onClose, onConfirm, title }) {
                 </div>
               </div>
             ) : null}
+
+            {/* AI validation */}
+            {point && validation?.valid && (
+              <>
+                {aiValidating ? (
+                  <div className="flex items-center gap-2 text-purple-700 bg-purple-50 px-3 py-2 rounded-lg">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                    <span className="text-sm font-medium">
+                      {language === 'es' ? 'Verificando con IA...' : 'AI verification...'}
+                    </span>
+                  </div>
+                ) : aiValidation ? (
+                  <div className={`flex items-start gap-2 px-3 py-2 rounded-lg ${
+                    aiValidation.valid 
+                      ? 'text-purple-700 bg-purple-50' 
+                      : 'text-amber-700 bg-amber-50'
+                  }`}>
+                    <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm flex-1">
+                      <div className="font-semibold flex items-center gap-2">
+                        {aiValidation.valid 
+                          ? (language === 'es' ? 'IA: Imagen correcta' : 'AI: Correct image')
+                          : (language === 'es' ? 'IA: Verificar imagen' : 'AI: Verify image')
+                        }
+                        {aiValidation.confidence > 0 && (
+                          <span className="text-xs font-normal opacity-70">
+                            ({aiValidation.confidence}%)
+                          </span>
+                        )}
+                      </div>
+                      {aiValidation.message && (
+                        <div className="text-xs mt-0.5 opacity-80">{aiValidation.message}</div>
+                      )}
+                      {aiValidation.suggestedIssues?.length > 0 && (
+                        <div className="text-xs mt-1 font-medium">
+                          {language === 'es' ? 'Fallas detectadas: ' : 'Issues detected: '}
+                          {aiValidation.suggestedIssues.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
           </div>
         )}
 
