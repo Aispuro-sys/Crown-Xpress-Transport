@@ -25,8 +25,12 @@ export default async function handler(req, res) {
 
       const { pdf_data, pdf_filename } = inspections[0]
       
-      // Convert base64 to buffer
-      const pdfBuffer = Buffer.from(pdf_data, 'base64')
+      // Remove data URI prefix if present and convert to buffer
+      let base64Data = pdf_data
+      if (pdf_data.includes(',')) {
+        base64Data = pdf_data.split(',')[1]
+      }
+      const pdfBuffer = Buffer.from(base64Data, 'base64')
 
       res.setHeader('Content-Type', 'application/pdf')
       res.setHeader('Content-Disposition', `attachment; filename="${pdf_filename || 'inspection.pdf'}"`)

@@ -6,10 +6,11 @@ import UnitInfoEnhanced from './UnitInfoEnhanced'
 import StepByStepInspection from './StepByStepInspection'
 import SealPhotoSection from './SealPhotoSection'
 import SignatureSection from './SignatureSection'
+import SubmitBar from './SubmitBar'
 
 export default function GuidedInspection() {
   const { t, language } = useLanguage()
-  const { unitInfo, points, completedCount } = useInspection()
+  const { unitInfo, points, completedCount, resetInspection } = useInspection()
   const [currentStage, setCurrentStage] = useState('unitInfo') // unitInfo, inspection, seal, signatures
   const [unitInfoValid, setUnitInfoValid] = useState(false)
   const [hasContainer, setHasContainer] = useState(false)
@@ -179,6 +180,10 @@ export default function GuidedInspection() {
               {language === 'es' ? 'Anterior' : 'Previous'}
             </button>
           </div>
+          <SubmitBar onSuccess={() => {
+            resetInspection()
+            setCurrentStage('unitInfo')
+          }} />
         </div>
       )}
     </div>

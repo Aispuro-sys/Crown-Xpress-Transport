@@ -1,11 +1,21 @@
+import { useEffect } from 'react'
 import { PenLine, ShieldCheck, UserCheck } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
+import { useAuth } from '../context/AuthContext'
 import SignatureBox from './SignatureBox'
 
 export default function SignaturesSection() {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const { guardSignature, setGuardSignature, auditorSignature, setAuditorSignature } = useInspection()
+
+  // Auto-fill guard name from logged in user
+  useEffect(() => {
+    if (user?.full_name && !guardSignature.name) {
+      setGuardSignature(prev => ({ ...prev, name: user.full_name }))
+    }
+  }, [user, guardSignature.name, setGuardSignature])
 
   return (
     <section className="card animate-slide-up">
