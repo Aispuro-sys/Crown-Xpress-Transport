@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { FileText, Search, Download, AlertTriangle, ChevronDown, ChevronRight, Lock } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { FileText, Search, Download, AlertTriangle, ChevronDown, ChevronRight, Lock, GitBranch } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { listInspections, downloadPdf, getInspection, reconfirmInspection } from '../utils/api'
@@ -9,6 +9,7 @@ import ReconfirmModal from './ReconfirmModal'
 /**
  * GuardHistory: read-only history of inspections done by the current guard.
  * Guard cannot edit/delete. Can only create reconfirmations linked to original.
+ * Shows original and reconfirmations side by side.
  */
 export default function GuardHistory() {
   const { t, language } = useLanguage()
@@ -39,11 +40,23 @@ export default function GuardHistory() {
     }
   }
 
-  const filtered = inspections.filter(i =>
+  // Group inspections: originals with their reconfirmations
+  const groupedInspections = useMemo(() => {
+    const originals = inspections.filter(i => !i.original_inspection_id)
+    const reconfirms = inspections.filter(i => i.original_inspection_id)
+    
+    return originals.map(orig => ({
+      original: orig,
+      reconfirmations: reconfirms.filter(r => r.original_inspection_id === orig.id)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    }))
+  }, [inspections])
+
+  const filteredGroups = groupedInspections.filter(g =>
     !search ||
-    i.trailer_number?.toLowerCase().includes(search.toLowerCase()) ||
-    i.driver_name?.toLowerCase().includes(search.toLowerCase()) ||
-    i.seal_number?.toLowerCase().includes(search.toLowerCase())
+    g.original.trailer_number?.toLowerCase().includes(search.toLowerCase()) ||
+    g.original.driver_name?.toLowerCase().includes(search.toLowerCase()) ||
+    g.original.seal_number?.toLowerCase().includes(search.toLowerCase())
   )
 
   const toggle = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
@@ -141,61 +154,128 @@ export default function GuardHistory() {
           </div>
         </div>
         <div className="card-body">
-          {filtered.length === 0 ? (
+          {filteredGroups.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
               <FileText className="w-12 h-12 mx-auto mb-3" />
               <p>{search ? (language === 'es' ? 'Sin resultados' : 'No results') : (language === 'es' ? 'Sin inspecciones aún' : 'No inspections yet')}</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {filtered.map(insp => (
-                <div key={insp.id} className="border border-slate-200 rounded-lg overflow-hidden">
+            <div className="space-y-4">
+              {filteredGroups.map(group => (
+                <div key={group.original.id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                  {/* Group Header */}
                   <div
-                    className="px-4 py-3 bg-white flex items-center justify-between cursor-pointer hover:bg-slate-50"
-                    onClick={() => toggle(insp.id)}
+                    className="px-4 py-3 bg-gradient-to-r from-crown-navy to-crown-navy/90 text-white flex items-center justify-between cursor-pointer"
+                    onClick={() => toggle(group.original.id)}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {expanded[insp.id] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                      {expanded[group.original.id] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       <div className="min-w-0">
-                        <div className="font-semibold text-slate-800 truncate">
-                          {insp.trailer_number} · {insp.driver_name}
+                        <div className="font-bold truncate">
+                          {group.original.trailer_number} · {group.original.driver_name}
                         </div>
-                        <div className="text-xs text-slate-500 truncate">
-                          {new Date(insp.created_at).toLocaleString()} · {insp.location}
+                        <div className="text-xs text-white/70 truncate">
+                          {new Date(group.original.created_at).toLocaleString()} · {group.original.location}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {insp.total_bad > 0 && (
-                        <span className="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-semibold">
-                          {insp.total_bad} {language === 'es' ? 'fallas' : 'fails'}
+                      {group.reconfirmations.length > 0 && (
+                        <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                          <GitBranch className="w-3 h-3" />
+                          {group.reconfirmations.length} {language === 'es' ? 'reconf.' : 'reconf.'}
                         </span>
                       )}
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                        insp.status === 'audited' ? 'bg-emerald-100 text-emerald-700' :
-                        insp.status === 'reconfirmed' ? 'bg-amber-100 text-amber-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {insp.status}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDownload(insp.id, insp.pdf_filename) }}
-                        className="p-1.5 rounded hover:bg-slate-100"
-                        title={language === 'es' ? 'Descargar PDF' : 'Download PDF'}
-                      >
-                        <Download className="w-4 h-4 text-slate-600" />
-                      </button>
                     </div>
                   </div>
 
-                  {expanded[insp.id] && (
+                  {/* Side by side: Original + Reconfirmations */}
+                  <div className={`grid gap-3 p-3 ${group.reconfirmations.length > 0 ? 'md:grid-cols-2' : 'grid-cols-1'}`}>
+                    {/* Original Inspection Card */}
+                    <div className="border-2 border-blue-200 rounded-lg overflow-hidden bg-blue-50/30">
+                      <div className="px-3 py-2 bg-blue-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-blue-800 uppercase">
+                          {language === 'es' ? 'Original' : 'Original'}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                          group.original.status === 'completed' ? 'bg-blue-600 text-white' : 'bg-blue-200 text-blue-800'
+                        }`}>
+                          {group.original.status}
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm">
+                            <span className="text-emerald-600 font-bold">{group.original.good_count || 0}</span>
+                            <span className="text-slate-400 mx-1">/</span>
+                            <span className="text-rose-600 font-bold">{group.original.bad_count || 0}</span>
+                            <span className="text-slate-400 mx-1">/</span>
+                            <span className="text-slate-500">{group.original.pending_count || 0}</span>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDownload(group.original.id, group.original.pdf_filename) }}
+                            className="p-1.5 rounded hover:bg-blue-100"
+                            title={language === 'es' ? 'Descargar PDF' : 'Download PDF'}
+                          >
+                            <Download className="w-4 h-4 text-blue-600" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          {new Date(group.original.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Reconfirmations */}
+                    {group.reconfirmations.length > 0 && (
+                      <div className="space-y-2">
+                        {group.reconfirmations.map((reconf, idx) => (
+                          <div key={reconf.id} className="border-2 border-amber-200 rounded-lg overflow-hidden bg-amber-50/30">
+                            <div className="px-3 py-2 bg-amber-100 flex items-center justify-between">
+                              <span className="text-xs font-bold text-amber-800 uppercase flex items-center gap-1">
+                                <GitBranch className="w-3 h-3" />
+                                {language === 'es' ? `Reconfirmación ${idx + 1}` : `Reconfirmation ${idx + 1}`}
+                              </span>
+                              <span className="text-xs bg-amber-600 text-white px-2 py-0.5 rounded-full font-semibold">
+                                {reconf.status}
+                              </span>
+                            </div>
+                            <div className="p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm">
+                                  <span className="text-emerald-600 font-bold">{reconf.good_count || 0}</span>
+                                  <span className="text-slate-400 mx-1">/</span>
+                                  <span className="text-rose-600 font-bold">{reconf.bad_count || 0}</span>
+                                  <span className="text-slate-400 mx-1">/</span>
+                                  <span className="text-slate-500">{reconf.pending_count || 0}</span>
+                                </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleDownload(reconf.id, reconf.pdf_filename) }}
+                                  className="p-1.5 rounded hover:bg-amber-100"
+                                  title={language === 'es' ? 'Descargar PDF' : 'Download PDF'}
+                                >
+                                  <Download className="w-4 h-4 text-amber-600" />
+                                </button>
+                              </div>
+                              <p className="text-xs text-slate-500">
+                                {new Date(reconf.created_at).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expanded details */}
+                  {expanded[group.original.id] && (
                     <div className="px-4 py-4 bg-slate-50 border-t">
-                      <AuditTrail inspectionId={insp.id} />
+                      <AuditTrail inspectionId={group.original.id} />
 
                       {/* Reconfirmation button */}
                       <div className="mt-4 pt-4 border-t border-slate-200">
                         <button
-                          onClick={() => handleReconfirm(insp.id)}
+                          onClick={() => handleReconfirm(group.original.id)}
                           className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
                         >
                           <AlertTriangle className="w-4 h-4" />
