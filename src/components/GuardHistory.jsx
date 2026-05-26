@@ -65,6 +65,9 @@ export default function GuardHistory() {
   const handleDownload = async (id, filename) => {
     try {
       const blob = await downloadPdf(id)
+      if (blob.size === 0) {
+        throw new Error('PDF vacío')
+      }
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -74,7 +77,10 @@ export default function GuardHistory() {
       a.remove()
       URL.revokeObjectURL(url)
     } catch (e) {
-      alert(language === 'es' ? 'Error descargando PDF' : 'Error downloading PDF')
+      console.error('PDF download error:', e)
+      alert(language === 'es' 
+        ? 'Error descargando PDF. Esta inspección puede no tener PDF guardado.' 
+        : 'Error downloading PDF. This inspection may not have a saved PDF.')
     }
   }
 
