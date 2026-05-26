@@ -86,7 +86,7 @@ export default function ReconfirmModal({ open, originalInspection, onClose, onSu
     return true
   })
   
-  const canSubmit = modifiedPoints.length > 0 && reason.trim().length >= 50 && badPointsValid
+  const canSubmit = modifiedPoints.length > 0 && reason.trim().length >= 10 && badPointsValid
 
   const handleSubmit = () => {
     if (!canSubmit) return
@@ -136,11 +136,11 @@ export default function ReconfirmModal({ open, originalInspection, onClose, onSu
             onChange={e => setReason(e.target.value)}
             className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
             rows={3}
-            placeholder={language === 'es' ? 'Ej: El punto 5 estaba mal marcado debido a que la llanta trasera derecha presentaba desgaste que no fue detectado inicialmente...' : 'Ex: Point 5 was incorrectly marked because the rear right tire showed wear that was not initially detected...'}
-            minLength={50}
+            placeholder={language === 'es' ? 'Ej: El punto 5 estaba mal marcado...' : 'Ex: Point 5 was incorrectly marked...'}
+            minLength={10}
           />
-          <p className={`text-xs mt-1 ${reason.length >= 50 ? 'text-emerald-600' : 'text-slate-500'}`}>
-            {language === 'es' ? 'Mínimo 50 caracteres' : 'Minimum 50 characters'} · {reason.length}/50
+          <p className={`text-xs mt-1 ${reason.length >= 10 ? 'text-emerald-600' : 'text-slate-500'}`}>
+            {language === 'es' ? 'Mínimo 10 caracteres' : 'Minimum 10 characters'} · {reason.length}/10
           </p>
         </div>
 
