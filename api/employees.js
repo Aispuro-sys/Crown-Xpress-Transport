@@ -124,6 +124,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   } catch (error) {
     console.error('API Error:', error)
+    
+    // Handle table doesn't exist error
+    if (error.message && error.message.includes('does not exist')) {
+      return res.status(500).json({ 
+        error: 'Employees table not found. Please run the SQL schema first.',
+        details: 'Execute the SQL from api/employees/schema.sql in your database'
+      })
+    }
+    
     return res.status(500).json({ error: error.message })
   }
 }

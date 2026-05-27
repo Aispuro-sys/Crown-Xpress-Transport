@@ -54,8 +54,20 @@ export default function UserManagement() {
       if (!showInactive) params.append('active', 'true')
       
       const res = await fetch(`${API_BASE}/employees?${params}`)
+      
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error('API Response Error:', errorText)
+        throw new Error(`HTTP ${res.status}: ${errorText}`)
+      }
+      
       const data = await res.json()
       setEmployees(data.data || [])
+      
+      // Show specific error if table doesn't exist
+      if (data.error && data.error.includes('table not found')) {
+        setError(data.details || data.error)
+      }
     } catch (err) {
       console.error('Error loading employees:', err)
       setError(err.message)
