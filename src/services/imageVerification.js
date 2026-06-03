@@ -1,20 +1,20 @@
-// Image Verification Service using AI (Gemini)
+// Image Verification Service using AI (Groq - LLaMA Vision)
 // This service validates that captured photos match the expected inspection point
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 /**
- * Verify if an image matches the expected inspection point using Google Gemini
+ * Verify if an image matches the expected inspection point using Groq
  * @param {string} imageBase64 - Base64 encoded image data
  * @param {object} point - Inspection point object with id, es, en, keywords
  * @param {string} language - Current language ('es' or 'en')
  * @returns {Promise<{valid: boolean, confidence: number, message: string, suggestedIssues: number[]}>}
  */
 export async function verifyInspectionImage(imageBase64, point, language = 'es') {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY
   
   if (!apiKey) {
-    console.warn('Gemini API key not configured, skipping image verification')
+    console.warn('Groq API key not configured, skipping image verification')
     return {
       valid: true,
       confidence: 0,
@@ -30,25 +30,17 @@ export async function verifyInspectionImage(imageBase64, point, language = 'es')
   const issues = point.issues || []
 
   const prompt = language === 'es' 
-    ? `Eres un inspector de seguridad de transporte especializado en inspecciones de tractocamiones y remolques.
+    ? `Eres un inspector de seguridad de transporte. Analiza esta imagen para el punto de inspección: "${pointName}".
+Palabras clave: ${keywords.join(', ')}
+Posibles fallas: ${issues.map((i, idx) => `${idx + 1}. ${i.es}`).join(', ')}
 
-Analiza esta imagen para el punto de inspección: "${pointName}"
-Palabras clave esperadas: ${keywords.join(', ')}
-
-Posibles fallas para este punto:
-${issues.map((i, idx) => `${idx + 1}. ${i.es}`).join('\n')}
-
-Responde SOLO con un JSON válido (sin markdown, sin \`\`\`):
+Responde SOLO con JSON válido (sin markdown):
 {"valid": true/false, "confidence": 0-100, "message": "explicación breve", "detectedIssues": [], "recommendation": ""}`
-    : `You are a transportation security inspector specialized in tractor and trailer inspections.
+    : `You are a transportation security inspector. Analyze this image for: "${pointName}".
+Keywords: ${keywords.join(', ')}
+Possible issues: ${issues.map((i, idx) => `${idx + 1}. ${i.en}`).join(', ')}
 
-Analyze this image for the inspection point: "${pointName}"
-Expected keywords: ${keywords.join(', ')}
-
-Possible issues for this point:
-${issues.map((i, idx) => `${idx + 1}. ${i.en}`).join('\n')}
-
-Respond ONLY with valid JSON (no markdown, no \`\`\`):
+Respond ONLY with valid JSON (no markdown):
 {"valid": true/false, "confidence": 0-100, "message": "brief explanation", "detectedIssues": [], "recommendation": ""}`
 
   // Retry logic
@@ -61,54 +53,52 @@ Respond ONLY with valid JSON (no markdown, no \`\`\`):
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
       }
 
-      // Extract base64 data without prefix
-      const base64Data = imageBase64.includes(',') 
-        ? imageBase64.split(',')[1] 
-        : imageBase64
+      // Ensure proper base64 format with data URI
+      const imageUrl = imageBase64.startsWith('data:') 
+        ? imageBase64 
+        : `data:image/jpeg;base64,${imageBase64}`
 
-      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: 'image/jpeg',
-                  data: base64Data
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 500
-          }
+          model: 'llama-3.2-90b-vision-preview',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image_url', image_url: { url: imageUrl } }
+              ]
+            }
+          ],
+          max_tokens: 300,
+          temperature: 0.1
         })
       })
 
       if (response.status === 429) {
-        console.warn(`Gemini rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
+        console.warn(`Groq rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
         lastError = new Error('Rate limited')
         continue
       }
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
+        throw new Error(`Groq API error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
-      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      const textResponse = data.choices?.[0]?.message?.content || ''
       
       // Clean response (remove markdown if present)
       const cleanJson = textResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       const result = JSON.parse(cleanJson)
 
-      console.log('Gemini verification result:', result)
+      console.log('Groq verification result:', result)
 
       return {
         valid: result.valid ?? true,
@@ -118,13 +108,13 @@ Respond ONLY with valid JSON (no markdown, no \`\`\`):
         recommendation: result.recommendation || ''
       }
     } catch (error) {
-      console.error(`Gemini verification error (attempt ${attempt + 1}):`, error)
+      console.error(`Groq verification error (attempt ${attempt + 1}):`, error)
       lastError = error
     }
   }
 
   // All retries failed - return graceful fallback
-  console.warn('Gemini verification unavailable, skipping')
+  console.warn('Groq verification unavailable, skipping')
   return {
     valid: true,
     confidence: 0,
