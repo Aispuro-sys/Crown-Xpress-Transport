@@ -1,0 +1,136 @@
+SISTEMA DE INSPECCIÓN DE 20 PUNTOS - CROWN XPRESS TRANSPORT
+Generado: Junio 2026
+
+================================================================================
+FUNCIONES DEL SISTEMA
+================================================================================
+
+Función,Estado,Guardia,Inspector,Auditor,Admin,Comentarios
+Login con usuario y contraseña,✓,✓,✓,✓,✓,Autenticación contra base de datos PostgreSQL (Neon)
+Cierre de sesión por inactividad (10 min),✓,✓,✓,✓,✓,Se cierra automáticamente después de 10 minutos sin actividad
+Cambio de idioma (ES/EN),✓,✓,✓,✓,✓,Disponible en español e inglés
+
+INSPECCIÓN V1 - VISTA CLÁSICA
+Formulario de datos del camión,✓,✓,✓,✗,✓,Número de trailer, sello, contenedor, candado, conductor, ubicación
+Diagrama visual del camión con 20 puntos,✓,✓,✓,✗,✓,Imagen del camión con puntos numerados que cambian de color
+Lista de 20 puntos de inspección,✓,✓,✓,✗,✓,Cada punto puede marcarse como Bueno o Malo
+Selección de tipo de falla para puntos malos,✓,✓,✓,✗,✓,Lista predefinida de fallas por cada punto
+Captura de foto para puntos malos,✓,✓,✓,✗,✓,Cámara integrada para documentar fallas
+Foto del sello (opcional),✓,✓,✓,✗,✓,Ya no es obligatoria para completar la inspección
+Firma del guardia (obligatoria),✓,✓,✓,✗,✓,Canvas de firma digital con nombre auto-llenado
+Firma del auditor (opcional),✓,✓,✓,✗,✓,Puede firmarse después
+Generación de PDF,✓,✓,✓,✗,✓,PDF con logo, datos, puntos, fotos y firmas
+Guardado en base de datos,✓,✓,✓,✗,✓,Se guarda la inspección completa con PDF en PostgreSQL
+
+INSPECCIÓN V2 - VISTA GUIADA
+Formulario de datos del camión,✓,✓,✓,✗,✓,Mismo formulario que v1 pero con mejor UX
+Diagrama visual del camión,✓,✓,✓,✗,✓,Se muestra durante la inspección paso a paso
+Inspección paso a paso (1 punto a la vez),✓,✓,✓,✗,✓,Avance automático al completar cada punto
+Resumen de inspección,✓,✓,✓,✗,✓,Vista general de todos los puntos completados
+Sección de comentarios al final,✓,✓,✓,✗,✓,Aparece solo cuando los 20 puntos están completados
+Foto del sello (opcional),✓,✓,✓,✗,✓,Etapa separada para la foto del sello
+Firmas,✓,✓,✓,✗,✓,Guardia obligatoria, auditor opcional
+Generación de PDF,✓,✓,✓,✗,✓,Mismo formato que v1
+
+MI HISTORIAL
+Ver inspecciones propias,✓,✓,✓,✗,✓,Lista de inspecciones realizadas por el usuario
+Expandir detalles de inspección,✓,✓,✓,✗,✓,Ver contadores de buenos/malos/pendientes
+Descargar PDF desde historial,✓,✓,✓,✗,✓,Descarga el PDF guardado en la base de datos
+Ver reconfirmaciones asociadas,✓,✓,✓,✗,✓,Las reconfirmaciones aparecen agrupadas con la inspección original
+Crear reconfirmación,✓,✓,✓,✗,✓,Corregir puntos de una inspección existente
+
+RECONFIRMACIONES
+Crear nueva reconfirmación,✓,✓,✓,✗,✓,Vinculada a la inspección original
+Modificar puntos (cambiar estado),✓,✓,✓,✗,✓,Cambiar de Bueno a Malo o viceversa
+Validación de puntos malos,✓,✓,✓,✗,✓,Requiere tipo de falla y foto para puntos malos
+Razón de reconfirmación (mín 10 caracteres),✓,✓,✓,✗,✓,Explicación obligatoria del cambio
+Asignación automática al usuario,✓,✓,✓,✗,✓,Se asigna al guardia/inspector que la realiza
+
+VISTA AUDITOR
+Ver todas las inspecciones,✓,✗,✗,✓,✓,Lista completa de inspecciones de todos los usuarios
+Filtrar por guardia,✓,✗,✗,✓,✓,Buscar inspecciones de un guardia específico
+Filtrar por fecha,✓,✗,✗,✓,✓,Rango de fechas para búsqueda
+Ver detalles completos,✓,✗,✗,✓,✓,Información completa de cada inspección
+Descargar PDF,✓,✗,✗,✓,✓,Descargar cualquier PDF de inspección
+
+GESTIÓN DE USUARIOS (SOLO ADMIN)
+Ver lista de usuarios,✓,✗,✗,✗,✓,Lista de todos los empleados registrados
+Crear nuevo usuario,✓,✗,✗,✗,✓,Agregar guardias, inspectores, auditores o admins
+Editar usuario existente,✓,✗,✗,✗,✓,Modificar nombre, rol, ubicación, contraseña
+Desactivar usuario,✓,✗,✗,✗,✓,Soft delete - el usuario no puede iniciar sesión
+Filtrar por rol,✓,✗,✗,✗,✓,Ver solo guardias, inspectores, etc.
+Buscar usuario,✓,✗,✗,✗,✓,Búsqueda por nombre o username
+
+================================================================================
+USUARIOS DEL SISTEMA
+================================================================================
+
+Username,Contraseña,Nombre Completo,Rol,Ubicación,Estado,Comentarios
+guardia01,1234,Carlos Mendoza,Guardia,Yard A - Laredo,Activo,Usuario de prueba principal
+guardia02,1234,Luis Hernandez,Guardia,Yard A - Laredo,Activo,
+guardia03,1234,Miguel Torres,Guardia,Yard B - El Paso,Activo,
+inspector01,1234,Alberto Vargas,Inspector,Yard A - Laredo,Activo,
+auditor01,1234,Roberto Sanchez,Auditor,Yard A - Laredo,Activo,Puede ver todas las inspecciones
+admin,admin,Admin Crown,Administrador,Yard A - Laredo,Activo,Acceso completo al sistema
+
+================================================================================
+ROLES Y PERMISOS
+================================================================================
+
+Rol,Crear Inspección,Ver Historial Propio,Ver Todas las Inspecciones,Crear Reconfirmación,Gestionar Usuarios
+Guardia,✓,✓,✗,✓,✗
+Inspector,✓,✓,✗,✓,✗
+Auditor,✗,✗,✓,✗,✗
+Administrador,✓,✓,✓,✓,✓
+
+================================================================================
+20 PUNTOS DE INSPECCIÓN
+================================================================================
+
+#,Punto (ES),Punto (EN),Área,Fallas Posibles
+1,Defensa,Bumper,Tractor,Dañada, suelta, óxido, faltante
+2,Llantas y Rines,Tires and Rims,Ambos,Desgastada, daño lateral, rin dañado, presión incorrecta
+3,Piso (Tractor),Floor (Tractor),Tractor,Sucio, dañado, alfombra rota, objetos sueltos
+4,Tanques de Diesel,Fuel Tanks,Tractor,Fuga, dañado, tapa faltante, corrosión
+5,Compartimentos de Cabina,Cab/Storage Areas,Tractor,Sucios, objetos no autorizados, daño en puertas
+6,Tanques de Aire,Air Tanks,Tractor,Fuga de aire, corrosión, válvula dañada
+7,Quinta Rueda,Fifth Wheel,Tractor,Desgaste excesivo, falta lubricación, mecanismo dañado
+8,Ejes de Transmisión,Drive Shafts,Tractor,Vibración, crucetas desgastadas, fuga de grasa
+9,Escape,Exhaust,Tractor,Fuga, tubo dañado, silenciador suelto
+10,Motor/Batería/Filtros,Engine/Battery/Air Filter,Tractor,Fuga aceite, batería dañada, filtro sucio
+11,Base del Remolque,Trailer Base,Trailer,Daño estructural, corrosión, objetos extraños
+12,Puertas Exteriores/Interiores,Outside/Inside Doors,Trailer,Empaques dañados, bisagras flojas, filtración luz
+13,Pared Lateral Derecha,Right Side Wall,Trailer,Abolladuras, filtración luz, corrosión
+14,Techos Interno y Externo,Ceiling/Roof,Trailer,Daño exterior, filtración agua, hoyos
+15,Pared Frontal,Front Wall,Trailer,Daño, filtración luz, remaches flojos
+16,Pared Lateral Izquierda,Left Side Wall,Trailer,Abolladuras, filtración luz, corrosión
+17,Piso Interior,Interior Floor,Trailer,Dañado, sucio, tablas flojas, residuos
+18,Patín,Landing Gear,Trailer,Dañado, manivela difícil, falta lubricación
+19,Unidad de Refrigeración,Refrigeration Unit,Trailer,No enciende, fuga refrigerante, ruido anormal
+20,Limpieza Interior,Trailer Cleanliness,Trailer,Insectos, roedores, plantas, telarañas, olores
+
+================================================================================
+TECNOLOGÍAS UTILIZADAS
+================================================================================
+
+Categoría,Tecnología,Versión/Detalle
+Frontend,React + Vite,Framework principal
+Estilos,TailwindCSS,Diseño responsivo
+Iconos,Lucide React,Iconografía moderna
+PDF,jsPDF,Generación de documentos
+Backend,Vercel Serverless Functions,API endpoints
+Base de Datos,Neon PostgreSQL,Almacenamiento en la nube
+Hosting,Vercel,Despliegue automático desde GitHub
+Repositorio,GitHub,Control de versiones
+
+================================================================================
+NOTAS ADICIONALES
+================================================================================
+
+- El sistema funciona en dispositivos móviles y desktop
+- Los PDFs incluyen logo de Crown Xpress Transport
+- Las fotos se comprimen automáticamente para optimizar almacenamiento
+- La sesión se cierra automáticamente después de 10 minutos de inactividad
+- Los usuarios mock están disponibles como fallback si la API falla
+- La foto del sello es opcional desde Junio 2026
+- Los comentarios de inspección aparecen al completar los 20 puntos

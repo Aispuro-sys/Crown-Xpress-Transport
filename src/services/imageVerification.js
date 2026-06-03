@@ -1,20 +1,20 @@
-// Image Verification Service using AI
+// Image Verification Service using AI (Gemini)
 // This service validates that captured photos match the expected inspection point
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 
 /**
- * Verify if an image matches the expected inspection point
+ * Verify if an image matches the expected inspection point using Google Gemini
  * @param {string} imageBase64 - Base64 encoded image data
  * @param {object} point - Inspection point object with id, es, en, keywords
  * @param {string} language - Current language ('es' or 'en')
  * @returns {Promise<{valid: boolean, confidence: number, message: string, suggestedIssues: number[]}>}
  */
 export async function verifyInspectionImage(imageBase64, point, language = 'es') {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
   
   if (!apiKey) {
-    console.warn('OpenAI API key not configured, skipping image verification')
+    console.warn('Gemini API key not configured, skipping image verification')
     return {
       valid: true,
       confidence: 0,
@@ -29,103 +29,86 @@ export async function verifyInspectionImage(imageBase64, point, language = 'es')
   const keywords = point.keywords || []
   const issues = point.issues || []
 
-  const systemPrompt = language === 'es' 
-    ? `Eres un inspector de seguridad de transporte especializado en inspecciones de tractocamiones y remolques. 
-Tu tarea es verificar si la imagen proporcionada corresponde al punto de inspección indicado.
+  const prompt = language === 'es' 
+    ? `Eres un inspector de seguridad de transporte especializado en inspecciones de tractocamiones y remolques.
 
-Punto de inspección: "${pointName}"
+Analiza esta imagen para el punto de inspección: "${pointName}"
 Palabras clave esperadas: ${keywords.join(', ')}
 
 Posibles fallas para este punto:
 ${issues.map((i, idx) => `${idx + 1}. ${i.es}`).join('\n')}
 
-Responde en formato JSON con:
-{
-  "valid": true/false (si la imagen corresponde al punto de inspección),
-  "confidence": 0-100 (nivel de confianza),
-  "message": "explicación breve",
-  "detectedIssues": [números de las fallas detectadas si las hay],
-  "recommendation": "recomendación si la imagen no es válida"
-}`
+Responde SOLO con un JSON válido (sin markdown, sin \`\`\`):
+{"valid": true/false, "confidence": 0-100, "message": "explicación breve", "detectedIssues": [], "recommendation": ""}`
     : `You are a transportation security inspector specialized in tractor and trailer inspections.
-Your task is to verify if the provided image corresponds to the indicated inspection point.
 
-Inspection point: "${pointName}"
+Analyze this image for the inspection point: "${pointName}"
 Expected keywords: ${keywords.join(', ')}
 
 Possible issues for this point:
 ${issues.map((i, idx) => `${idx + 1}. ${i.en}`).join('\n')}
 
-Respond in JSON format with:
-{
-  "valid": true/false (if the image corresponds to the inspection point),
-  "confidence": 0-100 (confidence level),
-  "message": "brief explanation",
-  "detectedIssues": [numbers of detected issues if any],
-  "recommendation": "recommendation if image is not valid"
-}`
+Respond ONLY with valid JSON (no markdown, no \`\`\`):
+{"valid": true/false, "confidence": 0-100, "message": "brief explanation", "detectedIssues": [], "recommendation": ""}`
 
-  // Retry logic for rate limiting
+  // Retry logic
   const maxRetries = 2
   let lastError = null
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // Wait before retry (exponential backoff)
       if (attempt > 0) {
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
       }
 
-      const response = await fetch(OPENAI_API_URL, {
+      // Extract base64 data without prefix
+      const base64Data = imageBase64.includes(',') 
+        ? imageBase64.split(',')[1] 
+        : imageBase64
+
+      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: language === 'es' 
-                    ? `Analiza esta imagen para el punto de inspección "${pointName}". ¿La imagen muestra correctamente este componente? ¿Detectas alguna falla?`
-                    : `Analyze this image for the inspection point "${pointName}". Does the image correctly show this component? Do you detect any issues?`
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`,
-                    detail: 'low'
-                  }
+          contents: [{
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: 'image/jpeg',
+                  data: base64Data
                 }
-              ]
-            }
-          ],
-          max_tokens: 500,
-          response_format: { type: 'json_object' }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 500
+          }
         })
       })
 
-      // Handle rate limiting (429)
       if (response.status === 429) {
-        console.warn(`Rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
+        console.warn(`Gemini rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
         lastError = new Error('Rate limited')
         continue
       }
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        const errorText = await response.text()
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
-      const result = JSON.parse(data.choices[0].message.content)
+      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      
+      // Clean response (remove markdown if present)
+      const cleanJson = textResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const result = JSON.parse(cleanJson)
+
+      console.log('Gemini verification result:', result)
 
       return {
         valid: result.valid ?? true,
@@ -135,13 +118,13 @@ Respond in JSON format with:
         recommendation: result.recommendation || ''
       }
     } catch (error) {
-      console.error(`Image verification error (attempt ${attempt + 1}):`, error)
+      console.error(`Gemini verification error (attempt ${attempt + 1}):`, error)
       lastError = error
     }
   }
 
   // All retries failed - return graceful fallback
-  console.warn('AI verification unavailable, skipping')
+  console.warn('Gemini verification unavailable, skipping')
   return {
     valid: true,
     confidence: 0,

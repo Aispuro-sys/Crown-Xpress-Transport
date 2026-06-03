@@ -1,0 +1,171 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+th { background-color: #1e3a5f; color: white; }
+.check { color: green; font-weight: bold; font-size: 16px; }
+.nocheck { color: red; font-weight: bold; }
+h1 { color: #1e3a5f; border-bottom: 3px solid #d4a017; padding-bottom: 10px; }
+h2 { color: #1e3a5f; background-color: #f0f0f0; padding: 10px; margin-top: 30px; }
+.section { margin-bottom: 20px; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+.gold { background-color: #d4a017; color: white; }
+</style>
+</head>
+<body>
+
+<h1>🚛 SISTEMA DE INSPECCIÓN DE 20 PUNTOS - CROWN XPRESS TRANSPORT</h1>
+<p><strong>Generado:</strong> Junio 2026</p>
+
+<h2>📋 FUNCIONES DEL SISTEMA</h2>
+
+<h3>Autenticación y Sesión</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Login con usuario y contraseña</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td>Autenticación contra base de datos PostgreSQL (Neon)</td></tr>
+<tr><td>Cierre de sesión por inactividad (10 min)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td>Se cierra automáticamente después de 10 minutos sin actividad</td></tr>
+<tr><td>Cambio de idioma (ES/EN)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td>Disponible en español e inglés</td></tr>
+</table>
+
+<h3>Inspección V1 - Vista Clásica</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Formulario de datos del camión</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Número de trailer, sello, contenedor, candado, conductor, ubicación</td></tr>
+<tr><td>Diagrama visual del camión con 20 puntos</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Imagen del camión con puntos numerados que cambian de color</td></tr>
+<tr><td>Lista de 20 puntos de inspección</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Cada punto puede marcarse como Bueno o Malo</td></tr>
+<tr><td>Selección de tipo de falla para puntos malos</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Lista predefinida de fallas por cada punto</td></tr>
+<tr><td>Captura de foto para puntos malos</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Cámara integrada para documentar fallas</td></tr>
+<tr><td>Foto del sello (opcional)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Ya no es obligatoria para completar la inspección</td></tr>
+<tr><td>Firma del guardia (obligatoria)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Canvas de firma digital con nombre auto-llenado</td></tr>
+<tr><td>Firma del auditor (opcional)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Puede firmarse después</td></tr>
+<tr><td>Generación de PDF</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>PDF con logo, datos, puntos, fotos y firmas</td></tr>
+<tr><td>Guardado en base de datos</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Se guarda la inspección completa con PDF en PostgreSQL</td></tr>
+</table>
+
+<h3>Inspección V2 - Vista Guiada</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Formulario de datos del camión</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Mismo formulario que v1 pero con mejor UX</td></tr>
+<tr><td>Diagrama visual del camión</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Se muestra durante la inspección paso a paso</td></tr>
+<tr><td>Inspección paso a paso (1 punto a la vez)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Avance automático al completar cada punto</td></tr>
+<tr><td>Resumen de inspección</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Vista general de todos los puntos completados</td></tr>
+<tr><td>Sección de comentarios al final</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Aparece solo cuando los 20 puntos están completados</td></tr>
+<tr><td>Foto del sello (opcional)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Etapa separada para la foto del sello</td></tr>
+<tr><td>Firmas</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Guardia obligatoria, auditor opcional</td></tr>
+<tr><td>Generación de PDF</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Mismo formato que v1</td></tr>
+</table>
+
+<h3>Mi Historial</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Ver inspecciones propias</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Lista de inspecciones realizadas por el usuario</td></tr>
+<tr><td>Expandir detalles de inspección</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Ver contadores de buenos/malos/pendientes</td></tr>
+<tr><td>Descargar PDF desde historial</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Descarga el PDF guardado en la base de datos</td></tr>
+<tr><td>Ver reconfirmaciones asociadas</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Las reconfirmaciones aparecen agrupadas con la inspección original</td></tr>
+<tr><td>Crear reconfirmación</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Corregir puntos de una inspección existente</td></tr>
+</table>
+
+<h3>Reconfirmaciones</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Crear nueva reconfirmación</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Vinculada a la inspección original</td></tr>
+<tr><td>Modificar puntos (cambiar estado)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Cambiar de Bueno a Malo o viceversa</td></tr>
+<tr><td>Validación de puntos malos</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Requiere tipo de falla y foto para puntos malos</td></tr>
+<tr><td>Razón de reconfirmación (mín 10 caracteres)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Explicación obligatoria del cambio</td></tr>
+<tr><td>Asignación automática al usuario</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td>Se asigna al guardia/inspector que la realiza</td></tr>
+</table>
+
+<h3>Vista Auditor</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Ver todas las inspecciones</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="check">✓</td><td>Lista completa de inspecciones de todos los usuarios</td></tr>
+<tr><td>Filtrar por guardia</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="check">✓</td><td>Buscar inspecciones de un guardia específico</td></tr>
+<tr><td>Filtrar por fecha</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="check">✓</td><td>Rango de fechas para búsqueda</td></tr>
+<tr><td>Ver detalles completos</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="check">✓</td><td>Información completa de cada inspección</td></tr>
+<tr><td>Descargar PDF</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="check">✓</td><td>Descargar cualquier PDF de inspección</td></tr>
+</table>
+
+<h3>Gestión de Usuarios (Solo Admin)</h3>
+<table>
+<tr><th>Función</th><th>Estado</th><th>Guardia</th><th>Inspector</th><th>Auditor</th><th>Admin</th><th>Comentarios</th></tr>
+<tr><td>Ver lista de usuarios</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Lista de todos los empleados registrados</td></tr>
+<tr><td>Crear nuevo usuario</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Agregar guardias, inspectores, auditores o admins</td></tr>
+<tr><td>Editar usuario existente</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Modificar nombre, rol, ubicación, contraseña</td></tr>
+<tr><td>Desactivar usuario</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Soft delete - el usuario no puede iniciar sesión</td></tr>
+<tr><td>Filtrar por rol</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Ver solo guardias, inspectores, etc.</td></tr>
+<tr><td>Buscar usuario</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td>Búsqueda por nombre o username</td></tr>
+</table>
+
+<h2>👥 USUARIOS DEL SISTEMA</h2>
+<table>
+<tr><th>Username</th><th>Contraseña</th><th>Nombre Completo</th><th>Rol</th><th>Ubicación</th><th>Estado</th><th>Comentarios</th></tr>
+<tr><td>guardia01</td><td>1234</td><td>Carlos Mendoza</td><td>Guardia</td><td>Yard A - Laredo</td><td class="check">Activo</td><td>Usuario de prueba principal</td></tr>
+<tr><td>guardia02</td><td>1234</td><td>Luis Hernandez</td><td>Guardia</td><td>Yard A - Laredo</td><td class="check">Activo</td><td></td></tr>
+<tr><td>guardia03</td><td>1234</td><td>Miguel Torres</td><td>Guardia</td><td>Yard B - El Paso</td><td class="check">Activo</td><td></td></tr>
+<tr><td>inspector01</td><td>1234</td><td>Alberto Vargas</td><td>Inspector</td><td>Yard A - Laredo</td><td class="check">Activo</td><td></td></tr>
+<tr><td>auditor01</td><td>1234</td><td>Roberto Sanchez</td><td>Auditor</td><td>Yard A - Laredo</td><td class="check">Activo</td><td>Puede ver todas las inspecciones</td></tr>
+<tr class="gold"><td>admin</td><td>admin</td><td>Admin Crown</td><td>Administrador</td><td>Yard A - Laredo</td><td class="check">Activo</td><td>Acceso completo al sistema</td></tr>
+</table>
+
+<h2>🔐 ROLES Y PERMISOS</h2>
+<table>
+<tr><th>Rol</th><th>Crear Inspección</th><th>Ver Historial Propio</th><th>Ver Todas las Inspecciones</th><th>Crear Reconfirmación</th><th>Gestionar Usuarios</th></tr>
+<tr><td>Guardia</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td class="nocheck">✗</td></tr>
+<tr><td>Inspector</td><td class="check">✓</td><td class="check">✓</td><td class="nocheck">✗</td><td class="check">✓</td><td class="nocheck">✗</td></tr>
+<tr><td>Auditor</td><td class="nocheck">✗</td><td class="nocheck">✗</td><td class="check">✓</td><td class="nocheck">✗</td><td class="nocheck">✗</td></tr>
+<tr class="gold"><td>Administrador</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+</table>
+
+<h2>📍 20 PUNTOS DE INSPECCIÓN</h2>
+<table>
+<tr><th>#</th><th>Punto (ES)</th><th>Punto (EN)</th><th>Área</th><th>Fallas Posibles</th></tr>
+<tr><td>1</td><td>Defensa</td><td>Bumper</td><td>Tractor</td><td>Dañada, suelta, óxido, faltante</td></tr>
+<tr><td>2</td><td>Llantas y Rines</td><td>Tires and Rims</td><td>Ambos</td><td>Desgastada, daño lateral, rin dañado, presión incorrecta</td></tr>
+<tr><td>3</td><td>Piso (Tractor)</td><td>Floor (Tractor)</td><td>Tractor</td><td>Sucio, dañado, alfombra rota, objetos sueltos</td></tr>
+<tr><td>4</td><td>Tanques de Diesel</td><td>Fuel Tanks</td><td>Tractor</td><td>Fuga, dañado, tapa faltante, corrosión</td></tr>
+<tr><td>5</td><td>Compartimentos de Cabina</td><td>Cab/Storage Areas</td><td>Tractor</td><td>Sucios, objetos no autorizados, daño en puertas</td></tr>
+<tr><td>6</td><td>Tanques de Aire</td><td>Air Tanks</td><td>Tractor</td><td>Fuga de aire, corrosión, válvula dañada</td></tr>
+<tr><td>7</td><td>Quinta Rueda</td><td>Fifth Wheel</td><td>Tractor</td><td>Desgaste excesivo, falta lubricación, mecanismo dañado</td></tr>
+<tr><td>8</td><td>Ejes de Transmisión</td><td>Drive Shafts</td><td>Tractor</td><td>Vibración, crucetas desgastadas, fuga de grasa</td></tr>
+<tr><td>9</td><td>Escape</td><td>Exhaust</td><td>Tractor</td><td>Fuga, tubo dañado, silenciador suelto</td></tr>
+<tr><td>10</td><td>Motor/Batería/Filtros</td><td>Engine/Battery/Air Filter</td><td>Tractor</td><td>Fuga aceite, batería dañada, filtro sucio</td></tr>
+<tr><td>11</td><td>Base del Remolque</td><td>Trailer Base</td><td>Trailer</td><td>Daño estructural, corrosión, objetos extraños</td></tr>
+<tr><td>12</td><td>Puertas Exteriores/Interiores</td><td>Outside/Inside Doors</td><td>Trailer</td><td>Empaques dañados, bisagras flojas, filtración luz</td></tr>
+<tr><td>13</td><td>Pared Lateral Derecha</td><td>Right Side Wall</td><td>Trailer</td><td>Abolladuras, filtración luz, corrosión</td></tr>
+<tr><td>14</td><td>Techos Interno y Externo</td><td>Ceiling/Roof</td><td>Trailer</td><td>Daño exterior, filtración agua, hoyos</td></tr>
+<tr><td>15</td><td>Pared Frontal</td><td>Front Wall</td><td>Trailer</td><td>Daño, filtración luz, remaches flojos</td></tr>
+<tr><td>16</td><td>Pared Lateral Izquierda</td><td>Left Side Wall</td><td>Trailer</td><td>Abolladuras, filtración luz, corrosión</td></tr>
+<tr><td>17</td><td>Piso Interior</td><td>Interior Floor</td><td>Trailer</td><td>Dañado, sucio, tablas flojas, residuos</td></tr>
+<tr><td>18</td><td>Patín</td><td>Landing Gear</td><td>Trailer</td><td>Dañado, manivela difícil, falta lubricación</td></tr>
+<tr><td>19</td><td>Unidad de Refrigeración</td><td>Refrigeration Unit</td><td>Trailer</td><td>No enciende, fuga refrigerante, ruido anormal</td></tr>
+<tr><td>20</td><td>Limpieza Interior</td><td>Trailer Cleanliness</td><td>Trailer</td><td>Insectos, roedores, plantas, telarañas, olores</td></tr>
+</table>
+
+<h2>💻 TECNOLOGÍAS UTILIZADAS</h2>
+<table>
+<tr><th>Categoría</th><th>Tecnología</th><th>Detalle</th></tr>
+<tr><td>Frontend</td><td>React + Vite</td><td>Framework principal</td></tr>
+<tr><td>Estilos</td><td>TailwindCSS</td><td>Diseño responsivo</td></tr>
+<tr><td>Iconos</td><td>Lucide React</td><td>Iconografía moderna</td></tr>
+<tr><td>PDF</td><td>jsPDF</td><td>Generación de documentos</td></tr>
+<tr><td>Backend</td><td>Vercel Serverless Functions</td><td>API endpoints</td></tr>
+<tr><td>Base de Datos</td><td>Neon PostgreSQL</td><td>Almacenamiento en la nube</td></tr>
+<tr><td>Hosting</td><td>Vercel</td><td>Despliegue automático desde GitHub</td></tr>
+<tr><td>Repositorio</td><td>GitHub</td><td>Control de versiones</td></tr>
+</table>
+
+<h2>📝 NOTAS ADICIONALES</h2>
+<ul>
+<li>El sistema funciona en dispositivos móviles y desktop</li>
+<li>Los PDFs incluyen logo de Crown Xpress Transport</li>
+<li>Las fotos se comprimen automáticamente para optimizar almacenamiento</li>
+<li>La sesión se cierra automáticamente después de 10 minutos de inactividad</li>
+<li>Los usuarios mock están disponibles como fallback si la API falla</li>
+<li>La foto del sello es opcional desde Junio 2026</li>
+<li>Los comentarios de inspección aparecen al completar los 20 puntos</li>
+</ul>
+
+</body>
+</html>
