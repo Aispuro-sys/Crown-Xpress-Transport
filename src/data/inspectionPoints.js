@@ -8,6 +8,7 @@ export const inspectionPoints = [
       { id: 102, es: 'Defensa suelta o mal fijada', en: 'Loose or poorly secured bumper' },
       { id: 103, es: 'Defensa con óxido o corrosión', en: 'Bumper with rust or corrosion' },
       { id: 104, es: 'Defensa faltante o incompleta', en: 'Missing or incomplete bumper' },
+      { id: 199, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -19,6 +20,7 @@ export const inspectionPoints = [
       { id: 203, es: 'Rin dañado o doblado', en: 'Damaged or bent rim' },
       { id: 204, es: 'Presión de aire incorrecta', en: 'Incorrect air pressure' },
       { id: 205, es: 'Tuercas flojas o faltantes', en: 'Loose or missing lug nuts' },
+      { id: 299, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -29,6 +31,7 @@ export const inspectionPoints = [
       { id: 302, es: 'Piso dañado o con hoyos', en: 'Damaged floor or holes' },
       { id: 303, es: 'Alfombra rota o faltante', en: 'Torn or missing carpet' },
       { id: 304, es: 'Objetos sueltos en el piso', en: 'Loose objects on floor' },
+      { id: 399, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -40,6 +43,7 @@ export const inspectionPoints = [
       { id: 403, es: 'Tapa de tanque faltante o dañada', en: 'Missing or damaged fuel cap' },
       { id: 404, es: 'Corrosión en el tanque', en: 'Tank corrosion' },
       { id: 405, es: 'Soportes del tanque dañados', en: 'Damaged tank straps/mounts' },
+      { id: 499, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -51,6 +55,7 @@ export const inspectionPoints = [
       { id: 503, es: 'Daño en puertas o cerraduras', en: 'Door or lock damage' },
       { id: 504, es: 'Techo interior dañado', en: 'Damaged interior roof' },
       { id: 505, es: 'Asientos dañados o sucios', en: 'Damaged or dirty seats' },
+      { id: 599, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -61,6 +66,7 @@ export const inspectionPoints = [
       { id: 602, es: 'Tanque con corrosión', en: 'Tank with corrosion' },
       { id: 603, es: 'Válvula de drenaje dañada', en: 'Damaged drain valve' },
       { id: 604, es: 'Soportes del tanque dañados', en: 'Damaged tank mounts' },
+      { id: 699, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -72,6 +78,7 @@ export const inspectionPoints = [
       { id: 703, es: 'Mecanismo de bloqueo dañado', en: 'Damaged locking mechanism' },
       { id: 704, es: 'Grietas en el chasis', en: 'Chassis cracks' },
       { id: 705, es: 'Tornillos flojos o faltantes', en: 'Loose or missing bolts' },
+      { id: 799, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -82,6 +89,7 @@ export const inspectionPoints = [
       { id: 802, es: 'Crucetas desgastadas', en: 'Worn U-joints' },
       { id: 803, es: 'Fuga de grasa', en: 'Grease leak' },
       { id: 804, es: 'Eje dañado o doblado', en: 'Damaged or bent shaft' },
+      { id: 899, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -92,6 +100,7 @@ export const inspectionPoints = [
       { id: 902, es: 'Tubo de escape dañado', en: 'Damaged exhaust pipe' },
       { id: 903, es: 'Silenciador suelto', en: 'Loose muffler' },
       { id: 904, es: 'Corrosión excesiva', en: 'Excessive corrosion' },
+      { id: 999, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -103,6 +112,7 @@ export const inspectionPoints = [
       { id: 1003, es: 'Filtro de aire sucio', en: 'Dirty air filter' },
       { id: 1004, es: 'Cables sueltos o dañados', en: 'Loose or damaged cables' },
       { id: 1005, es: 'Nivel de fluidos bajo', en: 'Low fluid levels' },
+      { id: 1099, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -113,6 +123,7 @@ export const inspectionPoints = [
       { id: 1102, es: 'Corrosión en vigas', en: 'Beam corrosion' },
       { id: 1103, es: 'Objetos extraños adheridos', en: 'Foreign objects attached' },
       { id: 1104, es: 'Falta de puntos de soldadura', en: 'Missing weld points' },
+      { id: 1199, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -124,6 +135,7 @@ export const inspectionPoints = [
       { id: 1203, es: 'Puerta no cierra correctamente', en: 'Door does not close properly' },
       { id: 1204, es: 'Filtración de luz visible', en: 'Visible light leak' },
       { id: 1205, es: 'Cerradura dañada', en: 'Damaged lock' },
+      { id: 1299, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -134,6 +146,7 @@ export const inspectionPoints = [
       { id: 1302, es: 'Filtración de luz', en: 'Light leak' },
       { id: 1303, es: 'Corrosión o óxido', en: 'Corrosion or rust' },
       { id: 1304, es: 'Remaches flojos o faltantes', en: 'Loose or missing rivets' },
+      { id: 1399, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -144,6 +157,7 @@ export const inspectionPoints = [
       { id: 1402, es: 'Filtración de agua', en: 'Water leak' },
       { id: 1403, es: 'Techo interior sucio o dañado', en: 'Dirty or damaged interior ceiling' },
       { id: 1404, es: 'Hoyos o perforaciones', en: 'Holes or perforations' },
+      { id: 1499, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -154,6 +168,7 @@ export const inspectionPoints = [
       { id: 1502, es: 'Filtración de luz', en: 'Light leak' },
       { id: 1503, es: 'Remaches flojos', en: 'Loose rivets' },
       { id: 1504, es: 'Suciedad o residuos', en: 'Dirt or debris' },
+      { id: 1599, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -164,6 +179,7 @@ export const inspectionPoints = [
       { id: 1602, es: 'Filtración de luz', en: 'Light leak' },
       { id: 1603, es: 'Corrosión o óxido', en: 'Corrosion or rust' },
       { id: 1604, es: 'Remaches flojos o faltantes', en: 'Loose or missing rivets' },
+      { id: 1699, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -174,6 +190,7 @@ export const inspectionPoints = [
       { id: 1702, es: 'Piso sucio o contaminado', en: 'Dirty or contaminated floor' },
       { id: 1703, es: 'Tablas flojas o rotas', en: 'Loose or broken boards' },
       { id: 1704, es: 'Residuos de carga anterior', en: 'Previous cargo residue' },
+      { id: 1799, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -184,6 +201,7 @@ export const inspectionPoints = [
       { id: 1802, es: 'Manivela difícil de operar', en: 'Crank difficult to operate' },
       { id: 1803, es: 'Falta de lubricación', en: 'Lack of lubrication' },
       { id: 1804, es: 'Placa de soporte dañada', en: 'Damaged support plate' },
+      { id: 1899, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -195,6 +213,7 @@ export const inspectionPoints = [
       { id: 1903, es: 'Ruido anormal', en: 'Abnormal noise' },
       { id: 1904, es: 'Temperatura incorrecta', en: 'Incorrect temperature' },
       { id: 1905, es: 'Daño visible en unidad', en: 'Visible unit damage' },
+      { id: 1999, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
   { 
@@ -207,6 +226,7 @@ export const inspectionPoints = [
       { id: 2004, es: 'Telarañas visibles', en: 'Visible cobwebs' },
       { id: 2005, es: 'Contaminación orgánica', en: 'Organic contamination' },
       { id: 2006, es: 'Olores desagradables', en: 'Unpleasant odors' },
+      { id: 2099, es: 'OTRO (ESPECIFICAR)', en: 'OTHER (SPECIFY)', isOther: true },
     ]
   },
 ]

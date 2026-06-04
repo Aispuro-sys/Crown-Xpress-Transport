@@ -1,65 +1,105 @@
 import { useState } from 'react'
-import { FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { FileText, AlertCircle, CheckCircle2, Loader2, X, Truck, PenLine } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { generateInspectionPDF } from '../utils/pdfGenerator'
 import { createInspection, buildPayload } from '../utils/api'
+import SignatureCanvas from 'react-signature-canvas'
+import { useRef } from 'react'
 
 export default function SubmitBar({ onSuccess }) {
   const { t, language } = useLanguage()
   const ctx = useInspection()
-  const { canSubmit, validation, completedCount, failedCount } = ctx
+  const { canSubmit, validation, completedCount, failedCount, operatorSignature, setOperatorSignature, unitInfo } = ctx
   const [generating, setGenerating] = useState(false)
+  const [showSignatureModal, setShowSignatureModal] = useState(false)
+  const sigRef = useRef(null)
 
   const issues = []
   if (!validation.allPointsEvaluated) issues.push(t('completeAllPoints'))
   if (!validation.failuresHaveIssue) issues.push(t('selectIssueForFailures'))
   if (!validation.failuresHavePhoto) issues.push(t('addPhotoForFailures'))
   // Seal photo is now optional - removed from validation
+  // Operator signature is captured when clicking "Generate PDF"
   if (!validation.guardSigned) issues.push(t('guardMustSign'))
 
-  const handleSubmit = async () => {
+  // Step 1: Click "Generate PDF" -> Show signature modal
+  const handleGenerateClick = () => {
     if (!canSubmit) return
+    setShowSignatureModal(true)
+  }
+
+  // Step 2: Operator signs -> Generate PDF
+  const handleSignAndGenerate = async () => {
+    if (!sigRef.current || sigRef.current.isEmpty()) {
+      alert(language === 'es' ? 'POR FAVOR FIRME ANTES DE CONTINUAR' : 'PLEASE SIGN BEFORE CONTINUING')
+      return
+    }
+
+    // Save operator signature
+    const signatureData = sigRef.current.toDataURL('image/png')
+    setOperatorSignature({
+      name: unitInfo.driverName?.toUpperCase() || '',
+      signature: signatureData,
+      signedAt: new Date().toISOString()
+    })
+
+    setShowSignatureModal(false)
     setGenerating(true)
-    try {
-      // 1. Generate PDF
-      const pdfResult = await generateInspectionPDF({
-        unitInfo: ctx.unitInfo,
-        points: ctx.points,
-        sealPhoto: ctx.sealPhoto,
-        guardSignature: ctx.guardSignature,
-        auditorSignature: ctx.auditorSignature,
-        language,
-      })
-      const pdfBase64 = pdfResult.doc.output('datauristring')
-      const pdfFilename = pdfResult.filename
 
-      // 2. Upload to backend
-      const payload = buildPayload(ctx, pdfBase64, pdfFilename)
-      const uploadResult = await createInspection(payload)
+    // Small delay to ensure state is updated
+    setTimeout(async () => {
+      try {
+        // 1. Generate PDF with the new signature
+        const pdfResult = await generateInspectionPDF({
+          unitInfo: ctx.unitInfo,
+          points: ctx.points,
+          sealPhoto: ctx.sealPhoto,
+          guardSignature: ctx.guardSignature,
+          auditorSignature: ctx.auditorSignature,
+          operatorSignature: {
+            name: unitInfo.driverName?.toUpperCase() || '',
+            signature: signatureData,
+            signedAt: new Date().toISOString()
+          },
+          language,
+        })
+        const pdfBase64 = pdfResult.doc.output('datauristring')
+        const pdfFilename = pdfResult.filename
 
-      // 3. Show PDF in new window for 4 seconds, then download and close
-      const pdfBlob = pdfResult.doc.output('blob')
-      const pdfUrl = URL.createObjectURL(pdfBlob)
-      const pdfWindow = window.open(pdfUrl, '_blank', 'width=800,height=600')
-      
-      // Download the PDF
-      pdfResult.doc.save(pdfFilename)
-      
-      // Close preview window after 4 seconds and trigger success
-      setTimeout(() => {
-        if (pdfWindow && !pdfWindow.closed) {
-          pdfWindow.close()
-        }
-        URL.revokeObjectURL(pdfUrl)
-        onSuccess?.({ filename: pdfFilename, ...uploadResult })
-      }, 4000)
-      
-    } catch (e) {
-      console.error('Submit error:', e)
-      const msg = e.message || String(e)
-      alert(language === 'es' ? `Error al guardar: ${msg}` : `Error saving: ${msg}`)
-      setGenerating(false)
+        // 2. Upload to backend
+        const payload = buildPayload(ctx, pdfBase64, pdfFilename)
+        const uploadResult = await createInspection(payload)
+
+        // 3. Show PDF in new window for 4 seconds, then download and close
+        const pdfBlob = pdfResult.doc.output('blob')
+        const pdfUrl = URL.createObjectURL(pdfBlob)
+        const pdfWindow = window.open(pdfUrl, '_blank', 'width=800,height=600')
+        
+        // Download the PDF
+        pdfResult.doc.save(pdfFilename)
+        
+        // Close preview window after 4 seconds and trigger success
+        setTimeout(() => {
+          if (pdfWindow && !pdfWindow.closed) {
+            pdfWindow.close()
+          }
+          URL.revokeObjectURL(pdfUrl)
+          onSuccess?.({ filename: pdfFilename, ...uploadResult })
+        }, 4000)
+        
+      } catch (e) {
+        console.error('Submit error:', e)
+        const msg = e.message || String(e)
+        alert(language === 'es' ? `Error al guardar: ${msg}` : `Error saving: ${msg}`)
+        setGenerating(false)
+      }
+    }, 100)
+  }
+
+  const clearSignature = () => {
+    if (sigRef.current) {
+      sigRef.current.clear()
     }
   }
 
@@ -100,19 +140,19 @@ export default function SubmitBar({ onSuccess }) {
 
               {/* Submit button */}
               <button
-                onClick={handleSubmit}
+                onClick={handleGenerateClick}
                 disabled={!canSubmit || generating}
                 className="btn-gold text-base px-6 py-3 shadow-lg disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
               >
                 {generating ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    {language === 'es' ? 'Generando...' : 'Generating...'}
+                    {language === 'es' ? 'GENERANDO...' : 'GENERATING...'}
                   </>
                 ) : (
                   <>
                     <FileText className="w-5 h-5" />
-                    {t('generatePdf')}
+                    {t('generatePdf').toUpperCase()}
                   </>
                 )}
               </button>
@@ -121,7 +161,7 @@ export default function SubmitBar({ onSuccess }) {
             {issues.length > 0 && (
               <details className="mt-3 group">
                 <summary className="text-xs font-semibold text-amber-700 cursor-pointer hover:text-amber-900">
-                  {language === 'es' ? `Ver ${issues.length} pendiente(s)` : `View ${issues.length} pending`}
+                  {language === 'es' ? `VER ${issues.length} PENDIENTE(S)` : `VIEW ${issues.length} PENDING`}
                 </summary>
                 <ul className="mt-2 space-y-1 text-xs text-amber-700 pl-4">
                   {issues.map((issue, i) => (
@@ -136,6 +176,73 @@ export default function SubmitBar({ onSuccess }) {
           </div>
         </div>
       </div>
+
+      {/* Operator Signature Modal */}
+      {showSignatureModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-5 py-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Truck className="w-6 h-6" />
+                  <div>
+                    <h3 className="font-bold text-lg">
+                      {language === 'es' ? 'FIRMA DEL OPERADOR' : 'OPERATOR SIGNATURE'}
+                    </h3>
+                    <p className="text-emerald-100 text-sm">
+                      {unitInfo.driverName?.toUpperCase() || (language === 'es' ? 'OPERADOR' : 'OPERATOR')}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowSignatureModal(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Signature Area */}
+            <div className="p-5">
+              <p className="text-sm text-slate-600 mb-3 text-center">
+                {language === 'es' 
+                  ? 'FIRME EN EL RECUADRO PARA CONFIRMAR LA INSPECCIÓN' 
+                  : 'SIGN IN THE BOX TO CONFIRM THE INSPECTION'}
+              </p>
+              
+              <div className="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden">
+                <SignatureCanvas
+                  ref={sigRef}
+                  canvasProps={{
+                    className: 'w-full h-40 bg-white',
+                    style: { width: '100%', height: '160px' }
+                  }}
+                  penColor="black"
+                />
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={clearSignature}
+                  className="flex-1 py-3 px-4 border-2 border-slate-300 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition flex items-center justify-center gap-2"
+                >
+                  <PenLine className="w-4 h-4" />
+                  {language === 'es' ? 'LIMPIAR' : 'CLEAR'}
+                </button>
+                <button
+                  onClick={handleSignAndGenerate}
+                  className="flex-1 py-3 px-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  {language === 'es' ? 'FIRMAR Y GENERAR PDF' : 'SIGN & GENERATE PDF'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

@@ -207,8 +207,9 @@ export default function InspectionPoint({ point }) {
       <IssueSelectModal
         open={issueOpen}
         onClose={() => setIssueOpen(false)}
-        onSelect={(id) => setPointIssue(point.id, id)}
+        onSelect={(id, customText) => setPointIssue(point.id, id, customText)}
         currentIssueId={state.issueId}
+        currentCustomText={state.issueCustomText}
         pointId={point.id}
         pointName={`${point.id}. ${point[language]}`}
       />

@@ -33,7 +33,7 @@ async function loadLogoImage() {
   }
 }
 
-export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guardSignature, auditorSignature, language = 'es' }) {
+export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guardSignature, auditorSignature, operatorSignature, language = 'es' }) {
   // Pre-load logo
   const logoBase64 = await loadLogoImage()
   
@@ -63,8 +63,9 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     failuresTitle: 'DETALLE DE FALLAS',
     sealPhoto: 'FOTO DEL SELLO',
     signatures: 'FIRMAS',
-    guardSig: 'Guardia',
-    auditorSig: 'Auditor',
+    guardSig: 'GUARDIA',
+    auditorSig: 'AUDITOR',
+    operatorSig: 'OPERADOR',
     signedAt: 'Firmado',
     notSigned: 'No firmado',
     summary: 'RESUMEN',
@@ -101,8 +102,9 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     failuresTitle: 'FAILURE DETAILS',
     sealPhoto: 'SEAL PHOTO',
     signatures: 'SIGNATURES',
-    guardSig: 'Guard',
-    auditorSig: 'Auditor',
+    guardSig: 'GUARD',
+    auditorSig: 'AUDITOR',
+    operatorSig: 'OPERATOR',
     signedAt: 'Signed',
     notSigned: 'Not signed',
     summary: 'SUMMARY',
@@ -174,15 +176,19 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   y += 6
 
   const tableBody = inspectionPoints.map(p => {
-    const state = points[p.id] || { status: null, issueId: null }
+    const state = points[p.id] || { status: null, issueId: null, issueCustomText: null }
     const statusText = state.status === 'good' ? T.good : state.status === 'bad' ? T.bad : T.pending
     const pointIssues = getIssuesForPoint(p.id)
     const issue = pointIssues.find(e => e.id === state.issueId)
+    // If custom text exists (for "OTHER" option), show it instead of the issue name
+    const issueText = state.issueCustomText 
+      ? state.issueCustomText.toUpperCase() 
+      : (issue ? issue[language].toUpperCase() : '')
     return [
       p.id.toString(),
-      p[language],
+      p[language].toUpperCase(),
       statusText,
-      issue ? issue[language] : ''
+      issueText
     ]
   })
 
@@ -315,10 +321,11 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     } catch (e) { /* ignore */ }
   }
 
-  // Signatures (right column - guard top, auditor bottom)
-  const sigX = margin + sigBoxW + 4
-  drawSignatureBox(doc, sigX, sigSectionY, sigBoxW, 28, T.guardSig, guardSignature, T)
-  drawSignatureBox(doc, sigX, sigSectionY + 28, sigBoxW, 28, T.auditorSig, auditorSignature, T)
+  // Signatures (3 columns: operator, guard, auditor)
+  const sigBoxW3 = (pageWidth - margin * 2 - 8) / 3
+  drawSignatureBox(doc, margin, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.operatorSig, operatorSignature, T)
+  drawSignatureBox(doc, margin + sigBoxW3 + 4, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.guardSig, guardSignature, T)
+  drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.auditorSig, auditorSignature, T)
 
   // ===== PAGE 2: TRUCK DIAGRAM =====
   doc.addPage()

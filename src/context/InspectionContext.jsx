@@ -4,7 +4,7 @@ import { inspectionPoints } from '../data/inspectionPoints'
 const InspectionContext = createContext()
 
 const initialPoints = () => inspectionPoints.reduce((acc, p) => {
-  acc[p.id] = { status: null, issueId: null, photo: null }
+  acc[p.id] = { status: null, issueId: null, issueCustomText: null, photo: null }
   return acc
 }, {})
 
@@ -34,6 +34,7 @@ export function InspectionProvider({ children }) {
   // Signatures
   const [guardSignature, setGuardSignature] = useState({ name: '', signature: null, signedAt: null })
   const [auditorSignature, setAuditorSignature] = useState({ name: '', signature: null, signedAt: null })
+  const [operatorSignature, setOperatorSignature] = useState({ name: '', signature: null, signedAt: null })
 
   // Helpers
   const updateUnitInfo = useCallback((field, value) => {
@@ -53,8 +54,8 @@ export function InspectionProvider({ children }) {
     }))
   }, [])
 
-  const setPointIssue = useCallback((id, issueId) => {
-    setPoints(prev => ({ ...prev, [id]: { ...prev[id], issueId } }))
+  const setPointIssue = useCallback((id, issueId, customText = null) => {
+    setPoints(prev => ({ ...prev, [id]: { ...prev[id], issueId, issueCustomText: customText } }))
   }, [])
 
   const setPointPhoto = useCallback((id, photo) => {
@@ -80,6 +81,7 @@ export function InspectionProvider({ children }) {
     setSealPhoto(null)
     setGuardSignature({ name: '', signature: null, signedAt: null })
     setAuditorSignature({ name: '', signature: null, signedAt: null })
+    setOperatorSignature({ name: '', signature: null, signedAt: null })
   }, [])
 
   // Computed
@@ -88,14 +90,16 @@ export function InspectionProvider({ children }) {
   const goodCount = Object.values(points).filter(p => p.status === 'good').length
   const progressPercent = Math.round((completedCount / inspectionPoints.length) * 100)
 
-  // Validation: all points evaluated, all bad have issueId+photo, guard signed (seal photo is optional)
+  // Validation: all points evaluated, all bad have issueId+photo, guard signed (seal photo and operator signature are handled separately)
   const validation = {
     allPointsEvaluated: completedCount === inspectionPoints.length,
     failuresHaveIssue: Object.values(points).every(p => p.status !== 'bad' || p.issueId),
     failuresHavePhoto: Object.values(points).every(p => p.status !== 'bad' || p.photo),
     hasSealPhoto: !!sealPhoto, // Optional - not required for submission
     guardSigned: !!(guardSignature.signature && guardSignature.name.trim()),
+    operatorSigned: !!(operatorSignature.signature && operatorSignature.name.trim()),
   }
+  // Operator signature is NOT required here - it will be captured when clicking "Generate PDF"
   const canSubmit = validation.allPointsEvaluated && validation.failuresHaveIssue && validation.failuresHavePhoto && validation.guardSigned
 
   return (
@@ -105,6 +109,7 @@ export function InspectionProvider({ children }) {
       sealPhoto, setSealPhoto,
       guardSignature, setGuardSignature,
       auditorSignature, setAuditorSignature,
+      operatorSignature, setOperatorSignature,
       resetInspection,
       completedCount, failedCount, goodCount, progressPercent,
       validation, canSubmit,

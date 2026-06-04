@@ -71,7 +71,7 @@ export const translations = {
     
     // Actions
     submit: 'Finalizar Inspección',
-    generatePdf: 'Generar PDF',
+    generatePdf: 'Terminar Inspección',
     downloadPdf: 'Descargar PDF',
     newInspection: 'Nueva Inspección',
     save: 'Guardar',
@@ -162,7 +162,7 @@ export const translations = {
     guardRequired: 'Guard signature required',
     
     submit: 'Submit Inspection',
-    generatePdf: 'Generate PDF',
+    generatePdf: 'Finish Inspection',
     downloadPdf: 'Download PDF',
     newInspection: 'New Inspection',
     save: 'Save',

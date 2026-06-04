@@ -48,6 +48,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   const validateField = (field) => {
+    // Optional fields based on checkboxes
     if (field === 'containerNumber' && !hasContainer) {
       return 'border-slate-200 focus:border-crown-navy'
     }
@@ -57,10 +58,23 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     if (field === 'lockNumber' && !hasLock) {
       return 'border-slate-200 focus:border-crown-navy'
     }
+    // Check if field has value
     if (!unitInfo[field] || unitInfo[field].trim() === '') {
-      return 'border-rose-400 focus:border-rose-500'
+      return 'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-200'
     }
-    return 'border-slate-200 focus:border-crown-navy'
+    return 'border-emerald-400 bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-200'
+  }
+  
+  const getFieldIcon = (field) => {
+    // Optional fields based on checkboxes
+    if (field === 'containerNumber' && !hasContainer) return null
+    if (field === 'sealNumber' && !hasSeal) return null
+    if (field === 'lockNumber' && !hasLock) return null
+    
+    if (!unitInfo[field] || unitInfo[field].trim() === '') {
+      return <span className="text-rose-500 text-xs font-bold">✗</span>
+    }
+    return <span className="text-emerald-500 text-xs font-bold">✓</span>
   }
 
   return (
@@ -73,15 +87,16 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Trailer Number */}
           <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              {t('trailerNumber')} <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>{t('trailerNumber')} <span className="text-rose-500">*</span></span>
+              {getFieldIcon('trailerNumber')}
             </label>
             <input
               type="text"
               value={unitInfo.trailerNumber || ''}
               onChange={e => update('trailerNumber', e.target.value.toUpperCase())}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('trailerNumber')}`}
-              placeholder={language === 'es' ? 'Ej: T-12345' : 'Ex: T-12345'}
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('trailerNumber')}`}
+              placeholder={language === 'es' ? 'EJ: T-12345' : 'EX: T-12345'}
               required
             />
           </div>
@@ -110,16 +125,19 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </div>
             {hasContainer && (
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Package className="w-3 h-3" />
-                  {language === 'es' ? 'Número de Contenedor' : 'Container Number'} <span className="text-rose-500">*</span>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Package className="w-3 h-3" />
+                    {language === 'es' ? 'NÚMERO DE CONTENEDOR' : 'CONTAINER NUMBER'} <span className="text-rose-500">*</span>
+                  </span>
+                  {getFieldIcon('containerNumber')}
                 </label>
                 <input
                   type="text"
                   value={unitInfo.containerNumber || ''}
                   onChange={e => update('containerNumber', e.target.value.toUpperCase())}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('containerNumber')}`}
-                  placeholder={language === 'es' ? 'Ej: MSKU1234567' : 'Ex: MSKU1234567'}
+                  className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('containerNumber')}`}
+                  placeholder={language === 'es' ? 'EJ: MSKU1234567' : 'EX: MSKU1234567'}
                   required={hasContainer}
                 />
               </div>
@@ -150,16 +168,19 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </div>
             {hasSeal && (
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
-                  {t('sealNumber')} <span className="text-rose-500">*</span>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    {t('sealNumber').toUpperCase()} <span className="text-rose-500">*</span>
+                  </span>
+                  {getFieldIcon('sealNumber')}
                 </label>
                 <input
                   type="text"
                   value={unitInfo.sealNumber || ''}
                   onChange={e => update('sealNumber', e.target.value.toUpperCase())}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('sealNumber')}`}
-                  placeholder={language === 'es' ? 'Ej: S-98765' : 'Ex: S-98765'}
+                  className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('sealNumber')}`}
+                  placeholder={language === 'es' ? 'EJ: S-98765' : 'EX: S-98765'}
                   required={hasSeal}
                 />
               </div>
@@ -190,16 +211,19 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </div>
             {hasLock && (
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
-                  {language === 'es' ? 'Número de Candado' : 'Lock Number'} <span className="text-rose-500">*</span>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    {language === 'es' ? 'NÚMERO DE CANDADO' : 'LOCK NUMBER'} <span className="text-rose-500">*</span>
+                  </span>
+                  {getFieldIcon('lockNumber')}
                 </label>
                 <input
                   type="text"
                   value={unitInfo.lockNumber || ''}
                   onChange={e => update('lockNumber', e.target.value.toUpperCase())}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('lockNumber')}`}
-                  placeholder={language === 'es' ? 'Ej: L-54321' : 'Ex: L-54321'}
+                  className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('lockNumber')}`}
+                  placeholder={language === 'es' ? 'EJ: L-54321' : 'EX: L-54321'}
                   required={hasLock}
                 />
               </div>
@@ -208,66 +232,78 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
           {/* Operator Name */}
           <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {t('driverName')} <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
+              <span className="flex items-center gap-1">
+                <User className="w-3 h-3" />
+                {t('driverName')} <span className="text-rose-500">*</span>
+              </span>
+              {getFieldIcon('driverName')}
             </label>
             <input
               type="text"
               value={unitInfo.driverName || ''}
-              onChange={e => update('driverName', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('driverName')}`}
-              placeholder={language === 'es' ? 'Nombre completo del operador' : 'Operator full name'}
+              onChange={e => update('driverName', e.target.value.toUpperCase())}
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 uppercase transition-colors ${validateField('driverName')}`}
+              placeholder={language === 'es' ? 'NOMBRE COMPLETO DEL OPERADOR' : 'OPERATOR FULL NAME'}
               required
             />
           </div>
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              {t('date')} <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                {t('date').toUpperCase()} <span className="text-rose-500">*</span>
+              </span>
+              {getFieldIcon('inspectionDate')}
             </label>
             <input
               type="date"
               value={unitInfo.inspectionDate || ''}
               onChange={e => update('inspectionDate', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('inspectionDate')}`}
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('inspectionDate')}`}
               required
             />
           </div>
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {language === 'es' ? 'Ubicación (Yarda)' : 'Location'} <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {language === 'es' ? 'UBICACIÓN (YARDA)' : 'LOCATION'} <span className="text-rose-500">*</span>
+              </span>
+              {getFieldIcon('location')}
             </label>
             <select
               value={unitInfo.location || ''}
               onChange={e => update('location', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 ${validateField('location')}`}
+              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('location')}`}
               required
             >
-              <option value="">{language === 'es' ? 'Seleccione...' : 'Select...'}</option>
+              <option value="">{language === 'es' ? 'SELECCIONE...' : 'SELECT...'}</option>
               {YARDS.map(yard => (
-                <option key={yard.id} value={yard.name}>{yard.name}</option>
+                <option key={yard.id} value={yard.name}>{yard.name.toUpperCase()}</option>
               ))}
             </select>
           </div>
 
           {/* Guard Name (readonly) */}
           <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {language === 'es' ? 'Guardia' : 'Guard'} <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <User className="w-3 h-3" />
+                {language === 'es' ? 'GUARDIA' : 'GUARD'}
+              </span>
+              <span className="text-emerald-500 text-xs font-bold">✓</span>
             </label>
             <input
               type="text"
-              value={unitInfo.guardName || ''}
+              value={(unitInfo.guardName || '').toUpperCase()}
               readOnly
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-700"
-              placeholder={language === 'es' ? 'Asignado automáticamente' : 'Auto-assigned'}
+              className="w-full px-3 py-2 border-2 border-emerald-400 bg-emerald-50 rounded-lg text-slate-700 uppercase"
+              placeholder={language === 'es' ? 'ASIGNADO AUTOMÁTICAMENTE' : 'AUTO-ASSIGNED'}
             />
           </div>
         </div>
