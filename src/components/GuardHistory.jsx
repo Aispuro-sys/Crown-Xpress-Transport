@@ -30,10 +30,14 @@ export default function GuardHistory() {
     setError(null)
     try {
       const res = await listInspections({ limit: 200 })
-      // Only show inspections from current guard
-      const mine = (res.data || []).filter(i => i.guard_name === user?.full_name)
+      // Only show inspections from current guard (case-insensitive comparison)
+      const mine = (res.data || []).filter(i => 
+        i.guard_name?.toLowerCase() === user?.full_name?.toLowerCase()
+      )
+      console.log('GuardHistory loaded:', res.data?.length, 'total,', mine.length, 'mine')
       setInspections(mine)
     } catch (err) {
+      console.error('GuardHistory error:', err)
       setError(err.message)
     } finally {
       setLoading(false)
