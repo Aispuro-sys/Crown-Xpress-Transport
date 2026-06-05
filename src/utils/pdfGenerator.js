@@ -349,15 +349,16 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.auditorSig, auditorSignature, T)
 
   // ===== PAGE 2: TRUCK DIAGRAM (LANDSCAPE - FULL PAGE) =====
-  doc.addPage('landscape')
+  // Add landscape page: 'l' for landscape, 'letter' for US Letter size
+  doc.addPage([279.4, 215.9], 'l') // Letter size in mm, landscape
   const landscapeWidth = doc.internal.pageSize.getWidth()
   const landscapeHeight = doc.internal.pageSize.getHeight()
-  const smallMargin = 10
+  const smallMargin = 8
   
   // Draw header for landscape page
   drawHeader(doc, T, landscapeWidth, smallMargin, logoBase64)
   
-  let diagramY = 32
+  let diagramY = 30
   
   // Title
   doc.setFillColor(...COLORS.navy)
@@ -375,11 +376,11 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   diagramY += 4
 
   // Draw truck diagram with real image - FULL WIDTH and HEIGHT to fill the page
-  const availableHeight = landscapeHeight - diagramY - 18 // Leave space for footer
+  const availableHeight = landscapeHeight - diagramY - 15 // Leave space for footer
   drawTruckDiagramPDF(doc, smallMargin, diagramY, landscapeWidth - smallMargin * 2, availableHeight, points, language, T, truckDiagramBase64)
 
-  // ===== FOOTER =====
-  drawFooter(doc, T, pageWidth, pageHeight, margin)
+  // ===== FOOTER for landscape page =====
+  drawFooter(doc, T, landscapeWidth, landscapeHeight, smallMargin)
 
   // Generate filename
   const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
