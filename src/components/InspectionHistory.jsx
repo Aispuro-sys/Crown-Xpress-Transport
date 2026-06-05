@@ -19,9 +19,12 @@ export default function InspectionHistory() {
       setLoading(true)
       setError(null)
       try {
+        console.log('Loading inspections...')
         const res = await listInspections({ limit: 100 })
-        setInspections(res.data)
+        console.log('Inspections loaded:', res)
+        setInspections(res.data || [])
       } catch (err) {
+        console.error('Error loading inspections:', err)
         setError(err.message)
       } finally {
         setLoading(false)
