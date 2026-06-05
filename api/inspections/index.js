@@ -65,11 +65,11 @@ export default async function handler(req, res) {
         hasSealPhoto: !!sealPhoto
       })
 
-      // Insert inspection
+      // Insert inspection (using only columns that exist in the original schema)
       const [inspection] = await sql`
         INSERT INTO inspections (
           trailer_number, container_number, seal_number, lock_number,
-          driver_name, operator_employee_number, odometer, location, inspection_date,
+          driver_name, odometer, location, inspection_date,
           high_security_seal, seal_affixed,
           guard_name, guard_signature, guard_signed_at,
           auditor_name, auditor_signature, auditor_signed_at,
@@ -82,7 +82,6 @@ export default async function handler(req, res) {
           ${unitInfo?.sealNumber || null},
           ${unitInfo?.lockNumber || null},
           ${unitInfo?.driverName || null},
-          ${unitInfo?.operatorEmployeeNumber || null},
           ${unitInfo?.odometer || null},
           ${unitInfo?.location || null},
           ${unitInfo?.inspectionDate ? new Date(unitInfo.inspectionDate) : new Date()},
