@@ -35,8 +35,6 @@ export async function initializeDatabase() {
       pending_count INTEGER DEFAULT 0,
       status VARCHAR(50) DEFAULT 'pending',
       original_inspection_id INTEGER REFERENCES inspections(id),
-      reconfirm_reason TEXT,
-      operator_employee_number VARCHAR(100),
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     )

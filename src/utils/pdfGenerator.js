@@ -349,8 +349,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.auditorSig, auditorSignature, T)
 
   // ===== PAGE 2: TRUCK DIAGRAM (LANDSCAPE - FULL PAGE) =====
-  // Add landscape page: 'l' for landscape, 'letter' for US Letter size
-  doc.addPage([279.4, 215.9], 'l') // Letter size in mm, landscape
+  doc.addPage([297, 210], 'landscape') // A4 landscape dimensions in mm
   const landscapeWidth = doc.internal.pageSize.getWidth()
   const landscapeHeight = doc.internal.pageSize.getHeight()
   const smallMargin = 8
@@ -358,7 +357,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   // Draw header for landscape page
   drawHeader(doc, T, landscapeWidth, smallMargin, logoBase64)
   
-  let diagramY = 30
+  let diagramY = 28
   
   // Title
   doc.setFillColor(...COLORS.navy)

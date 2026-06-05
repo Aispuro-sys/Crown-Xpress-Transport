@@ -72,15 +72,7 @@ export default function SubmitBar({ onSuccess }) {
 
         // 2. Upload to backend
         const payload = buildPayload(ctx, pdfBase64, pdfFilename)
-        console.log('Sending payload to backend:', { 
-          hasUnitInfo: !!payload.unitInfo,
-          hasPoints: !!payload.points,
-          hasPdfBase64: !!payload.pdfBase64,
-          pdfFilename: payload.pdfFilename
-        })
-        
         const uploadResult = await createInspection(payload)
-        console.log('Upload result:', uploadResult)
 
         // 3. Show PDF in new window (no download, just preview)
         const pdfBlob = pdfResult.doc.output('blob')
@@ -89,8 +81,7 @@ export default function SubmitBar({ onSuccess }) {
         
         // Reset inspection for new one after showing PDF
         setTimeout(() => {
-          // Reset generating state and inspection
-          setGenerating(false)
+          // Reset inspection for new one
           ctx.resetInspection()
           onSuccess?.({ filename: pdfFilename, ...uploadResult })
         }, 2000)
