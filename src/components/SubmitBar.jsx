@@ -76,9 +76,11 @@ export default function SubmitBar({ onSuccess }) {
         const pdfUrl = URL.createObjectURL(pdfBlob)
         window.open(pdfUrl, '_blank', 'width=1000,height=800')
         
+        // Reset generating state
+        setGenerating(false)
+        
         // Reset inspection for new one after showing PDF
         setTimeout(() => {
-          // Reset inspection for new one
           ctx.resetInspection()
           onSuccess?.({ filename: pdfFilename, ...uploadResult })
         }, 2000)
