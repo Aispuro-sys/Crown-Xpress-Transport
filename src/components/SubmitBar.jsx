@@ -36,10 +36,13 @@ export default function SubmitBar({ onSuccess }) {
       return
     }
 
-    // Save operator signature
+    // Save operator signature with employee number
     const signatureData = sigRef.current.toDataURL('image/png')
+    const operatorDisplay = unitInfo.operatorEmployeeNumber 
+      ? `${unitInfo.operatorEmployeeNumber} - ${unitInfo.driverName || ''}`.toUpperCase()
+      : (unitInfo.driverName || '').toUpperCase()
     setOperatorSignature({
-      name: unitInfo.driverName?.toUpperCase() || '',
+      name: operatorDisplay,
       signature: signatureData,
       signedAt: new Date().toISOString()
     })
@@ -58,7 +61,7 @@ export default function SubmitBar({ onSuccess }) {
           guardSignature: ctx.guardSignature,
           auditorSignature: ctx.auditorSignature,
           operatorSignature: {
-            name: unitInfo.driverName?.toUpperCase() || '',
+            name: operatorDisplay,
             signature: signatureData,
             signedAt: new Date().toISOString()
           },
@@ -186,7 +189,9 @@ export default function SubmitBar({ onSuccess }) {
                       {language === 'es' ? 'FIRMA DEL OPERADOR' : 'OPERATOR SIGNATURE'}
                     </h3>
                     <p className="text-emerald-100 text-sm">
-                      {unitInfo.driverName?.toUpperCase() || (language === 'es' ? 'OPERADOR' : 'OPERATOR')}
+                      {unitInfo.operatorEmployeeNumber 
+                        ? `${unitInfo.operatorEmployeeNumber} - ${unitInfo.driverName || ''}`.toUpperCase()
+                        : (unitInfo.driverName?.toUpperCase() || (language === 'es' ? 'OPERADOR' : 'OPERATOR'))}
                     </p>
                   </div>
                 </div>
