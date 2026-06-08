@@ -7,9 +7,15 @@ import PhotoViewerModal from './PhotoViewerModal'
 
 export default function SealPhoto() {
   const { t } = useLanguage()
-  const { sealPhoto, setSealPhoto } = useInspection()
+  const { sealPhoto, setSealPhoto, unitInfo } = useInspection()
   const [cameraOpen, setCameraOpen] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
+
+  // Hide seal photo for EMPTY and BOBTAIL inspections
+  const inspectionType = unitInfo?.inspectionType
+  if (inspectionType === 'EMPTY' || inspectionType === 'BOBTAIL') {
+    return null
+  }
 
   return (
     <>

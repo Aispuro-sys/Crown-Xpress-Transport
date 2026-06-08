@@ -72,6 +72,8 @@ export default function StepByStepInspection({ onAllCompleted }) {
       setPointStatus(point.id, 'good')
     })
     setShowConfirmAllOk(false)
+    // Jump to the last point after marking all as good
+    setCurrentStep(totalPoints - 1)
   }
 
   // Show summary view
