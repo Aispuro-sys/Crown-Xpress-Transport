@@ -51,7 +51,8 @@ export default function GuidedInspection() {
     if (currentStage === 'unitInfo' && unitInfoValid) {
       setCurrentStage('inspection')
     } else if (currentStage === 'inspection' && allPointsCompleted) {
-      setCurrentStage('seal')
+      // Skip seal if not LOADED
+      setCurrentStage(needsSealPhoto ? 'seal' : 'signatures')
     } else if (currentStage === 'seal') {
       setCurrentStage('signatures')
     }
@@ -63,14 +64,18 @@ export default function GuidedInspection() {
     } else if (currentStage === 'seal') {
       setCurrentStage('inspection')
     } else if (currentStage === 'signatures') {
-      setCurrentStage('seal')
+      // Go back to seal if LOADED, otherwise to inspection
+      setCurrentStage(needsSealPhoto ? 'seal' : 'inspection')
     }
   }
 
+  // Determine if seal photo stage is needed (only for LOADED)
+  const needsSealPhoto = unitInfo?.inspectionType === 'LOADED'
+  
   const stages = [
     { id: 'unitInfo', name: language === 'es' ? 'Datos del Camión' : 'Truck Info', icon: ClipboardCheck },
     { id: 'inspection', name: language === 'es' ? 'Inspección' : 'Inspection', icon: CheckCircle },
-    { id: 'seal', name: language === 'es' ? 'Foto del Sello' : 'Seal Photo', icon: CheckCircle },
+    ...(needsSealPhoto ? [{ id: 'seal', name: language === 'es' ? 'Foto del Sello' : 'Seal Photo', icon: CheckCircle }] : []),
     { id: 'signatures', name: language === 'es' ? 'Firmas' : 'Signatures', icon: CheckCircle }
   ]
 
@@ -165,11 +170,11 @@ export default function GuidedInspection() {
           </div>
           
           {/* Step by Step Inspection */}
-          <StepByStepInspection onAllCompleted={() => setCurrentStage('seal')} />
+          <StepByStepInspection onAllCompleted={() => setCurrentStage(needsSealPhoto ? 'seal' : 'signatures')} />
         </div>
       )}
 
-      {currentStage === 'seal' && (
+      {currentStage === 'seal' && needsSealPhoto && (
         <div>
           <SealPhotoSection />
           <div className="mt-4 flex justify-between">
