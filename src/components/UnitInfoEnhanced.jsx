@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Calendar, User, Tag, Lock, Package } from 'lucide-react'
+import { MapPin, Calendar, User, Tag, Lock, Package, Search, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { useAuth } from '../context/AuthContext'
+import { searchOperator } from '../utils/api'
 
 const YARDS = [
   { id: 1, name: 'Yard A - Laredo' },
@@ -19,6 +20,10 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(true)
   const [hasLock, setHasLock] = useState(false)
+  const [employeeNumber, setEmployeeNumber] = useState('')
+  const [operatorSearching, setOperatorSearching] = useState(false)
+  const [operatorFound, setOperatorFound] = useState(null)
+  const [operatorError, setOperatorError] = useState(null)
 
   // Notify parent when checkbox states change
   const handleContainerChange = (checked) => {
@@ -41,9 +46,36 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     // Set today's date in YYYY-MM-DD format for date input
     const today = new Date().toISOString().slice(0, 10)
     updateUnitInfo('inspectionDate', today)
-    updateUnitInfo('driverName', user?.full_name || '')
+    // Guard name is auto-assigned from logged in user
+    updateUnitInfo('guardName', user?.full_name || '')
     updateUnitInfo('location', user?.location_id ? YARDS.find(y => y.id === user.location_id)?.name || '' : '')
   }, [user, updateUnitInfo])
+
+  // Search operator by employee number
+  const handleSearchOperator = async () => {
+    if (!employeeNumber || employeeNumber.length < 3) {
+      setOperatorError(language === 'es' ? 'Ingrese número de empleado' : 'Enter employee number')
+      return
+    }
+    
+    setOperatorSearching(true)
+    setOperatorError(null)
+    setOperatorFound(null)
+    
+    try {
+      const result = await searchOperator(employeeNumber)
+      if (result.success && result.operator) {
+        setOperatorFound(result.operator)
+        updateUnitInfo('driverName', result.operator.fullName)
+        updateUnitInfo('employeeNumber', result.operator.employeeNumber)
+      }
+    } catch (err) {
+      setOperatorError(language === 'es' ? 'Operador no encontrado' : 'Operator not found')
+      updateUnitInfo('driverName', '')
+    } finally {
+      setOperatorSearching(false)
+    }
+  }
 
   const update = (field, value) => {
     updateUnitInfo(field, value)
@@ -232,7 +264,62 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             )}
           </div>
 
-          {/* Operator Name */}
+          {/* Operator - Employee Number Search */}
+          <div className="col-span-1">
+            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
+              <span className="flex items-center gap-1">
+                <User className="w-3 h-3" />
+                {language === 'es' ? 'NO. EMPLEADO OPERADOR' : 'OPERATOR EMPLOYEE #'} <span className="text-rose-500">*</span>
+              </span>
+              {operatorFound ? (
+                <CheckCircle className="w-4 h-4 text-emerald-500" />
+              ) : operatorError ? (
+                <XCircle className="w-4 h-4 text-rose-500" />
+              ) : null}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={employeeNumber}
+                onChange={e => {
+                  setEmployeeNumber(e.target.value.toUpperCase())
+                  setOperatorFound(null)
+                  setOperatorError(null)
+                }}
+                onKeyDown={e => e.key === 'Enter' && handleSearchOperator()}
+                className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 uppercase transition-colors ${
+                  operatorFound ? 'border-emerald-400 bg-emerald-50' : 
+                  operatorError ? 'border-rose-400 bg-rose-50' : 
+                  'border-slate-200 focus:border-crown-navy'
+                }`}
+                placeholder={language === 'es' ? 'EJ: EMP001' : 'E.G.: EMP001'}
+              />
+              <button
+                type="button"
+                onClick={handleSearchOperator}
+                disabled={operatorSearching}
+                className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 disabled:opacity-50 flex items-center gap-1"
+              >
+                {operatorSearching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {operatorFound && (
+              <p className="text-xs text-emerald-600 mt-1 font-semibold">
+                ✓ {operatorFound.fullName}
+              </p>
+            )}
+            {operatorError && (
+              <p className="text-xs text-rose-600 mt-1">
+                {operatorError}
+              </p>
+            )}
+          </div>
+
+          {/* Operator Name (readonly - filled from search) */}
           <div className="col-span-1">
             <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
               <span className="flex items-center gap-1">
@@ -244,10 +331,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             <input
               type="text"
               value={unitInfo.driverName || ''}
-              onChange={e => update('driverName', e.target.value.toUpperCase())}
-              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 uppercase transition-colors ${validateField('driverName')}`}
-              placeholder={language === 'es' ? 'NOMBRE COMPLETO DEL OPERADOR' : 'OPERATOR FULL NAME'}
-              required
+              readOnly
+              className={`w-full px-3 py-2 border-2 rounded-lg bg-slate-100 cursor-not-allowed uppercase transition-colors ${
+                unitInfo.driverName ? 'border-emerald-400' : 'border-slate-200'
+              }`}
+              placeholder={language === 'es' ? 'BUSCAR POR NO. EMPLEADO' : 'SEARCH BY EMPLOYEE #'}
             />
           </div>
 

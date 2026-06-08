@@ -62,6 +62,12 @@ export async function healthCheck() {
   return await fetchJson(`${API_BASE}/health`)
 }
 
+/** Search operator by employee number */
+export async function searchOperator(employeeNumber) {
+  const res = await fetchJson(`${API_BASE}/operators/search?employee_number=${encodeURIComponent(employeeNumber)}`)
+  return res // { success, operator: { id, employeeNumber, fullName, ... } }
+}
+
 /** Reconfirm an inspection (create new linked record) */
 export async function reconfirmInspection(originalId, payload) {
   const res = await fetchJson(`${API_BASE}/inspections/${originalId}/reconfirm`, {

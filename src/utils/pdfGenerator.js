@@ -158,10 +158,10 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   y += 6
 
   const infoRows = [
-    [T.trailerNumber, unitInfo.trailerNumber || '—', T.sealNumber, unitInfo.sealNumber || '—'],
+    [T.trailerNumber, unitInfo.trailerNumber || '—', T.sealNumber, unitInfo.sealNumber || 'N/A'],
     [T.driverName, unitInfo.driverName || '—', T.date, formatDate(unitInfo.inspectionDate)],
-    [T.odometer, unitInfo.odometer || '—', T.location, unitInfo.location || '—'],
-    [T.highSecuritySeal, unitInfo.highSecuritySeal === 'yes' ? T.yes : T.no, T.sealAffixed, unitInfo.sealAffixed === 'yes' ? T.yes : T.no],
+    [T.location, unitInfo.location || '—', '', ''],
+    [T.highSecuritySeal, unitInfo.highSecuritySeal === 'yes' ? T.yes : 'N/A', T.sealAffixed, unitInfo.sealAffixed === 'yes' ? T.yes : 'N/A'],
   ]
 
   autoTable(doc, {
@@ -666,9 +666,9 @@ function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramB
   }
 }
 
-// Draw individual point marker with status letter (B/M/P or G/B/P in English)
+// Draw individual point marker with number and status letter (e.g., "1B", "5M", "12P")
 function drawPointMarker(doc, x, y, id, status, language) {
-  const radius = 5
+  const radius = 6 // Slightly larger to fit number + letter
   
   // Set fill based on status - using colors similar to the reference image
   if (status === 'good') {
@@ -685,7 +685,7 @@ function drawPointMarker(doc, x, y, id, status, language) {
   doc.setLineWidth(0.5)
   doc.circle(x, y, radius, 'FD')
   
-  // Status letter inside circle (B=Bueno/G=Good, M=Malo/B=Bad, P=Pendiente/Pending)
+  // Status letter (B=Bueno/G=Good, M=Malo/B=Bad, P=Pendiente/Pending)
   let statusLetter = 'P'
   if (status === 'good') {
     statusLetter = language === 'es' ? 'B' : 'G'
@@ -693,8 +693,11 @@ function drawPointMarker(doc, x, y, id, status, language) {
     statusLetter = language === 'es' ? 'M' : 'B'
   }
   
+  // Show number + letter (e.g., "1B", "12M")
+  const label = `${id}${statusLetter}`
+  
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(8)
-  doc.text(statusLetter, x, y + 2.5, { align: 'center' })
+  doc.setFontSize(6) // Smaller font to fit both number and letter
+  doc.text(label, x, y + 1.8, { align: 'center' })
 }
