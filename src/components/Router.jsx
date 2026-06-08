@@ -18,10 +18,13 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Router() {
   const { t, language } = useLanguage()
-  const { resetInspection } = useInspection()
+  const { resetInspection, unitInfo } = useInspection()
   const { user, canEdit, canViewAll } = useAuth()
   const [page, setPage] = useState(canViewAll() && !canEdit() ? 'auditor' : 'form')
   const [success, setSuccess] = useState({ open: false, filename: null })
+  
+  // Check if inspection type has been selected
+  const inspectionTypeSelected = !!unitInfo?.inspectionType
 
   const handleSuccess = (payload) => {
     setSuccess({ open: true, filename: payload.filename })
@@ -79,11 +82,16 @@ export default function Router() {
         {page === 'form' && canEdit() && (
           <div className="space-y-5">
             <UnitInfo />
-            <TruckDiagram />
-            <InspectionList />
-            <SealPhoto />
-            <SignaturesSection />
-            <SubmitBar onSuccess={handleSuccess} />
+            {/* Only show remaining components after inspection type is selected */}
+            {inspectionTypeSelected && (
+              <>
+                <TruckDiagram />
+                <InspectionList />
+                <SealPhoto />
+                <SignaturesSection />
+                <SubmitBar onSuccess={handleSuccess} />
+              </>
+            )}
           </div>
         )}
         {page === 'guided' && canEdit() && (
