@@ -318,7 +318,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     y += Math.ceil(failures.length / cols) * (photoH + 22)
   }
 
-  // ===== PAGE 2: TRUCK DIAGRAM (vertical page, horizontal image) =====
+  // ===== PAGE 2: TRUCK DIAGRAM (vertical page, horizontal image centered) =====
   doc.addPage()
   drawHeader(doc, T, pageWidth, margin, logoBase64)
   
@@ -337,10 +337,13 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   doc.setFontSize(7)
   doc.setTextColor(30, 41, 59)
   doc.text(language === 'es' ? 'Leyenda: B = Bueno | M = Malo | P = Pendiente' : 'Legend: G = Good | B = Bad | P = Pending', margin, diagramY)
-  diagramY += 6
+  diagramY += 8
 
-  // Draw truck diagram with real image and point markers - full width, horizontal orientation
-  drawTruckDiagramPDF(doc, margin, diagramY, pageWidth - margin * 2, 160, points, language, T, truckDiagramBase64)
+  // Draw truck diagram - use full page width and maximize height for better visibility
+  // The image is horizontal (wide), so we use full width and calculate proportional height
+  const diagramWidth = pageWidth - margin * 2
+  const diagramHeight = 200 // Increased height for better visibility
+  drawTruckDiagramPDF(doc, margin, diagramY, diagramWidth, diagramHeight, points, language, T, truckDiagramBase64)
 
   // ===== PAGE 3: SEAL PHOTO + SIGNATURES =====
   doc.addPage()
@@ -551,9 +554,19 @@ function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramB
   // Draw the truck diagram image
   if (truckDiagramBase64) {
     try {
-      // Image aspect ratio is approximately 2.5:1, adjust height accordingly
-      const imgHeight = h * 0.85
-      doc.addImage(truckDiagramBase64, 'JPEG', x, y, w, imgHeight)
+      // The truck diagram image is horizontal (landscape orientation)
+      // We want to display it horizontally on a vertical page
+      // Image aspect ratio is approximately 2.2:1 (width:height)
+      const aspectRatio = 2.2
+      
+      // Calculate dimensions to fit the width while maintaining aspect ratio
+      const imgWidth = w
+      const imgHeight = imgWidth / aspectRatio
+      
+      // Center the image vertically in the available space
+      const imgY = y + (h - imgHeight - 30) / 2 // Leave space for legend
+      
+      doc.addImage(truckDiagramBase64, 'JPEG', x, imgY, imgWidth, imgHeight)
       
       // Point positions matching the TruckDiagramVisual.jsx positions (in percentages)
       // These match the exact positions from the visual component
@@ -584,14 +597,14 @@ function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramB
       
       // Draw point markers on the image
       pointPositions.forEach(pos => {
-        const px = x + (pos.xPct / 100) * w
-        const py = y + (pos.yPct / 100) * imgHeight
+        const px = x + (pos.xPct / 100) * imgWidth
+        const py = imgY + (pos.yPct / 100) * imgHeight
         const state = points[pos.id] || { status: null }
         drawPointMarker(doc, px, py, pos.id, state.status, language)
       })
       
       // Draw legend below image - matching the colors used in markers
-      const legendY = y + imgHeight + 8
+      const legendY = imgY + imgHeight + 10
       doc.setFontSize(8)
       doc.setFont('helvetica', 'normal')
       
