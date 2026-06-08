@@ -1,4 +1,5 @@
-import { Languages, RotateCcw, LogOut, User } from 'lucide-react'
+import { useState } from 'react'
+import { Languages, LogOut, User, Plus, ChevronDown, RotateCcw, RefreshCw, Trash2 } from 'lucide-react'
 import Logo from './Logo'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
@@ -8,11 +9,24 @@ export default function Header() {
   const { language, toggleLanguage, t } = useLanguage()
   const { resetInspection, progressPercent } = useInspection()
   const { user, logout } = useAuth()
+  const [showMenu, setShowMenu] = useState(false)
 
-  const handleReset = () => {
+  const handleNewInspection = () => {
     if (confirm(language === 'es' ? '¿Iniciar una nueva inspección? Se perderán los datos actuales.' : 'Start a new inspection? Current data will be lost.')) {
       resetInspection()
+      setShowMenu(false)
     }
+  }
+  
+  const handleClear = () => {
+    if (confirm(language === 'es' ? '¿Limpiar todos los datos? Esta acción no se puede deshacer.' : 'Clear all data? This action cannot be undone.')) {
+      resetInspection()
+      setShowMenu(false)
+    }
+  }
+  
+  const handleRefresh = () => {
+    window.location.reload()
   }
 
   return (
@@ -54,15 +68,64 @@ export default function Header() {
             <span className="uppercase">{language}</span>
           </button>
 
-          {/* Reset */}
-          <button
-            onClick={handleReset}
-            className="p-2 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-            title={t('newInspection')}
-            aria-label={t('newInspection')}
-          >
-            <RotateCcw className="w-5 h-5" />
-          </button>
+          {/* New Inspection Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">{language === 'es' ? 'Nueva Inspección' : 'New Inspection'}</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-50">
+                  <button
+                    onClick={handleNewInspection}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-emerald-50 flex items-center gap-3 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-emerald-600" />
+                    <span className="font-medium text-slate-700">
+                      {language === 'es' ? 'Nueva Inspección' : 'New Inspection'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleClear}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-rose-50 flex items-center gap-3 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4 text-rose-600" />
+                    <span className="font-medium text-slate-700">
+                      {language === 'es' ? 'Limpiar Datos' : 'Clear Data'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleRefresh}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium text-slate-700">
+                      {language === 'es' ? 'Actualizar Página' : 'Refresh Page'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      window.history.back()
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-3 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4 text-slate-600" />
+                    <span className="font-medium text-slate-700">
+                      {language === 'es' ? 'Regresar' : 'Go Back'}
+                    </span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Logout */}
           <button

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, AlertCircle, CheckCircle2, Loader2, X, Truck, PenLine } from 'lucide-react'
+import { FileText, AlertCircle, CheckCircle2, Loader2, X, Truck, PenLine, Home } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { generateInspectionPDF } from '../utils/pdfGenerator'
@@ -13,6 +13,9 @@ export default function SubmitBar({ onSuccess }) {
   const { canSubmit, validation, completedCount, failedCount, operatorSignature, setOperatorSignature, unitInfo } = ctx
   const [generating, setGenerating] = useState(false)
   const [showSignatureModal, setShowSignatureModal] = useState(false)
+  const [showPdfViewer, setShowPdfViewer] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
+  const [pdfFilename, setPdfFilename] = useState('')
   const sigRef = useRef(null)
 
   const issues = []
@@ -71,19 +74,15 @@ export default function SubmitBar({ onSuccess }) {
         const payload = buildPayload(ctx, pdfBase64, pdfFilename)
         const uploadResult = await createInspection(payload)
 
-        // 3. Show PDF in new window (no download, just preview)
+        // 3. Show PDF in modal viewer
         const pdfBlob = pdfResult.doc.output('blob')
-        const pdfUrl = URL.createObjectURL(pdfBlob)
-        window.open(pdfUrl, '_blank', 'width=1000,height=800')
+        const pdfBlobUrl = URL.createObjectURL(pdfBlob)
+        setPdfUrl(pdfBlobUrl)
+        setPdfFilename(pdfFilename)
+        setShowPdfViewer(true)
         
         // Reset generating state
         setGenerating(false)
-        
-        // Reset inspection for new one after showing PDF
-        setTimeout(() => {
-          ctx.resetInspection()
-          onSuccess?.({ filename: pdfFilename, ...uploadResult })
-        }, 2000)
         
       } catch (e) {
         console.error('Submit error:', e)
@@ -92,6 +91,16 @@ export default function SubmitBar({ onSuccess }) {
         setGenerating(false)
       }
     }, 100)
+  }
+  
+  const handleClosePdfViewer = () => {
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl)
+    }
+    setShowPdfViewer(false)
+    setPdfUrl(null)
+    ctx.resetInspection()
+    onSuccess?.({ filename: pdfFilename })
   }
 
   const clearSignature = () => {
@@ -237,6 +246,40 @@ export default function SubmitBar({ onSuccess }) {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* PDF Viewer Modal */}
+      {showPdfViewer && pdfUrl && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-crown-navy to-crown-navy-dark px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+              <div>
+                <h3 className="font-bold text-white text-lg">
+                  {language === 'es' ? 'PDF GENERADO EXITOSAMENTE' : 'PDF GENERATED SUCCESSFULLY'}
+                </h3>
+                <p className="text-crown-gold text-sm">{pdfFilename}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClosePdfViewer}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              <Home className="w-5 h-5" />
+              <span>{language === 'es' ? 'Regresar a Inicio' : 'Return to Home'}</span>
+            </button>
+          </div>
+
+          {/* PDF Viewer */}
+          <div className="flex-1 overflow-hidden">
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full border-0"
+              title="PDF Viewer"
+            />
           </div>
         </div>
       )}
