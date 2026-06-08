@@ -318,49 +318,15 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     y += Math.ceil(failures.length / cols) * (photoH + 22)
   }
 
-  // ===== SEAL PHOTO + SIGNATURES =====
-  if (y > pageHeight - 70) {
-    doc.addPage()
-    drawHeader(doc, T, pageWidth, margin, logoBase64)
-    y = 38
-  }
-
-  // Seal photo (left)
-  const sigSectionY = y
-  const sigBoxW = (pageWidth - margin * 2 - 4) / 2
-
-  if (sealPhoto) {
-    doc.setFillColor(...COLORS.gold)
-    doc.rect(margin, sigSectionY, sigBoxW, 6, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    doc.text(T.sealPhoto, margin + 2, sigSectionY + 4)
-
-    try {
-      doc.addImage(sealPhoto, 'JPEG', margin, sigSectionY + 6, sigBoxW, 50)
-    } catch (e) { /* ignore */ }
-  }
-
-  // Signatures (3 columns: operator, guard, auditor)
-  const sigBoxW3 = (pageWidth - margin * 2 - 8) / 3
-  drawSignatureBox(doc, margin, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.operatorSig, operatorSignature, T)
-  drawSignatureBox(doc, margin + sigBoxW3 + 4, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.guardSig, guardSignature, T)
-  drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigSectionY + (sealPhoto ? 58 : 0), sigBoxW3, 28, T.auditorSig, auditorSignature, T)
-
-  // ===== PAGE 2: TRUCK DIAGRAM (LANDSCAPE) =====
-  doc.addPage('landscape')
-  const landscapeWidth = doc.internal.pageSize.getWidth()
-  const landscapeHeight = doc.internal.pageSize.getHeight()
-  
-  // Draw header for landscape page
-  drawHeader(doc, T, landscapeWidth, margin, logoBase64)
+  // ===== PAGE 2: TRUCK DIAGRAM (vertical page, horizontal image) =====
+  doc.addPage()
+  drawHeader(doc, T, pageWidth, margin, logoBase64)
   
   let diagramY = 38
   
   // Title
   doc.setFillColor(...COLORS.navy)
-  doc.rect(margin, diagramY, landscapeWidth - margin * 2, 6, 'F')
+  doc.rect(margin, diagramY, pageWidth - margin * 2, 6, 'F')
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(8)
@@ -373,8 +339,50 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   doc.text(language === 'es' ? 'Leyenda: B = Bueno | M = Malo | P = Pendiente' : 'Legend: G = Good | B = Bad | P = Pending', margin, diagramY)
   diagramY += 6
 
-  // Draw truck diagram with real image and point markers - wider in landscape
-  drawTruckDiagramPDF(doc, margin, diagramY, landscapeWidth - margin * 2, 130, points, language, T, truckDiagramBase64)
+  // Draw truck diagram with real image and point markers - full width, horizontal orientation
+  drawTruckDiagramPDF(doc, margin, diagramY, pageWidth - margin * 2, 160, points, language, T, truckDiagramBase64)
+
+  // ===== PAGE 3: SEAL PHOTO + SIGNATURES =====
+  doc.addPage()
+  drawHeader(doc, T, pageWidth, margin, logoBase64)
+  
+  let sigY = 38
+
+  // Seal photo section
+  if (sealPhoto) {
+    doc.setFillColor(...COLORS.gold)
+    doc.rect(margin, sigY, pageWidth - margin * 2, 6, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.text(T.sealPhoto, margin + 2, sigY + 4)
+    sigY += 6
+
+    try {
+      // Center the seal photo
+      const photoW = 100
+      const photoH = 75
+      const photoX = (pageWidth - photoW) / 2
+      doc.addImage(sealPhoto, 'JPEG', photoX, sigY, photoW, photoH)
+      sigY += photoH + 10
+    } catch (e) { /* ignore */ }
+  }
+
+  // Signatures section title
+  doc.setFillColor(...COLORS.navy)
+  doc.rect(margin, sigY, pageWidth - margin * 2, 6, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.text(T.signatures, margin + 2, sigY + 4)
+  sigY += 10
+
+  // Signatures (3 columns: operator, guard, auditor)
+  const sigBoxW3 = (pageWidth - margin * 2 - 8) / 3
+  const sigBoxH = 45
+  drawSignatureBox(doc, margin, sigY, sigBoxW3, sigBoxH, T.operatorSig, operatorSignature, T)
+  drawSignatureBox(doc, margin + sigBoxW3 + 4, sigY, sigBoxW3, sigBoxH, T.guardSig, guardSignature, T)
+  drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigY, sigBoxW3, sigBoxH, T.auditorSig, auditorSignature, T)
 
   // ===== FOOTER =====
   drawFooter(doc, T, pageWidth, pageHeight, margin)
