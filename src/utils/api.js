@@ -8,15 +8,21 @@ async function fetchJson(url, options = {}) {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   })
+  
+  // Clone response before reading body (in case we need to read it twice)
+  const text = await res.text()
+  
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
+    let err = {}
+    try { err = JSON.parse(text) } catch {}
     throw new Error(err.error || err.message || `HTTP ${res.status}`)
   }
-  // Always try to parse as JSON first
+  
+  // Parse JSON from text
   try {
-    return await res.json()
+    return JSON.parse(text)
   } catch {
-    return res
+    return text
   }
 }
 
