@@ -255,9 +255,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         <button
           type="button"
           onClick={() => setInspectionType(null)}
-          className="text-xs text-slate-500 hover:text-slate-700 underline"
+          className="text-xs text-white/80 hover:text-white underline"
         >
-          {language === 'es' ? 'Cambiar' : 'Change'}
+          {language === 'es' ? 'CAMBIAR' : 'CHANGE'}
         </button>
       </div>
       <div className="card-body">
