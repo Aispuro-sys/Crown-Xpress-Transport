@@ -53,6 +53,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
   // Search operator by employee number
   const handleSearchOperator = async () => {
+    console.log('Searching for operator:', employeeNumber)
+    
     if (!employeeNumber || employeeNumber.length < 3) {
       setOperatorError(language === 'es' ? 'Ingrese número de empleado' : 'Enter employee number')
       return
@@ -63,13 +65,16 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setOperatorFound(null)
     
     try {
+      console.log('Calling searchOperator API...')
       const result = await searchOperator(employeeNumber)
+      console.log('API result:', result)
       if (result.success && result.operator) {
         setOperatorFound(result.operator)
         updateUnitInfo('driverName', result.operator.fullName)
         updateUnitInfo('employeeNumber', result.operator.employeeNumber)
       }
     } catch (err) {
+      console.error('Search operator error:', err)
       setOperatorError(language === 'es' ? 'Operador no encontrado' : 'Operator not found')
       updateUnitInfo('driverName', '')
     } finally {
