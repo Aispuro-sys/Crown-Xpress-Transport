@@ -164,12 +164,31 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   doc.text(T.unitInfo, margin + 2, y + 4)
   y += 6
 
-  const infoRows = [
-    [T.trailerNumber, unitInfo.trailerNumber || '—', T.sealNumber, unitInfo.sealNumber || 'N/A'],
-    [T.driverName, unitInfo.driverName || '—', T.date, formatDate(unitInfo.inspectionDate)],
-    [T.location, unitInfo.location || '—', '', ''],
-    [T.highSecuritySeal, unitInfo.highSecuritySeal === 'yes' ? T.yes : 'N/A', T.sealAffixed, unitInfo.sealAffixed === 'yes' ? T.yes : 'N/A'],
-  ]
+  // Build info rows - show lock number only for LOADED type
+  const infoRows = []
+  
+  // Row 1: Trailer/Container and Seal/Lock based on inspection type
+  if (inspectionType === 'LOADED') {
+    // LOADED can have seal OR lock
+    const lockLabel = language === 'es' ? 'No. Candado' : 'Lock No.'
+    const sealOrLock = unitInfo.sealNumber || unitInfo.lockNumber || 'N/A'
+    const sealOrLockLabel = unitInfo.sealNumber ? T.sealNumber : lockLabel
+    infoRows.push([T.trailerNumber, unitInfo.trailerNumber || '—', sealOrLockLabel, sealOrLock])
+  } else {
+    // EMPTY and BOBTAIL don't use seal or lock
+    infoRows.push([T.trailerNumber, unitInfo.trailerNumber || '—', '', ''])
+  }
+  
+  // Row 2: Driver and Date
+  infoRows.push([T.driverName, unitInfo.driverName || '—', T.date, formatDate(unitInfo.inspectionDate)])
+  
+  // Row 3: Location
+  infoRows.push([T.location, unitInfo.location || '—', '', ''])
+  
+  // Row 4: Seal info only for LOADED
+  if (inspectionType === 'LOADED') {
+    infoRows.push([T.highSecuritySeal, unitInfo.highSecuritySeal === 'yes' ? T.yes : 'N/A', T.sealAffixed, unitInfo.sealAffixed === 'yes' ? T.yes : 'N/A'])
+  }
 
   autoTable(doc, {
     startY: y,

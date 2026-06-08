@@ -76,6 +76,18 @@ export async function searchOperator(employeeNumber) {
   return res // { success, operator: { id, employeeNumber, fullName, ... } }
 }
 
+/** Search operators by name */
+export async function searchOperatorsByName(name) {
+  const res = await fetchJson(`${API_BASE}/employees?search_name=${encodeURIComponent(name)}`)
+  return res // { success, operators: [...] }
+}
+
+/** List all active operators */
+export async function listOperators() {
+  const res = await fetchJson(`${API_BASE}/employees?list_operators=true`)
+  return res // { success, operators: [...] }
+}
+
 /** Reconfirm an inspection (create new linked record) */
 export async function reconfirmInspection(originalId, payload) {
   const res = await fetchJson(`${API_BASE}/inspections/${originalId}/reconfirm`, {

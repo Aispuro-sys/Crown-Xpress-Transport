@@ -10,9 +10,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    // GET - List employees OR search operator by employee_number
+    // GET - List employees OR search operator by employee_number OR search by name OR list all operators
     if (req.method === 'GET') {
-      const { employee_number } = req.query
+      const { employee_number, search_name, list_operators } = req.query
+      
+      // If list_operators is true, return all active operators
+      if (list_operators === 'true') {
+        const operators = await sql`
+          SELECT id, employee_number, full_name, license_number, license_expiry, phone, status
+          FROM operators
+          WHERE status = 'active'
+          ORDER BY full_name ASC
+        `
+        
+        return res.status(200).json({
+          success: true,
+          operators: operators.map(op => ({
+            id: op.id,
+            employeeNumber: op.employee_number,
+            fullName: op.full_name,
+            licenseNumber: op.license_number,
+            licenseExpiry: op.license_expiry,
+            phone: op.phone,
+            status: op.status
+          }))
+        })
+      }
       
       // If employee_number is provided, search for operator
       if (employee_number) {
@@ -38,6 +61,32 @@ export default async function handler(req, res) {
             phone: operator.phone,
             status: operator.status
           }
+        })
+      }
+      
+      // If search_name is provided, search operators by name
+      if (search_name) {
+        const searchTerm = `%${search_name.toUpperCase()}%`
+        const operators = await sql`
+          SELECT id, employee_number, full_name, license_number, license_expiry, phone, status
+          FROM operators
+          WHERE UPPER(full_name) LIKE ${searchTerm}
+          AND status = 'active'
+          ORDER BY full_name ASC
+          LIMIT 10
+        `
+        
+        return res.status(200).json({
+          success: true,
+          operators: operators.map(op => ({
+            id: op.id,
+            employeeNumber: op.employee_number,
+            fullName: op.full_name,
+            licenseNumber: op.license_number,
+            licenseExpiry: op.license_expiry,
+            phone: op.phone,
+            status: op.status
+          }))
         })
       }
       

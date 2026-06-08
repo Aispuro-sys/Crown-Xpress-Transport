@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ClipboardCheck, ArrowRight, CheckCircle, Truck } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
+import { getApplicablePoints } from '../data/inspectionPoints'
 import UnitInfoEnhanced from './UnitInfoEnhanced'
 import StepByStepInspection from './StepByStepInspection'
 import SealPhotoSection from './SealPhotoSection'
@@ -18,7 +19,12 @@ export default function GuidedInspection() {
   const [hasSeal, setHasSeal] = useState(true)
   const [hasLock, setHasLock] = useState(false)
 
-  const totalPoints = 20
+  // Get applicable points based on inspection type
+  const applicablePoints = useMemo(() => {
+    return getApplicablePoints(unitInfo?.inspectionType)
+  }, [unitInfo?.inspectionType])
+
+  const totalPoints = applicablePoints.length
   const allPointsCompleted = completedCount === totalPoints
 
   // Check if unit info is valid

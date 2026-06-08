@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback } from 'react'
-import { inspectionPoints } from '../data/inspectionPoints'
+import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import { inspectionPoints, getApplicablePoints } from '../data/inspectionPoints'
 
 const InspectionContext = createContext()
 
@@ -84,17 +84,26 @@ export function InspectionProvider({ children }) {
     setOperatorSignature({ name: '', signature: null, signedAt: null })
   }, [])
 
-  // Computed
-  const completedCount = Object.values(points).filter(p => p.status !== null).length
-  const failedCount = Object.values(points).filter(p => p.status === 'bad').length
-  const goodCount = Object.values(points).filter(p => p.status === 'good').length
-  const progressPercent = Math.round((completedCount / inspectionPoints.length) * 100)
+  // Get applicable points based on inspection type
+  const applicablePoints = useMemo(() => {
+    return getApplicablePoints(unitInfo?.inspectionType)
+  }, [unitInfo?.inspectionType])
 
-  // Validation: all points evaluated, all bad have issueId+photo, guard signed (seal photo and operator signature are handled separately)
+  const applicablePointIds = useMemo(() => {
+    return applicablePoints.map(p => p.id)
+  }, [applicablePoints])
+
+  // Computed - only count applicable points for this inspection type
+  const completedCount = applicablePointIds.filter(id => points[id]?.status !== null).length
+  const failedCount = applicablePointIds.filter(id => points[id]?.status === 'bad').length
+  const goodCount = applicablePointIds.filter(id => points[id]?.status === 'good').length
+  const progressPercent = applicablePoints.length > 0 ? Math.round((completedCount / applicablePoints.length) * 100) : 0
+
+  // Validation: all applicable points evaluated, all bad have issueId+photo, guard signed
   const validation = {
-    allPointsEvaluated: completedCount === inspectionPoints.length,
-    failuresHaveIssue: Object.values(points).every(p => p.status !== 'bad' || p.issueId),
-    failuresHavePhoto: Object.values(points).every(p => p.status !== 'bad' || p.photo),
+    allPointsEvaluated: completedCount === applicablePoints.length,
+    failuresHaveIssue: applicablePointIds.every(id => points[id]?.status !== 'bad' || points[id]?.issueId),
+    failuresHavePhoto: applicablePointIds.every(id => points[id]?.status !== 'bad' || points[id]?.photo),
     hasSealPhoto: !!sealPhoto, // Optional - not required for submission
     guardSigned: !!(guardSignature.signature && guardSignature.name.trim()),
     operatorSigned: !!(operatorSignature.signature && operatorSignature.name.trim()),

@@ -3,7 +3,7 @@ import { MapPin, Calendar, User, Tag, Lock, Package, Search, CheckCircle, XCircl
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { useAuth } from '../context/AuthContext'
-import { searchOperator } from '../utils/api'
+import { searchOperator, searchOperatorsByName, listOperators } from '../utils/api'
 import { INSPECTION_TYPES } from '../data/inspectionPoints'
 
 const YARDS = [
@@ -23,10 +23,17 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
+  const [searchMode, setSearchMode] = useState('number') // 'number', 'name', 'list', 'manual'
   const [employeeNumber, setEmployeeNumber] = useState('')
+  const [operatorName, setOperatorName] = useState('')
   const [operatorSearching, setOperatorSearching] = useState(false)
   const [operatorFound, setOperatorFound] = useState(null)
   const [operatorError, setOperatorError] = useState(null)
+  const [operatorsList, setOperatorsList] = useState([])
+  const [operatorsLoading, setOperatorsLoading] = useState(false)
+  const [nameSearchResults, setNameSearchResults] = useState([])
+  const [showNameResults, setShowNameResults] = useState(false)
+  const [manualOperatorName, setManualOperatorName] = useState('')
 
   // Sync local inspectionType with context when context changes
   useEffect(() => {
@@ -98,10 +105,29 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('location', user?.location_id ? YARDS.find(y => y.id === user.location_id)?.name || '' : '')
   }, [user, updateUnitInfo])
 
+  // Load all operators when list mode is selected
+  useEffect(() => {
+    if (searchMode === 'list' && operatorsList.length === 0) {
+      loadOperatorsList()
+    }
+  }, [searchMode])
+
+  const loadOperatorsList = async () => {
+    setOperatorsLoading(true)
+    try {
+      const result = await listOperators()
+      if (result.success && result.operators) {
+        setOperatorsList(result.operators)
+      }
+    } catch (err) {
+      console.error('Failed to load operators:', err)
+    } finally {
+      setOperatorsLoading(false)
+    }
+  }
+
   // Search operator by employee number
   const handleSearchOperator = async () => {
-    console.log('Searching for operator:', employeeNumber)
-    
     if (!employeeNumber || employeeNumber.length < 3) {
       setOperatorError(language === 'es' ? 'Ingrese número de empleado' : 'Enter employee number')
       return
@@ -112,9 +138,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setOperatorFound(null)
     
     try {
-      console.log('Calling searchOperator API...')
       const result = await searchOperator(employeeNumber)
-      console.log('API result:', result)
       if (result.success && result.operator) {
         setOperatorFound(result.operator)
         updateUnitInfo('driverName', result.operator.fullName)
@@ -127,6 +151,59 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     } finally {
       setOperatorSearching(false)
     }
+  }
+
+  // Search operators by name
+  const handleSearchByName = async (searchText) => {
+    if (!searchText || searchText.length < 2) {
+      setNameSearchResults([])
+      setShowNameResults(false)
+      return
+    }
+
+    try {
+      const result = await searchOperatorsByName(searchText)
+      if (result.success && result.operators) {
+        setNameSearchResults(result.operators)
+        setShowNameResults(true)
+      }
+    } catch (err) {
+      console.error('Search by name error:', err)
+      setNameSearchResults([])
+    }
+  }
+
+  // Select operator from list
+  const handleSelectOperator = (operator) => {
+    setOperatorFound(operator)
+    updateUnitInfo('driverName', operator.fullName)
+    updateUnitInfo('employeeNumber', operator.employeeNumber)
+    setShowNameResults(false)
+    setOperatorError(null)
+  }
+
+  // Handle manual entry
+  const handleManualEntry = () => {
+    if (manualOperatorName.trim()) {
+      updateUnitInfo('driverName', manualOperatorName.toUpperCase())
+      updateUnitInfo('employeeNumber', 'MANUAL')
+      setOperatorFound({ fullName: manualOperatorName.toUpperCase(), employeeNumber: 'MANUAL' })
+      setOperatorError(null)
+    }
+  }
+
+  // Reset search when changing modes
+  const handleModeChange = (mode) => {
+    setSearchMode(mode)
+    setOperatorFound(null)
+    setOperatorError(null)
+    setEmployeeNumber('')
+    setOperatorName('')
+    setManualOperatorName('')
+    setShowNameResults(false)
+    setNameSearchResults([])
+    updateUnitInfo('driverName', '')
+    updateUnitInfo('employeeNumber', '')
   }
 
   const update = (field, value) => {
@@ -371,79 +448,231 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </div>
           )}
 
-          {/* Operator - Employee Number Search */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
-              <span className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {language === 'es' ? 'NO. EMPLEADO OPERADOR' : 'OPERATOR EMPLOYEE #'} <span className="text-rose-500">*</span>
-              </span>
-              {operatorFound ? (
-                <CheckCircle className="w-4 h-4 text-emerald-500" />
-              ) : operatorError ? (
-                <XCircle className="w-4 h-4 text-rose-500" />
-              ) : null}
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={employeeNumber}
-                onChange={e => {
-                  setEmployeeNumber(e.target.value.toUpperCase())
-                  setOperatorFound(null)
-                  setOperatorError(null)
-                }}
-                onKeyDown={e => e.key === 'Enter' && handleSearchOperator()}
-                className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 uppercase transition-colors ${
-                  operatorFound ? 'border-emerald-400 bg-emerald-50' : 
-                  operatorError ? 'border-rose-400 bg-rose-50' : 
-                  'border-slate-200 focus:border-crown-navy'
-                }`}
-                placeholder={language === 'es' ? 'EJ: EMP001' : 'E.G.: EMP001'}
-              />
-              <button
-                type="button"
-                onClick={handleSearchOperator}
-                disabled={operatorSearching}
-                className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 disabled:opacity-50 flex items-center gap-1"
-              >
-                {operatorSearching ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-            {operatorFound && (
-              <p className="text-xs text-emerald-600 mt-1 font-semibold">
-                ✓ {operatorFound.fullName}
-              </p>
-            )}
-            {operatorError && (
-              <p className="text-xs text-rose-600 mt-1">
-                {operatorError}
-              </p>
-            )}
-          </div>
+          {/* Operator Search Section - Enhanced with multiple options */}
+          <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+            <div className="border-2 border-slate-200 rounded-lg p-4 bg-slate-50">
+              <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center justify-between uppercase">
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {language === 'es' ? 'BÚSQUEDA DE OPERADOR' : 'OPERATOR SEARCH'} <span className="text-rose-500">*</span>
+                </span>
+                {operatorFound && <CheckCircle className="w-5 h-5 text-emerald-500" />}
+              </label>
 
-          {/* Operator Name (readonly - filled from search) */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
-              <span className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {t('driverName')} <span className="text-rose-500">*</span>
-              </span>
-              {getFieldIcon('driverName')}
-            </label>
-            <input
-              type="text"
-              value={unitInfo.driverName || ''}
-              readOnly
-              className={`w-full px-3 py-2 border-2 rounded-lg bg-slate-100 cursor-not-allowed uppercase transition-colors ${
-                unitInfo.driverName ? 'border-emerald-400' : 'border-slate-200'
-              }`}
-              placeholder={language === 'es' ? 'BUSCAR POR NO. EMPLEADO' : 'SEARCH BY EMPLOYEE #'}
-            />
+              {/* Search Mode Tabs */}
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleModeChange('number')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    searchMode === 'number' ? 'bg-crown-navy text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {language === 'es' ? 'Por Número' : 'By Number'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeChange('name')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    searchMode === 'name' ? 'bg-crown-navy text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {language === 'es' ? 'Por Nombre' : 'By Name'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeChange('list')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    searchMode === 'list' ? 'bg-crown-navy text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {language === 'es' ? 'Lista' : 'List'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeChange('manual')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                    searchMode === 'manual' ? 'bg-crown-navy text-white' : 'bg-white text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {language === 'es' ? 'Manual' : 'Manual'}
+                </button>
+              </div>
+
+              {/* Search by Number */}
+              {searchMode === 'number' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase">
+                    {language === 'es' ? 'Número de Empleado' : 'Employee Number'}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={employeeNumber}
+                      onChange={e => {
+                        setEmployeeNumber(e.target.value.toUpperCase())
+                        setOperatorFound(null)
+                        setOperatorError(null)
+                      }}
+                      onKeyDown={e => e.key === 'Enter' && handleSearchOperator()}
+                      className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 uppercase transition-colors ${
+                        operatorFound ? 'border-emerald-400 bg-emerald-50' : 
+                        operatorError ? 'border-rose-400 bg-rose-50' : 
+                        'border-white focus:border-crown-navy'
+                      }`}
+                      placeholder={language === 'es' ? 'EJ: EMP001' : 'E.G.: EMP001'}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchOperator}
+                      disabled={operatorSearching}
+                      className="px-4 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {operatorSearching ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                      <span className="hidden sm:inline">{language === 'es' ? 'Buscar' : 'Search'}</span>
+                    </button>
+                  </div>
+                  {operatorError && (
+                    <p className="text-xs text-rose-600 mt-2">⚠️ {operatorError}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Search by Name */}
+              {searchMode === 'name' && (
+                <div className="relative">
+                  <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase">
+                    {language === 'es' ? 'Nombre o Apellido' : 'First or Last Name'}
+                  </label>
+                  <input
+                    type="text"
+                    value={operatorName}
+                    onChange={e => {
+                      const val = e.target.value
+                      setOperatorName(val)
+                      handleSearchByName(val)
+                    }}
+                    className="w-full px-3 py-2 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:border-crown-navy uppercase"
+                    placeholder={language === 'es' ? 'EJ: JUAN, GARCIA, ETC.' : 'E.G.: JOHN, SMITH, ETC.'}
+                  />
+                  {showNameResults && nameSearchResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {nameSearchResults.map(op => (
+                        <button
+                          key={op.id}
+                          type="button"
+                          onClick={() => {
+                            handleSelectOperator(op)
+                            setOperatorName('')
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-crown-gold/10 border-b border-slate-100 last:border-0 transition-colors"
+                        >
+                          <div className="font-semibold text-slate-800">{op.fullName}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{op.employeeNumber}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {showNameResults && nameSearchResults.length === 0 && operatorName.length >= 2 && (
+                    <p className="text-xs text-slate-500 mt-2">
+                      {language === 'es' ? 'No se encontraron resultados' : 'No results found'}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* List All Operators */}
+              {searchMode === 'list' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase">
+                    {language === 'es' ? 'Seleccionar de la Lista' : 'Select from List'}
+                  </label>
+                  {operatorsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-6 h-6 animate-spin text-crown-navy" />
+                      <span className="ml-2 text-sm text-slate-600">
+                        {language === 'es' ? 'Cargando...' : 'Loading...'}
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      value={operatorFound?.id || ''}
+                      onChange={e => {
+                        const selected = operatorsList.find(op => op.id === parseInt(e.target.value))
+                        if (selected) handleSelectOperator(selected)
+                      }}
+                      className="w-full px-3 py-2 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:border-crown-navy uppercase"
+                    >
+                      <option value="">
+                        {language === 'es' ? 'SELECCIONE UN OPERADOR...' : 'SELECT AN OPERATOR...'}
+                      </option>
+                      {operatorsList.map(op => (
+                        <option key={op.id} value={op.id}>
+                          {op.fullName} ({op.employeeNumber})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+
+              {/* Manual Entry */}
+              {searchMode === 'manual' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase">
+                    {language === 'es' ? 'Ingresar Manualmente' : 'Enter Manually'}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={manualOperatorName}
+                      onChange={e => setManualOperatorName(e.target.value.toUpperCase())}
+                      onKeyDown={e => e.key === 'Enter' && handleManualEntry()}
+                      className="flex-1 px-3 py-2 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:border-crown-navy uppercase"
+                      placeholder={language === 'es' ? 'NOMBRE COMPLETO DEL OPERADOR' : 'FULL OPERATOR NAME'}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleManualEntry}
+                      className="px-4 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 flex items-center gap-2"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="hidden sm:inline">{language === 'es' ? 'Confirmar' : 'Confirm'}</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-amber-600 mt-2">
+                    ⚠️ {language === 'es' ? 'No se validará con la base de datos' : 'Will not be validated with database'}
+                  </p>
+                </div>
+              )}
+
+              {/* Selected Operator Display */}
+              {operatorFound && (
+                <div className="mt-4 p-3 bg-emerald-50 border-2 border-emerald-400 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-bold text-emerald-800 uppercase">
+                        ✓ {operatorFound.fullName}
+                      </div>
+                      <div className="text-xs text-emerald-600 mt-0.5">
+                        {language === 'es' ? 'No. Empleado:' : 'Employee #:'} {operatorFound.employeeNumber}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleModeChange(searchMode)}
+                      className="text-xs text-emerald-700 hover:text-emerald-900 underline"
+                    >
+                      {language === 'es' ? 'Cambiar' : 'Change'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Date - readonly, auto-set to today */}
