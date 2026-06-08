@@ -38,10 +38,10 @@ export default function SignaturesSection() {
         <h2 className="font-bold tracking-wide uppercase text-sm">{t('signaturesTitle')}</h2>
       </div>
       <div className="card-body space-y-4">
-        <p className="text-sm text-slate-500 text-center">
+        <p className="text-xs text-slate-400 text-center italic">
           {language === 'es' 
-            ? 'LA FIRMA DEL OPERADOR SE CAPTURARÁ AL MOMENTO DE GENERAR EL PDF' 
-            : 'OPERATOR SIGNATURE WILL BE CAPTURED WHEN GENERATING THE PDF'}
+            ? 'La firma del operador se capturará al generar el PDF (opcional)' 
+            : 'Operator signature will be captured when generating PDF (optional)'}
         </p>
         
         {/* Warning if points not completed */}

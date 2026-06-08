@@ -1,19 +1,33 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Lock, Camera, Eye, Check } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
+import { getApplicablePoints } from '../data/inspectionPoints'
 import CameraModal from './CameraModal'
 import PhotoViewerModal from './PhotoViewerModal'
 
 export default function SealPhoto() {
   const { t } = useLanguage()
-  const { sealPhoto, setSealPhoto, unitInfo } = useInspection()
+  const { sealPhoto, setSealPhoto, unitInfo, completedCount } = useInspection()
   const [cameraOpen, setCameraOpen] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
+
+  // Calculate applicable points based on inspection type
+  const applicablePoints = useMemo(() => {
+    return getApplicablePoints(unitInfo?.inspectionType)
+  }, [unitInfo?.inspectionType])
+  
+  const totalPoints = applicablePoints.length
+  const allPointsCompleted = completedCount === totalPoints
 
   // Hide seal photo for EMPTY and BOBTAIL inspections
   const inspectionType = unitInfo?.inspectionType
   if (inspectionType === 'EMPTY' || inspectionType === 'BOBTAIL') {
+    return null
+  }
+  
+  // Hide seal photo section until all points are completed
+  if (!allPointsCompleted) {
     return null
   }
 

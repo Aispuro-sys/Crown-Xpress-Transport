@@ -32,20 +32,18 @@ export default function SubmitBar({ onSuccess }) {
     setShowSignatureModal(true)
   }
 
-  // Step 2: Operator signs -> Generate PDF
+  // Step 2: Operator signs -> Generate PDF (signature is optional)
   const handleSignAndGenerate = async () => {
-    if (!sigRef.current || sigRef.current.isEmpty()) {
-      alert(language === 'es' ? 'POR FAVOR FIRME ANTES DE CONTINUAR' : 'PLEASE SIGN BEFORE CONTINUING')
-      return
+    // Operator signature is optional - can be empty
+    let signatureData = null
+    if (sigRef.current && !sigRef.current.isEmpty()) {
+      signatureData = sigRef.current.toDataURL('image/png')
+      setOperatorSignature({
+        name: unitInfo.driverName?.toUpperCase() || '',
+        signature: signatureData,
+        signedAt: new Date().toISOString()
+      })
     }
-
-    // Save operator signature
-    const signatureData = sigRef.current.toDataURL('image/png')
-    setOperatorSignature({
-      name: unitInfo.driverName?.toUpperCase() || '',
-      signature: signatureData,
-      signedAt: new Date().toISOString()
-    })
 
     setShowSignatureModal(false)
     setGenerating(true)
@@ -60,11 +58,11 @@ export default function SubmitBar({ onSuccess }) {
           sealPhoto: ctx.sealPhoto,
           guardSignature: ctx.guardSignature,
           auditorSignature: ctx.auditorSignature,
-          operatorSignature: {
+          operatorSignature: signatureData ? {
             name: unitInfo.driverName?.toUpperCase() || '',
             signature: signatureData,
             signedAt: new Date().toISOString()
-          },
+          } : null,
           language,
         })
         const pdfBase64 = pdfResult.doc.output('datauristring')
@@ -212,10 +210,15 @@ export default function SubmitBar({ onSuccess }) {
 
             {/* Signature Area */}
             <div className="p-5">
-              <p className="text-sm text-slate-600 mb-3 text-center">
+              <p className="text-sm text-slate-500 mb-1 text-center">
                 {language === 'es' 
-                  ? 'FIRME EN EL RECUADRO PARA CONFIRMAR LA INSPECCIÓN' 
-                  : 'SIGN IN THE BOX TO CONFIRM THE INSPECTION'}
+                  ? 'Firma del operador (opcional)' 
+                  : 'Operator signature (optional)'}
+              </p>
+              <p className="text-xs text-slate-400 mb-3 text-center italic">
+                {language === 'es' 
+                  ? 'Puede dejar en blanco y continuar' 
+                  : 'You can leave blank and continue'}
               </p>
               
               <div className="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden">
@@ -242,7 +245,7 @@ export default function SubmitBar({ onSuccess }) {
                   className="flex-1 py-3 px-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
-                  {language === 'es' ? 'FIRMAR Y GENERAR PDF' : 'SIGN & GENERATE PDF'}
+                  {language === 'es' ? 'GENERAR PDF' : 'GENERATE PDF'}
                 </button>
               </div>
             </div>
