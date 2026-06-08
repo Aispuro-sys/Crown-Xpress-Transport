@@ -18,7 +18,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const { t, language } = useLanguage()
   const { unitInfo, updateUnitInfo } = useInspection()
   const { user } = useAuth()
-  const [inspectionType, setInspectionType] = useState(null) // null = not selected yet
+  // Sync local state with context - use context value as source of truth
+  const [inspectionType, setInspectionType] = useState(unitInfo?.inspectionType || null)
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
@@ -26,6 +27,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [operatorSearching, setOperatorSearching] = useState(false)
   const [operatorFound, setOperatorFound] = useState(null)
   const [operatorError, setOperatorError] = useState(null)
+
+  // Sync local inspectionType with context when context changes
+  useEffect(() => {
+    setInspectionType(unitInfo?.inspectionType || null)
+  }, [unitInfo?.inspectionType])
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {
