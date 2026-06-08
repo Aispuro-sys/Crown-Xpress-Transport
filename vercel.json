@@ -47,6 +47,14 @@
       "destination": "/api/inspections/[id]/chain.js"
     },
     {
+      "source": "/api/employees",
+      "destination": "/api/employees.js"
+    },
+    {
+      "source": "/api/auth",
+      "destination": "/api/auth.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
