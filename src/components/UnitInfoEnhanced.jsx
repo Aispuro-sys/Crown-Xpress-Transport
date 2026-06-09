@@ -20,7 +20,7 @@ const TRAILER_TYPES = {
     es: 'CAJA',
     en: 'BOX',
     icon: 'box',
-    sizes: ['53', '48']
+    sizes: ['53', '40', '20']
   },
   CONTAINER: {
     es: 'CONTENEDOR',
@@ -32,7 +32,7 @@ const TRAILER_TYPES = {
     es: 'PLATAFORMA',
     en: 'FLATBED',
     icon: 'flatbed',
-    sizes: ['53', '48', '40']
+    sizes: ['53', '40']
   }
 }
 
@@ -50,6 +50,14 @@ const EQUIPMENT_OWNERS = {
   }
 }
 
+// Crown fleet options
+const CROWN_FLEETS = {
+  CXT: { name: 'CXT', description: { es: 'Crown Xpress Transport', en: 'Crown Xpress Transport' } },
+  RBX: { name: 'RBX', description: { es: 'RBX Fleet', en: 'RBX Fleet' } },
+  ABBA: { name: 'ABBA', description: { es: 'ABBA Fleet', en: 'ABBA Fleet' } },
+  JGB: { name: 'JGB', description: { es: 'JGB Fleet', en: 'JGB Fleet' } }
+}
+
 export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLockChange, onInspectionTypeChange }) {
   const { t, language } = useLanguage()
   const { unitInfo, updateUnitInfo } = useInspection()
@@ -59,6 +67,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [trailerType, setTrailerType] = useState(unitInfo?.trailerType || null)
   const [trailerSize, setTrailerSize] = useState(unitInfo?.trailerSize || null)
   const [equipmentOwner, setEquipmentOwner] = useState(unitInfo?.equipmentOwner || null)
+  const [crownFleet, setCrownFleet] = useState(unitInfo?.crownFleet || null)
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
@@ -80,20 +89,23 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setTrailerType(unitInfo?.trailerType || null)
     setTrailerSize(unitInfo?.trailerSize || null)
     setEquipmentOwner(unitInfo?.equipmentOwner || null)
-  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner])
+    setCrownFleet(unitInfo?.crownFleet || null)
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet])
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {
     setInspectionType(type)
     updateUnitInfo('inspectionType', type)
     
-    // Reset trailer type, size and equipment owner when changing inspection type
+    // Reset trailer type, size, equipment owner and fleet when changing inspection type
     setTrailerType(null)
     setTrailerSize(null)
     setEquipmentOwner(null)
+    setCrownFleet(null)
     updateUnitInfo('trailerType', null)
     updateUnitInfo('trailerSize', null)
     updateUnitInfo('equipmentOwner', null)
+    updateUnitInfo('crownFleet', null)
     
     const typeConfig = INSPECTION_TYPES[type]
     
@@ -151,6 +163,15 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const handleEquipmentOwnerChange = (owner) => {
     setEquipmentOwner(owner)
     updateUnitInfo('equipmentOwner', owner)
+    // Reset crown fleet when changing owner
+    setCrownFleet(null)
+    updateUnitInfo('crownFleet', null)
+  }
+
+  // Handle crown fleet selection
+  const handleCrownFleetChange = (fleet) => {
+    setCrownFleet(fleet)
+    updateUnitInfo('crownFleet', fleet)
   }
 
   // Notify parent when checkbox states change
@@ -613,12 +634,69 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     )
   }
 
+  // If CROWN selected but no fleet, show fleet selector
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType && trailerSize && equipmentOwner === 'CROWN' && !crownFleet) {
+    const typeConfig = TRAILER_TYPES[trailerType]
+    
+    return (
+      <section className="card animate-slide-up">
+        <div className="card-header flex items-center gap-3">
+          <Truck className="w-5 h-5 text-crown-gold" />
+          <h2 className="font-bold tracking-wide uppercase text-sm">
+            {language === 'es' ? 'FLOTA CROWN' : 'CROWN FLEET'}
+          </h2>
+          <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+            inspectionType === 'LOADED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          }`}>
+            {INSPECTION_TYPES[inspectionType]?.[language]} · {typeConfig?.[language] || trailerType} {trailerSize}' · CROWN
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setEquipmentOwner(null)
+              updateUnitInfo('equipmentOwner', null)
+            }}
+            className="text-xs text-white/80 hover:text-white underline"
+          >
+            {language === 'es' ? 'CAMBIAR' : 'CHANGE'}
+          </button>
+        </div>
+        <div className="card-body">
+          <p className="text-sm text-slate-600 mb-4">
+            {language === 'es' 
+              ? 'Seleccione la flota de Crown:' 
+              : 'Select the Crown fleet:'}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {Object.entries(CROWN_FLEETS).map(([key, fleet]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleCrownFleetChange(key)}
+                className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+              >
+                <span className="font-bold text-2xl text-slate-800 group-hover:text-crown-gold transition-colors">
+                  {fleet.name}
+                </span>
+                <span className="text-xs text-slate-500 text-center">
+                  {fleet.description[language]}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   // Build badge text with trailer info
   const getBadgeText = () => {
     const typeLabel = INSPECTION_TYPES[inspectionType]?.[language] || inspectionType
     if (inspectionType === 'BOBTAIL') return typeLabel
     const trailerLabel = TRAILER_TYPES[trailerType]?.[language] || trailerType
-    const ownerLabel = EQUIPMENT_OWNERS[equipmentOwner]?.[language] || equipmentOwner
+    const ownerLabel = equipmentOwner === 'CROWN' && crownFleet 
+      ? crownFleet 
+      : EQUIPMENT_OWNERS[equipmentOwner]?.[language] || equipmentOwner
     return `${typeLabel} · ${trailerLabel} ${trailerSize}' · ${ownerLabel}`
   }
 
@@ -642,10 +720,12 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             setTrailerType(null)
             setTrailerSize(null)
             setEquipmentOwner(null)
+            setCrownFleet(null)
             updateUnitInfo('inspectionType', null)
             updateUnitInfo('trailerType', null)
             updateUnitInfo('trailerSize', null)
             updateUnitInfo('equipmentOwner', null)
+            updateUnitInfo('crownFleet', null)
           }}
           className="text-xs text-white/80 hover:text-white underline"
         >
