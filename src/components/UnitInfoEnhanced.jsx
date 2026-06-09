@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Calendar, User, Tag, Lock, Package, Search, CheckCircle, XCircle, Loader2, Truck, Box, PackageX } from 'lucide-react'
+import { MapPin, Calendar, User, Tag, Lock, Package, Search, CheckCircle, XCircle, Loader2, Truck, Box, PackageX, Keyboard } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { useAuth } from '../context/AuthContext'
 import { searchOperator, searchOperatorsByName, listOperators } from '../utils/api'
 import { INSPECTION_TYPES } from '../data/inspectionPoints'
+import NumericKeypad from './NumericKeypad'
 
 const YARDS = [
   { id: 1, name: 'Yard A - Laredo' },
@@ -71,6 +72,10 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
+  // Keypad states
+  const [keypadOpen, setKeypadOpen] = useState(false)
+  const [keypadField, setKeypadField] = useState(null) // 'trailerNumber', 'chassisNumber', 'sealNumber', 'lockNumber'
+  const [keypadTitle, setKeypadTitle] = useState('')
   const [searchMode, setSearchMode] = useState('number') // 'number', 'name', 'list', 'manual'
   const [employeeNumber, setEmployeeNumber] = useState('')
   const [operatorName, setOperatorName] = useState('')
@@ -172,6 +177,22 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const handleCrownFleetChange = (fleet) => {
     setCrownFleet(fleet)
     updateUnitInfo('crownFleet', fleet)
+  }
+
+  // Open keypad for a specific field
+  const openKeypad = (field, title, currentValue = '') => {
+    setKeypadField(field)
+    setKeypadTitle(title)
+    setKeypadOpen(true)
+  }
+
+  // Handle keypad confirmation
+  const handleKeypadConfirm = (value) => {
+    if (keypadField) {
+      update(keypadField, value)
+    }
+    setKeypadOpen(false)
+    setKeypadField(null)
   }
 
   // Notify parent when checkbox states change
@@ -734,21 +755,59 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       </div>
       <div className="card-body">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Trailer Number */}
+          {/* Trailer/Container Number with Keypad */}
           <div className="col-span-1">
             <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
-              <span>{inspectionType === 'BOBTAIL' ? (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER') : (language === 'es' ? 'NÚMERO DE TRAILER / CONTENEDOR' : 'TRAILER / CONTAINER NUMBER')} <span className="text-rose-500">*</span></span>
+              <span>{inspectionType === 'BOBTAIL' ? (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER') : (language === 'es' ? 'NÚMERO DE CONTENEDOR/CAJA' : 'CONTAINER/BOX NUMBER')} <span className="text-rose-500">*</span></span>
               {getFieldIcon('trailerNumber')}
             </label>
-            <input
-              type="text"
-              value={unitInfo.trailerNumber || ''}
-              onChange={e => update('trailerNumber', e.target.value.toUpperCase())}
-              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase ${validateField('trailerNumber')}`}
-              placeholder={inspectionType === 'BOBTAIL' ? (language === 'es' ? 'EJ: TR-12345' : 'EX: TR-12345') : (language === 'es' ? 'EJ: T-12345' : 'EX: T-12345')}
-              required
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={unitInfo.trailerNumber || ''}
+                readOnly
+                onClick={() => openKeypad('trailerNumber', language === 'es' ? 'NÚMERO DE CONTENEDOR/CAJA' : 'CONTAINER/BOX NUMBER')}
+                className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase cursor-pointer ${validateField('trailerNumber')}`}
+                placeholder={inspectionType === 'BOBTAIL' ? (language === 'es' ? 'EJ: TR-12345' : 'EX: TR-12345') : (language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER')}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => openKeypad('trailerNumber', language === 'es' ? 'NÚMERO DE CONTENEDOR/CAJA' : 'CONTAINER/BOX NUMBER')}
+                className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 transition-colors"
+              >
+                <Keyboard className="w-5 h-5" />
+              </button>
+            </div>
           </div>
+
+          {/* Chassis Number with Keypad - Only for LOADED/EMPTY with container */}
+          {(inspectionType === 'LOADED' || inspectionType === 'EMPTY') && (
+            <div className="col-span-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
+                <span>{language === 'es' ? 'NÚMERO DE CHASIS' : 'CHASSIS NUMBER'} <span className="text-rose-500">*</span></span>
+                {getFieldIcon('chassisNumber')}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={unitInfo.chassisNumber || ''}
+                  readOnly
+                  onClick={() => openKeypad('chassisNumber', language === 'es' ? 'NÚMERO DE CHASIS' : 'CHASSIS NUMBER')}
+                  className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase cursor-pointer ${validateField('chassisNumber')}`}
+                  placeholder={language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER'}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => openKeypad('chassisNumber', language === 'es' ? 'NÚMERO DE CHASIS' : 'CHASSIS NUMBER')}
+                  className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 transition-colors"
+                >
+                  <Keyboard className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Seal and Lock Section - Only for LOADED - Better layout */}
           {inspectionType === 'LOADED' && (
@@ -778,14 +837,24 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                       <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase">
                         {language === 'es' ? 'NÚMERO DE SELLO' : 'SEAL NUMBER'} <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={unitInfo.sealNumber || ''}
-                        onChange={e => update('sealNumber', e.target.value.toUpperCase())}
-                        className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase ${validateField('sealNumber')}`}
-                        placeholder="EJ: S-98765"
-                        required={hasSeal}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={unitInfo.sealNumber || ''}
+                          readOnly
+                          onClick={() => openKeypad('sealNumber', language === 'es' ? 'NÚMERO DE SELLO' : 'SEAL NUMBER')}
+                          className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase cursor-pointer ${validateField('sealNumber')}`}
+                          placeholder={language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER'}
+                          required={hasSeal}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => openKeypad('sealNumber', language === 'es' ? 'NÚMERO DE SELLO' : 'SEAL NUMBER')}
+                          className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 transition-colors"
+                        >
+                          <Keyboard className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -814,14 +883,24 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                       <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase">
                         {language === 'es' ? 'NÚMERO DE CANDADO' : 'LOCK NUMBER'} <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={unitInfo.lockNumber || ''}
-                        onChange={e => update('lockNumber', e.target.value.toUpperCase())}
-                        className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase ${validateField('lockNumber')}`}
-                        placeholder="EJ: L-54321"
-                        required={hasLock}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={unitInfo.lockNumber || ''}
+                          readOnly
+                          onClick={() => openKeypad('lockNumber', language === 'es' ? 'NÚMERO DE CANDADO' : 'LOCK NUMBER')}
+                          className={`flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors uppercase cursor-pointer ${validateField('lockNumber')}`}
+                          placeholder={language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER'}
+                          required={hasLock}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => openKeypad('lockNumber', language === 'es' ? 'NÚMERO DE CANDADO' : 'LOCK NUMBER')}
+                          className="px-3 py-2 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 transition-colors"
+                        >
+                          <Keyboard className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1124,6 +1203,17 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         </div>
 
       </div>
+
+      {/* Numeric Keypad Modal */}
+      <NumericKeypad
+        isOpen={keypadOpen}
+        onClose={() => setKeypadOpen(false)}
+        onConfirm={handleKeypadConfirm}
+        title={keypadTitle}
+        initialValue={keypadField ? (unitInfo[keypadField] || '') : ''}
+        allowLetters={true}
+        maxLength={20}
+      />
     </section>
   )
 }
