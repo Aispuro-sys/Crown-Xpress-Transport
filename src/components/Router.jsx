@@ -27,10 +27,12 @@ export default function Router() {
   // For BOBTAIL: only need inspectionType
   // For LOADED/EMPTY: need inspectionType + trailerType + trailerSize + equipmentOwner
   // For CROWN owner: also need crownFleet
+  // For CUSTOMER with CONTAINER: also need customerPrefix
   const inspectionTypeSelected = !!unitInfo?.inspectionType && (
     unitInfo.inspectionType === 'BOBTAIL' || 
     (!!unitInfo?.trailerType && !!unitInfo?.trailerSize && !!unitInfo?.equipmentOwner && 
-      (unitInfo.equipmentOwner === 'CUSTOMER' || !!unitInfo?.crownFleet))
+      (unitInfo.equipmentOwner === 'CROWN' ? !!unitInfo?.crownFleet : 
+        (unitInfo.trailerType === 'CONTAINER' ? !!unitInfo?.customerPrefix : true)))
   )
 
   const handleSuccess = (payload) => {

@@ -57,12 +57,30 @@ const EQUIPMENT_OWNERS = {
   }
 }
 
-// Crown fleet options
-const CROWN_FLEETS = {
+// Crown fleet options by trailer type
+const CROWN_FLEETS_BOX = {
   CXT: { name: 'CXT', description: { es: 'Crown Xpress Transport', en: 'Crown Xpress Transport' } },
   RBX: { name: 'RBX', description: { es: 'RBX Fleet', en: 'RBX Fleet' } },
   ABBA: { name: 'ABBA', description: { es: 'ABBA Fleet', en: 'ABBA Fleet' } },
   JGB: { name: 'JGB', description: { es: 'JGB Fleet', en: 'JGB Fleet' } }
+}
+
+const CROWN_FLEETS_CONTAINER = {
+  CXTC: { name: 'CXTC', description: { es: 'Crown Xpress Transport Container', en: 'Crown Xpress Transport Container' } }
+}
+
+// Standard container prefixes for CUSTOMER equipment
+const CUSTOMER_CONTAINER_PREFIXES = {
+  EMHU: { name: 'EMHU', description: { es: 'Emhu Container', en: 'Emhu Container' } },
+  UMXU: { name: 'UMXU', description: { es: 'Umxu Container', en: 'Umxu Container' } },
+  MEDU: { name: 'MEDU', description: { es: 'MSC Container', en: 'MSC Container' } },
+  MSCU: { name: 'MSCU', description: { es: 'MSC Container', en: 'MSC Container' } },
+  MAEU: { name: 'MAEU', description: { es: 'Maersk Container', en: 'Maersk Container' } },
+  CMAU: { name: 'CMAU', description: { es: 'CMA CGM Container', en: 'CMA CGM Container' } },
+  HLXU: { name: 'HLXU', description: { es: 'Hapag-Lloyd Container', en: 'Hapag-Lloyd Container' } },
+  OOLU: { name: 'OOLU', description: { es: 'OOCL Container', en: 'OOCL Container' } },
+  TCNU: { name: 'TCNU', description: { es: 'Triton Container', en: 'Triton Container' } },
+  TRLU: { name: 'TRLU', description: { es: 'Triton Container', en: 'Triton Container' } }
 }
 
 export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLockChange, onInspectionTypeChange }) {
@@ -75,6 +93,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [trailerSize, setTrailerSize] = useState(unitInfo?.trailerSize || null)
   const [equipmentOwner, setEquipmentOwner] = useState(unitInfo?.equipmentOwner || null)
   const [crownFleet, setCrownFleet] = useState(unitInfo?.crownFleet || null)
+  const [customerPrefix, setCustomerPrefix] = useState(unitInfo?.customerPrefix || null)
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
@@ -101,22 +120,25 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setTrailerSize(unitInfo?.trailerSize || null)
     setEquipmentOwner(unitInfo?.equipmentOwner || null)
     setCrownFleet(unitInfo?.crownFleet || null)
-  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet])
+    setCustomerPrefix(unitInfo?.customerPrefix || null)
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet, unitInfo?.customerPrefix])
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {
     setInspectionType(type)
     updateUnitInfo('inspectionType', type)
     
-    // Reset trailer type, size, equipment owner and fleet when changing inspection type
+    // Reset trailer type, size, equipment owner, fleet and customer prefix when changing inspection type
     setTrailerType(null)
     setTrailerSize(null)
     setEquipmentOwner(null)
     setCrownFleet(null)
+    setCustomerPrefix(null)
     updateUnitInfo('trailerType', null)
     updateUnitInfo('trailerSize', null)
     updateUnitInfo('equipmentOwner', null)
     updateUnitInfo('crownFleet', null)
+    updateUnitInfo('customerPrefix', null)
     
     const typeConfig = INSPECTION_TYPES[type]
     
@@ -174,15 +196,23 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const handleEquipmentOwnerChange = (owner) => {
     setEquipmentOwner(owner)
     updateUnitInfo('equipmentOwner', owner)
-    // Reset crown fleet when changing owner
+    // Reset crown fleet and customer prefix when changing owner
     setCrownFleet(null)
+    setCustomerPrefix(null)
     updateUnitInfo('crownFleet', null)
+    updateUnitInfo('customerPrefix', null)
   }
 
   // Handle crown fleet selection
   const handleCrownFleetChange = (fleet) => {
     setCrownFleet(fleet)
     updateUnitInfo('crownFleet', fleet)
+  }
+
+  // Handle customer prefix selection
+  const handleCustomerPrefixChange = (prefix) => {
+    setCustomerPrefix(prefix)
+    updateUnitInfo('customerPrefix', prefix)
   }
 
   // Open keypad for a specific field
@@ -711,22 +741,154 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               ? 'Seleccione la flota de Crown:' 
               : 'Select the Crown fleet:'}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {Object.entries(CROWN_FLEETS).map(([key, fleet]) => (
+          {/* Different fleets based on trailer type */}
+          {trailerType === 'CONTAINER' ? (
+            // CONTAINER fleets: CXTC + OTRO
+            <div className="grid grid-cols-2 gap-3">
+              {Object.entries(CROWN_FLEETS_CONTAINER).map(([key, fleet]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleCrownFleetChange(key)}
+                  className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+                >
+                  <span className="font-bold text-2xl text-slate-800 group-hover:text-crown-gold transition-colors">
+                    {fleet.name}
+                  </span>
+                  <span className="text-xs text-slate-500 text-center">
+                    {fleet.description[language]}
+                  </span>
+                </button>
+              ))}
+              {/* OTRO - Custom prefix */}
+              <button
+                type="button"
+                onClick={() => {
+                  const customFleet = prompt(language === 'es' ? 'Ingrese el prefijo de la flota:' : 'Enter fleet prefix:')
+                  if (customFleet && customFleet.trim()) {
+                    handleCrownFleetChange(customFleet.trim().toUpperCase())
+                  }
+                }}
+                className="p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+              >
+                <span className="font-bold text-2xl text-slate-500 group-hover:text-crown-gold transition-colors">
+                  +
+                </span>
+                <span className="text-xs text-slate-500 text-center">
+                  {language === 'es' ? 'OTRO' : 'OTHER'}
+                </span>
+              </button>
+            </div>
+          ) : (
+            // BOX fleets: CXT, RBX, ABBA, JGB + OTRO
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {Object.entries(CROWN_FLEETS_BOX).map(([key, fleet]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleCrownFleetChange(key)}
+                  className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+                >
+                  <span className="font-bold text-2xl text-slate-800 group-hover:text-crown-gold transition-colors">
+                    {fleet.name}
+                  </span>
+                  <span className="text-xs text-slate-500 text-center">
+                    {fleet.description[language]}
+                  </span>
+                </button>
+              ))}
+              {/* OTRO - Custom prefix */}
+              <button
+                type="button"
+                onClick={() => {
+                  const customFleet = prompt(language === 'es' ? 'Ingrese el prefijo de la flota:' : 'Enter fleet prefix:')
+                  if (customFleet && customFleet.trim()) {
+                    handleCrownFleetChange(customFleet.trim().toUpperCase())
+                  }
+                }}
+                className="p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+              >
+                <span className="font-bold text-2xl text-slate-500 group-hover:text-crown-gold transition-colors">
+                  +
+                </span>
+                <span className="text-xs text-slate-500 text-center">
+                  {language === 'es' ? 'OTRO' : 'OTHER'}
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  // If CUSTOMER selected with CONTAINER but no prefix, show prefix selector
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType === 'CONTAINER' && trailerSize && equipmentOwner === 'CUSTOMER' && !customerPrefix) {
+    const typeConfig = TRAILER_TYPES[trailerType]
+    
+    return (
+      <section className="card animate-slide-up">
+        <div className="card-header flex items-center gap-3">
+          <Package className="w-5 h-5 text-crown-gold" />
+          <h2 className="font-bold tracking-wide uppercase text-sm">
+            {language === 'es' ? 'PREFIJO DEL CONTENEDOR' : 'CONTAINER PREFIX'}
+          </h2>
+          <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+            inspectionType === 'LOADED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          }`}>
+            {INSPECTION_TYPES[inspectionType]?.[language]} · {typeConfig?.[language] || trailerType} {trailerSize}' · CLIENTE
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setEquipmentOwner(null)
+              updateUnitInfo('equipmentOwner', null)
+            }}
+            className="text-xs text-white/80 hover:text-white underline"
+          >
+            {language === 'es' ? 'CAMBIAR' : 'CHANGE'}
+          </button>
+        </div>
+        <div className="card-body">
+          <p className="text-sm text-slate-600 mb-4">
+            {language === 'es' 
+              ? 'Seleccione el prefijo del contenedor:' 
+              : 'Select the container prefix:'}
+          </p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {Object.entries(CUSTOMER_CONTAINER_PREFIXES).map(([key, prefix]) => (
               <button
                 key={key}
                 type="button"
-                onClick={() => handleCrownFleetChange(key)}
-                className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-2 group"
+                onClick={() => handleCustomerPrefixChange(key)}
+                className="p-4 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-1 group"
               >
-                <span className="font-bold text-2xl text-slate-800 group-hover:text-crown-gold transition-colors">
-                  {fleet.name}
+                <span className="font-bold text-xl text-slate-800 group-hover:text-crown-gold transition-colors">
+                  {prefix.name}
                 </span>
                 <span className="text-xs text-slate-500 text-center">
-                  {fleet.description[language]}
+                  {prefix.description[language]}
                 </span>
               </button>
             ))}
+            {/* OTRO - Custom prefix */}
+            <button
+              type="button"
+              onClick={() => {
+                const customPrefix = prompt(language === 'es' ? 'Ingrese el prefijo del contenedor (4 letras):' : 'Enter container prefix (4 letters):')
+                if (customPrefix && customPrefix.trim()) {
+                  handleCustomerPrefixChange(customPrefix.trim().toUpperCase())
+                }
+              }}
+              className="p-4 border-2 border-dashed border-slate-300 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-1 group"
+            >
+              <span className="font-bold text-xl text-slate-500 group-hover:text-crown-gold transition-colors">
+                +
+              </span>
+              <span className="text-xs text-slate-500 text-center">
+                {language === 'es' ? 'OTRO' : 'OTHER'}
+              </span>
+            </button>
           </div>
         </div>
       </section>
@@ -738,9 +900,14 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     const typeLabel = INSPECTION_TYPES[inspectionType]?.[language] || inspectionType
     if (inspectionType === 'BOBTAIL') return typeLabel
     const trailerLabel = TRAILER_TYPES[trailerType]?.[language] || trailerType
-    const ownerLabel = equipmentOwner === 'CROWN' && crownFleet 
-      ? crownFleet 
-      : EQUIPMENT_OWNERS[equipmentOwner]?.[language] || equipmentOwner
+    let ownerLabel = ''
+    if (equipmentOwner === 'CROWN' && crownFleet) {
+      ownerLabel = crownFleet
+    } else if (equipmentOwner === 'CUSTOMER' && trailerType === 'CONTAINER' && customerPrefix) {
+      ownerLabel = customerPrefix
+    } else {
+      ownerLabel = EQUIPMENT_OWNERS[equipmentOwner]?.[language] || equipmentOwner
+    }
     return `${typeLabel} · ${trailerLabel} ${trailerSize}' · ${ownerLabel}`
   }
 
@@ -765,11 +932,13 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             setTrailerSize(null)
             setEquipmentOwner(null)
             setCrownFleet(null)
+            setCustomerPrefix(null)
             updateUnitInfo('inspectionType', null)
             updateUnitInfo('trailerType', null)
             updateUnitInfo('trailerSize', null)
             updateUnitInfo('equipmentOwner', null)
             updateUnitInfo('crownFleet', null)
+            updateUnitInfo('customerPrefix', null)
           }}
           className="text-xs text-white/80 hover:text-white underline"
         >
@@ -804,8 +973,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </div>
           </div>
 
-          {/* Chassis Number with Keypad - Only for LOADED/EMPTY with container */}
-          {(inspectionType === 'LOADED' || inspectionType === 'EMPTY') && (
+          {/* Chassis Number with Keypad - Only for CONTAINER type */}
+          {(inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType === 'CONTAINER' && (
             <div className="col-span-1">
               <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
                 <span>{language === 'es' ? 'NÚMERO DE CHASIS' : 'CHASSIS NUMBER'} <span className="text-rose-500">*</span></span>
@@ -1234,7 +1403,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         onConfirm={handleKeypadConfirm}
         title={keypadTitle}
         initialValue={keypadField ? (unitInfo[keypadField] || '') : ''}
-        allowLetters={true}
         maxLength={20}
       />
     </section>
