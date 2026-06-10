@@ -2,7 +2,9 @@ import { useMemo } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { inspectionPoints, getApplicablePoints } from '../data/inspectionPoints'
-import truckImage from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
+import truckImageLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
+import truckImageEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
+import truckImageDropped from '../assets/Botado-Caja-Contenedor.jpg'
 
 // Position definitions for each inspection point on the truck diagram
 // Positions are in percentages relative to the image container
@@ -41,6 +43,19 @@ const pointPositions = [
 export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   const { language } = useLanguage()
   const { points, unitInfo } = useInspection()
+  
+  // Select the appropriate truck image based on inspection type
+  const truckImage = useMemo(() => {
+    switch (unitInfo?.inspectionType) {
+      case 'EMPTY':
+        return truckImageEmpty
+      case 'DROPPED':
+        return truckImageDropped
+      case 'LOADED':
+      default:
+        return truckImageLoaded
+    }
+  }, [unitInfo?.inspectionType])
   
   // Get applicable points based on inspection type
   const applicablePoints = useMemo(() => {

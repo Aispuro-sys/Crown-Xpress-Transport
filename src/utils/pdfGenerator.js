@@ -5,8 +5,10 @@ import { inspectionPoints, getIssuesForPoint, INSPECTION_TYPES } from '../data/i
 // Crown Xpress logo will be loaded from public folder
 const CROWN_LOGO_URL = '/crown-logo.png'
 
-// Truck diagram image - will be loaded from assets
-import truckDiagramImage from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
+// Truck diagram images - different images for each inspection type
+import truckDiagramLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
+import truckDiagramEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
+import truckDiagramDropped from '../assets/Botado-Caja-Contenedor.jpg'
 
 const COLORS = {
   navy: [30, 91, 122],
@@ -36,9 +38,24 @@ async function loadLogoImage() {
   }
 }
 
-// Load truck diagram image as base64
-async function loadTruckDiagramImage() {
+// Load truck diagram image as base64 based on inspection type
+async function loadTruckDiagramImage(inspectionType) {
   try {
+    // Select the appropriate image based on inspection type
+    let truckDiagramImage
+    switch (inspectionType) {
+      case 'EMPTY':
+        truckDiagramImage = truckDiagramEmpty
+        break
+      case 'DROPPED':
+        truckDiagramImage = truckDiagramDropped
+        break
+      case 'LOADED':
+      default:
+        truckDiagramImage = truckDiagramLoaded
+        break
+    }
+    
     const response = await fetch(truckDiagramImage)
     const blob = await response.blob()
     return new Promise((resolve) => {
@@ -54,9 +71,9 @@ async function loadTruckDiagramImage() {
 }
 
 export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guardSignature, auditorSignature, operatorSignature, language = 'es' }) {
-  // Pre-load images
+  // Pre-load images (pass inspection type to get correct diagram)
   const logoBase64 = await loadLogoImage()
-  const truckDiagramBase64 = await loadTruckDiagramImage()
+  const truckDiagramBase64 = await loadTruckDiagramImage(unitInfo?.inspectionType)
   
   const T = language === 'es' ? {
     title: 'INSPECCIÓN DE 20 PUNTOS',
