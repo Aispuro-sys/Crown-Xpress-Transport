@@ -127,6 +127,7 @@ export default function GuardHistory() {
 
   const handleViewPdf = async (id, filename) => {
     try {
+      // First try to download PDF from backend
       const blob = await downloadPdf(id)
       if (blob.size === 0) {
         throw new Error('PDF vacío')
@@ -135,9 +136,33 @@ export default function GuardHistory() {
       setPdfViewer({ open: true, url, filename: filename || `inspection-${id}.pdf` })
     } catch (e) {
       console.error('PDF view error:', e)
-      alert(language === 'es' 
-        ? 'Error abriendo PDF. Esta inspección puede no tener PDF guardado.' 
-        : 'Error opening PDF. This inspection may not have a saved PDF.')
+      
+      // If PDF doesn't exist in backend, try to generate it on the fly
+      try {
+        // Get inspection data
+        const inspectionData = await getInspection(id)
+        
+        // Generate PDF on the fly
+        const pdfResult = await generateInspectionPDF({
+          unitInfo: inspectionData.inspection,
+          points: inspectionData.points,
+          sealPhoto: inspectionData.inspection.seal_photo,
+          guardSignature: inspectionData.inspection.guard_signature,
+          auditorSignature: inspectionData.inspection.auditor_signature,
+          operatorSignature: inspectionData.inspection.operator_signature,
+          language: inspectionData.inspection.language || 'es'
+        })
+        
+        // Create blob and show PDF
+        const pdfBlob = pdfResult.doc.output('blob')
+        const url = URL.createObjectURL(pdfBlob)
+        setPdfViewer({ open: true, url, filename: filename || `inspection-${id}.pdf` })
+      } catch (genError) {
+        console.error('PDF generation error:', genError)
+        alert(language === 'es' 
+          ? 'Error generando PDF. Por favor intente descargarlo.' 
+          : 'Error generating PDF. Please try downloading it.')
+      }
     }
   }
 
@@ -547,9 +572,13 @@ export default function GuardHistory() {
 
       {/* PDF Viewer Modal */}
       {pdfViewer.open && pdfViewer.url && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in">
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
+          style={{ touchAction: 'none' }}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <div className="bg-gradient-to-r from-crown-navy to-crown-navy-dark px-6 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-crown-navy to-crown-navy-dark px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6 text-crown-gold" />
               <div>
@@ -569,11 +598,15 @@ export default function GuardHistory() {
           </div>
 
           {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             <iframe
-              src={pdfViewer.url}
+              src={`${pdfViewer.url}#view=FitH&toolbar=1&navpanes=1&scrollbar=1`}
               className="w-full h-full border-0"
               title="PDF Viewer"
+              style={{ 
+                touchAction: 'pan-y pinch-zoom',
+                WebkitOverflowScrolling: 'touch'
+              }}
             />
           </div>
         </div>

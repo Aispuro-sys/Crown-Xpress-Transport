@@ -255,9 +255,13 @@ export default function SubmitBar({ onSuccess }) {
 
       {/* PDF Viewer Modal */}
       {showPdfViewer && pdfUrl && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in">
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col animate-fade-in"
+          style={{ touchAction: 'none' }}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <div className="bg-gradient-to-r from-crown-navy to-crown-navy-dark px-6 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-crown-navy to-crown-navy-dark px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-emerald-400" />
               <div>
@@ -277,11 +281,15 @@ export default function SubmitBar({ onSuccess }) {
           </div>
 
           {/* PDF Viewer */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             <iframe
-              src={pdfUrl}
+              src={`${pdfUrl}#view=FitH&toolbar=1&navpanes=1&scrollbar=1`}
               className="w-full h-full border-0"
               title="PDF Viewer"
+              style={{ 
+                touchAction: 'pan-y pinch-zoom',
+                WebkitOverflowScrolling: 'touch'
+              }}
             />
           </div>
         </div>
