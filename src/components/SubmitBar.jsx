@@ -270,55 +270,52 @@ export default function SubmitBar({ onSuccess }) {
         </div>
       )}
 
-      {/* PDF Success Modal - with options to view/download */}
+      {/* PDF Viewer Modal - embedded in same page */}
       {showPdfViewer && pdfUrl && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
-          {/* Success Card */}
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-6 text-center">
-              <CheckCircle2 className="w-20 h-20 text-white mx-auto mb-3" />
-              <h3 className="font-bold text-white text-2xl">
-                {language === 'es' ? '¡INSPECCIÓN GUARDADA!' : 'INSPECTION SAVED!'}
-              </h3>
-              <p className="text-emerald-100 text-sm mt-2">{pdfFilename}</p>
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-white" />
+              <div>
+                <h3 className="font-bold text-white text-sm">
+                  {language === 'es' ? '✅ INSPECCIÓN GUARDADA' : '✅ INSPECTION SAVED'}
+                </h3>
+              </div>
             </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-3">
-              <p className="text-slate-600 text-center text-sm mb-4">
-                {language === 'es' 
-                  ? 'La inspección se guardó correctamente. Elige una opción:' 
-                  : 'The inspection was saved successfully. Choose an option:'}
-              </p>
-
-              {/* View PDF Button */}
-              <button
-                onClick={handleOpenInNewTab}
-                className="w-full py-4 bg-crown-navy hover:bg-crown-navy-dark text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-3 text-lg"
-              >
-                <ExternalLink className="w-6 h-6" />
-                {language === 'es' ? 'VER PDF COMPLETO' : 'VIEW FULL PDF'}
-              </button>
-
-              {/* Download PDF Button */}
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleDownloadPdf}
-                className="w-full py-4 bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-3 text-lg"
+                className="p-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
+                title={language === 'es' ? 'Descargar' : 'Download'}
               >
-                <Download className="w-6 h-6" />
-                {language === 'es' ? 'DESCARGAR PDF' : 'DOWNLOAD PDF'}
+                <Download className="w-5 h-5" />
               </button>
-
-              {/* Confirm Button */}
               <button
                 onClick={handleClosePdfViewer}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-3 text-lg"
+                className="flex items-center gap-1 px-3 py-2 bg-white text-emerald-700 font-bold rounded-lg transition-colors text-sm"
               >
-                <CheckCircle2 className="w-6 h-6" />
+                <CheckCircle2 className="w-4 h-4" />
                 {language === 'es' ? 'CONFIRMAR' : 'CONFIRM'}
               </button>
             </div>
+          </div>
+
+          {/* PDF Viewer - using object tag for better iOS support */}
+          <div className="flex-1 bg-slate-200 overflow-hidden">
+            <object
+              data={pdfUrl}
+              type="application/pdf"
+              className="w-full h-full"
+              style={{ minHeight: '100%' }}
+            >
+              {/* Fallback for browsers that don't support object */}
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="PDF Viewer"
+              />
+            </object>
           </div>
         </div>
       )}
