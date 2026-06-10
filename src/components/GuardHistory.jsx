@@ -125,15 +125,29 @@ export default function GuardHistory() {
   }
 
   const handleViewPdf = async (id, filename) => {
+    // Helper function to open PDF that works on tablets
+    const openPdfBlob = (blob, name) => {
+      const url = URL.createObjectURL(blob)
+      // Create a temporary link element - works better on iPad/tablets
+      const link = document.createElement('a')
+      link.href = url
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      // For iOS Safari, we need to trigger the link differently
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      // Clean up after a delay
+      setTimeout(() => URL.revokeObjectURL(url), 5000)
+    }
+
     try {
       // First try to download PDF from backend
       const blob = await downloadPdf(id)
       if (blob.size === 0) {
         throw new Error('PDF vacío')
       }
-      // Open PDF in new tab instead of modal
-      const url = URL.createObjectURL(blob)
-      window.open(url, '_blank')
+      openPdfBlob(blob, filename || `inspection-${id}.pdf`)
     } catch (e) {
       console.error('PDF view error:', e)
       
@@ -153,10 +167,9 @@ export default function GuardHistory() {
           language: inspectionData.inspection.language || 'es'
         })
         
-        // Open PDF in new tab instead of modal
+        // Open PDF using link method for tablet compatibility
         const pdfBlob = pdfResult.doc.output('blob')
-        const url = URL.createObjectURL(pdfBlob)
-        window.open(url, '_blank')
+        openPdfBlob(pdfBlob, filename || `inspection-${id}.pdf`)
       } catch (genError) {
         console.error('PDF generation error:', genError)
         alert(language === 'es' 
