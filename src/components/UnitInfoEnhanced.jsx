@@ -252,8 +252,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
   // Auto-fill date and guard name on mount
   useEffect(() => {
-    // Set today's date in YYYY-MM-DD format for date input
-    const today = new Date().toISOString().slice(0, 10)
+    // Set today's date in YYYY-MM-DD format using Tijuana timezone
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Tijuana' })
     updateUnitInfo('inspectionDate', today)
     // Guard name is auto-assigned from logged in user
     updateUnitInfo('guardName', user?.full_name || '')
@@ -1527,24 +1527,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                 <option key={yard.id} value={yard.name}>{yard.name.toUpperCase()}</option>
               ))}
             </select>
-          </div>
-
-          {/* Guard Name (readonly) */}
-          <div className="col-span-1">
-            <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {language === 'es' ? 'GUARDIA' : 'GUARD'}
-              </span>
-              <span className="text-emerald-500 text-xs font-bold">✓</span>
-            </label>
-            <input
-              type="text"
-              value={(unitInfo.guardName || '').toUpperCase()}
-              readOnly
-              className="w-full px-3 py-2 border-2 border-emerald-400 bg-emerald-50 rounded-lg text-slate-700 uppercase"
-              placeholder={language === 'es' ? 'ASIGNADO AUTOMÁTICAMENTE' : 'AUTO-ASSIGNED'}
-            />
           </div>
         </div>
 
