@@ -950,7 +950,15 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
           {/* Trailer/Container Number with Keypad */}
           <div className="col-span-1">
             <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center justify-between uppercase">
-              <span>{inspectionType === 'BOBTAIL' ? (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER') : (language === 'es' ? 'NÚMERO DE CONTENEDOR/CAJA' : 'CONTAINER/BOX NUMBER')} <span className="text-rose-500">*</span></span>
+              <span>{inspectionType === 'BOBTAIL' 
+                  ? (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER') 
+                  : trailerType === 'CONTAINER'
+                  ? (language === 'es' ? 'NÚMERO DE CONTENEDOR' : 'CONTAINER NUMBER')
+                  : trailerType === 'BOX'
+                  ? (language === 'es' ? 'NÚMERO DE CAJA' : 'BOX NUMBER')
+                  : trailerType === 'FLATBED'
+                  ? (language === 'es' ? 'NÚMERO DE PLATAFORMA' : 'FLATBED NUMBER')
+                  : (language === 'es' ? 'NÚMERO DE REMOLQUE' : 'TRAILER NUMBER')} <span className="text-rose-500">*</span></span>
               {getFieldIcon('trailerNumber')}
             </label>
             <div className="flex gap-2">
