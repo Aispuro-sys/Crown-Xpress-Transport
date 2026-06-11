@@ -12,6 +12,7 @@ export function InspectionProvider({ children }) {
   // Unit info
   const [unitInfo, setUnitInfo] = useState({
     trailerNumber: '',
+    tractorNumber: '',
     sealNumber: '',
     lockNumber: '',
     containerNumber: '',
@@ -65,6 +66,7 @@ export function InspectionProvider({ children }) {
   const resetInspection = useCallback(() => {
     setUnitInfo({
       trailerNumber: '',
+      tractorNumber: '',
       sealNumber: '',
       lockNumber: '',
       containerNumber: '',

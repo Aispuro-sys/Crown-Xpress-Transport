@@ -97,9 +97,10 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
-  // Flow control states - track if trailer number and seal/lock have been entered
-  const [trailerNumberEntered, setTrailerNumberEntered] = useState(!!unitInfo?.trailerNumber)
+  // Flow control states - track if container/box number, seal/lock, and tractor number have been entered
+  const [containerNumberEntered, setContainerNumberEntered] = useState(!!unitInfo?.trailerNumber)
   const [sealLockEntered, setSealLockEntered] = useState(false)
+  const [tractorNumberEntered, setTractorNumberEntered] = useState(!!unitInfo?.tractorNumber)
   // Keypad states
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [keypadField, setKeypadField] = useState(null) // 'trailerNumber', 'chassisNumber', 'sealNumber', 'lockNumber'
@@ -933,8 +934,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     return false
   }
 
-  // Step: Enter trailer number after prefix selection
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && isPrefixSelected() && !trailerNumberEntered) {
+  // Step: Enter container/box/flatbed number after prefix selection
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && isPrefixSelected() && !containerNumberEntered) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
@@ -1020,11 +1021,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                   alert(language === 'es' ? 'Ingrese el número de chasis' : 'Enter the chassis number')
                   return
                 }
-                setTrailerNumberEntered(true)
-                // For EMPTY, skip seal/lock step
-                if (inspectionType === 'EMPTY') {
-                  setSealLockEntered(true)
-                }
+                setContainerNumberEntered(true)
               } else {
                 alert(language === 'es' ? 'Ingrese el número' : 'Enter the number')
               }
@@ -1048,8 +1045,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     )
   }
 
-  // Step: Enter seal/lock for LOADED inspections
-  if (inspectionType === 'LOADED' && trailerNumberEntered && !sealLockEntered) {
+  // Step: Enter seal/lock for LOADED inspections (after container number)
+  if (inspectionType === 'LOADED' && containerNumberEntered && !sealLockEntered) {
     return (
       <section className="card animate-slide-up">
         <div className="card-header flex items-center gap-3">
@@ -1167,6 +1164,80 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             disabled={!(hasSeal || hasLock)}
             className="mt-4 w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-lg"
           >
+            {language === 'es' ? 'CONTINUAR' : 'CONTINUE'}
+          </button>
+        </div>
+
+        {/* Keypad */}
+        <NumericKeypad
+          isOpen={keypadOpen}
+          onClose={() => setKeypadOpen(false)}
+          onConfirm={handleKeypadConfirm}
+          title={keypadTitle}
+          initialValue=""
+        />
+      </section>
+    )
+  }
+
+  // Step: Enter tractor number (after seal/lock for LOADED, after container for EMPTY)
+  const shouldShowTractorStep = (inspectionType === 'LOADED' || inspectionType === 'EMPTY') && 
+    containerNumberEntered && 
+    (inspectionType === 'EMPTY' || sealLockEntered) && 
+    !tractorNumberEntered
+
+  if (shouldShowTractorStep) {
+    return (
+      <section className="card animate-slide-up">
+        <div className="card-header flex items-center gap-3">
+          <Truck className="w-5 h-5 text-crown-gold" />
+          <h2 className="font-bold tracking-wide uppercase text-sm">
+            {language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER'}
+          </h2>
+          <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+            inspectionType === 'LOADED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          }`}>
+            {getBadgeText()}
+          </span>
+        </div>
+        <div className="card-body">
+          <p className="text-sm text-slate-600 mb-4">
+            {language === 'es' 
+              ? 'Ingrese el número de tractor:' 
+              : 'Enter the tractor number:'}
+          </p>
+
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={unitInfo.tractorNumber || ''}
+              readOnly
+              onClick={() => openKeypad('tractorNumber', language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER')}
+              className="flex-1 px-4 py-4 border-2 border-slate-300 rounded-xl text-2xl font-bold text-center uppercase cursor-pointer hover:border-crown-gold transition-colors"
+              placeholder={language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER'}
+            />
+            <button
+              type="button"
+              onClick={() => openKeypad('tractorNumber', language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER')}
+              className="px-6 py-4 bg-crown-navy text-white rounded-xl hover:bg-crown-navy/90 transition-colors"
+            >
+              <Keyboard className="w-8 h-8" />
+            </button>
+          </div>
+
+          {/* Continue button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (unitInfo.tractorNumber && unitInfo.tractorNumber.trim()) {
+                setTractorNumberEntered(true)
+              } else {
+                alert(language === 'es' ? 'Ingrese el número de tractor' : 'Enter the tractor number')
+              }
+            }}
+            disabled={!unitInfo.tractorNumber || !unitInfo.tractorNumber.trim()}
+            className="mt-6 w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors text-lg"
+          >
             {language === 'es' ? 'CONTINUAR A INSPECCIÓN' : 'CONTINUE TO INSPECTION'}
           </button>
         </div>
@@ -1184,7 +1255,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If all steps completed, show minimal info card (inspection points will be shown by parent)
-  if (!trailerNumberEntered || (inspectionType === 'LOADED' && !sealLockEntered)) {
+  if (!containerNumberEntered || (inspectionType === 'LOADED' && !sealLockEntered) || !tractorNumberEntered) {
     // This shouldn't happen, but just in case
     return null
   }
@@ -1211,8 +1282,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             setEquipmentOwner(null)
             setCrownFleet(null)
             setCustomerPrefix(null)
-            setTrailerNumberEntered(false)
+            setContainerNumberEntered(false)
             setSealLockEntered(false)
+            setTractorNumberEntered(false)
             updateUnitInfo('inspectionType', null)
             updateUnitInfo('trailerType', null)
             updateUnitInfo('trailerSize', null)
@@ -1223,6 +1295,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             updateUnitInfo('chassisNumber', '')
             updateUnitInfo('sealNumber', '')
             updateUnitInfo('lockNumber', '')
+            updateUnitInfo('tractorNumber', '')
           }}
           className="text-xs text-white/80 hover:text-white underline"
         >
@@ -1255,6 +1328,10 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                 <div className="font-bold text-slate-800">{unitInfo.lockNumber || '-'}</div>
               </div>
             )}
+            <div>
+              <span className="text-slate-500 text-xs">{language === 'es' ? 'TRACTOR' : 'TRACTOR'}:</span>
+              <div className="font-bold text-slate-800">{unitInfo.tractorNumber || '-'}</div>
+            </div>
           </div>
         </div>
 
