@@ -83,7 +83,7 @@ const CUSTOMER_CONTAINER_PREFIXES = {
   TRLU: { name: 'TRLU', description: { es: 'Triton Container', en: 'Triton Container' } }
 }
 
-export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLockChange, onInspectionTypeChange }) {
+export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLockChange, onInspectionTypeChange, onFlowComplete }) {
   const { t, language } = useLanguage()
   const { unitInfo, updateUnitInfo } = useInspection()
   const { user } = useAuth()
@@ -267,6 +267,18 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       loadOperatorsList()
     }
   }, [searchMode])
+
+  // Notify parent when flow is complete (all steps done)
+  useEffect(() => {
+    const isFlowComplete = (inspectionType === 'BOBTAIL') || 
+      (containerNumberEntered && 
+       (inspectionType === 'EMPTY' || sealLockEntered) && 
+       tractorNumberEntered)
+    
+    if (onFlowComplete) {
+      onFlowComplete(isFlowComplete)
+    }
+  }, [inspectionType, containerNumberEntered, sealLockEntered, tractorNumberEntered, onFlowComplete])
 
   const loadOperatorsList = async () => {
     setOperatorsLoading(true)

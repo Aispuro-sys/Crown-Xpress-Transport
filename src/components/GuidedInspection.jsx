@@ -18,6 +18,7 @@ export default function GuidedInspection() {
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(true)
   const [hasLock, setHasLock] = useState(false)
+  const [unitInfoFlowComplete, setUnitInfoFlowComplete] = useState(false)
 
   // Get applicable points based on inspection type
   const applicablePoints = useMemo(() => {
@@ -29,7 +30,7 @@ export default function GuidedInspection() {
 
   // Check if unit info is valid
   useEffect(() => {
-    const required = ['trailerNumber', 'driverName', 'location']
+    const required = ['trailerNumber', 'driverName', 'location', 'tractorNumber']
     const optional = []
     
     if (hasSeal) required.push('sealNumber')
@@ -139,8 +140,9 @@ export default function GuidedInspection() {
             onContainerChange={setHasContainer}
             onSealChange={setHasSeal}
             onLockChange={setHasLock}
+            onFlowComplete={setUnitInfoFlowComplete}
           />
-          {unitInfoValid && (
+          {unitInfoValid && unitInfoFlowComplete && (
             <div className="mt-4 flex justify-end">
               <button
                 onClick={goToNextStage}
