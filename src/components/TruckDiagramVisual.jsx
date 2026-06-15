@@ -66,7 +66,7 @@ const pointPositionsFlatbed = [
   { id: 15, x: 48, y: 20, label: 'Frente Plat.' },       // Frente de la plataforma
   { id: 16, x: 70, y: 75, label: 'Lado Izq.' },          // PLATFORM BODY lado izq (bottom)
   { id: 17, x: 55, y: 75, label: 'Piso Plat.' },         // PLATFORM BODY piso (bottom-center)
-  { id: 18, x: 58, y: 45, label: 'Patín' },              // LANDING GEAR
+  { id: 18, x: 51.3, y: 90, label: 'Patín' },              // LANDING GEAR
   { id: 19, x: 72, y: 45, label: 'Ejes Traseros' },      // REAR TANDEM
   { id: 20, x: 92, y: 85, label: 'Limpieza' },           // Limpieza - TRAILER-REAR (bottom-right)
 ]
