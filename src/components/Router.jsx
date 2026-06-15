@@ -95,8 +95,9 @@ export default function Router() {
         {page === 'form' && canEdit() && (
           <div className="space-y-5">
             <UnitInfo onFlowComplete={setUnitInfoFlowComplete} />
-            {/* Show "Start Inspection" button after unit info is complete */}
-            {inspectionTypeSelected && unitInfoFlowComplete && !showInspectionPoints && (
+            {/* For BOBTAIL: go directly to 20 points, no button needed */}
+            {/* For LOADED/EMPTY: Show "Start Inspection" button after unit info is complete */}
+            {inspectionTypeSelected && unitInfoFlowComplete && !showInspectionPoints && unitInfo?.inspectionType !== 'BOBTAIL' && (
               <div className="flex justify-center">
                 <button
                   onClick={() => {
@@ -109,8 +110,8 @@ export default function Router() {
                 </button>
               </div>
             )}
-            {/* Only show inspection components after clicking the button */}
-            {inspectionTypeSelected && unitInfoFlowComplete && showInspectionPoints && (
+            {/* Only show inspection components after clicking the button (or directly for BOBTAIL) */}
+            {inspectionTypeSelected && unitInfoFlowComplete && (showInspectionPoints || unitInfo?.inspectionType === 'BOBTAIL') && (
               <>
                 <TruckDiagram />
                 <InspectionList />
