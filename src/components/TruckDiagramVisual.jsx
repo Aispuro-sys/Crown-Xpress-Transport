@@ -5,16 +5,14 @@ import { inspectionPoints, getApplicablePoints } from '../data/inspectionPoints'
 import truckImageLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
 import truckImageEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
 import truckImageDropped from '../assets/Botado-Caja-Contenedor.jpg'
+import truckImageFlatbed from '../assets/Origen plataforma.png'
+import truckImageBobtail from '../assets/Origen Trailer.png'
 
 // Position definitions for each inspection point on the truck diagram
 // Positions are in percentages relative to the image container
-// Based on the truck diagram image layout:
-// - Top left: Front view of tractor (CAB-AREA)
-// - Top center: Side view of full truck (tractor + trailer)
-// - Top right: Rear view of trailer (TRAILER-REAR)
-// - Bottom left: Rear views of tractor cab
-// - Bottom center: Side view of trailer only (TRAILER BODY)
-const pointPositions = [
+
+// Default positions for LOADED/EMPTY (Container/Box with trailer)
+const pointPositionsDefault = [
   // TRACTOR POINTS (1-10) - Based on top views
   { id: 1, x: 13, y: 38, label: 'Defensa' },           // Bumper - front of tractor (top-left view)
   { id: 2, x: 28.5, y: 38, label: 'Llantas' },           // Tires - tractor section (bottom-left)
@@ -40,12 +38,66 @@ const pointPositions = [
   { id: 20, x: 9.2, y: 87, label: 'Limpieza' },         // Cleanliness - rear of trailer body
 ]
 
+// Positions for FLATBED (Plataforma) - Based on "Origen plataforma.png"
+// Layout: Top-left: CAB-AREA front, Top-center: side view with flatbed, Top-right: TRAILER-REAR
+// Bottom-left: TRACTOR CAB rear, Bottom-center: PLATFORM BODY side view
+const pointPositionsFlatbed = [
+  // TRACTOR POINTS (1-10)
+  { id: 1, x: 8, y: 28, label: 'Defensa' },             // Bumper - front view top-left
+  { id: 2, x: 17, y: 72, label: 'Llantas' },            // Tires - tractor section bottom-left
+  { id: 3, x: 17, y: 85, label: 'Piso' },               // Floor - tractor cab bottom-left
+  { id: 4, x: 32, y: 35, label: 'Tanques Diesel' },     // Fuel tanks - side of tractor
+  { id: 5, x: 8, y: 12, label: 'Cabina' },              // Cab compartments - top of cab area
+  { id: 6, x: 38, y: 35, label: 'Tanques Aire' },       // Air tanks - under chassis
+  { id: 7, x: 43, y: 28, label: 'Quinta Rueda' },       // Fifth wheel - connection area
+  { id: 8, x: 25, y: 85, label: 'Ejes Trans.' },        // Drive shafts - bottom view
+  { id: 9, x: 28, y: 12, label: 'Escape' },             // Exhaust - side of cab
+  { id: 10, x: 8, y: 55, label: 'Motor' },              // Engine/Battery - front cab area
+  
+  // TRAILER POINTS (11-20) - Flatbed specific
+  { id: 11, x: 55, y: 35, label: 'Chasis' },            // Chassis section
+  { id: 12, x: 92, y: 55, label: 'Parte Trasera' },     // Rear of flatbed - TRAILER-REAR view
+  { id: 13, x: 75, y: 18, label: 'Lado Der.' },         // Right side - platform body
+  { id: 14, x: 65, y: 12, label: 'Plataforma' },        // Platform body top
+  { id: 15, x: 50, y: 18, label: 'Frente Plat.' },      // Front of platform
+  { id: 16, x: 75, y: 75, label: 'Lado Izq.' },         // Left side - bottom view
+  { id: 17, x: 55, y: 75, label: 'Piso Plat.' },        // Platform floor - bottom view
+  { id: 18, x: 62, y: 35, label: 'Patín' },             // Landing gear
+  { id: 19, x: 78, y: 35, label: 'Ejes Traseros' },     // Rear tandem
+  { id: 20, x: 92, y: 85, label: 'Limpieza' },          // Cleanliness - rear view
+]
+
+// Positions for BOBTAIL (Solo tractor) - Based on "Origen Trailer.png"
+// Layout: Left: CABIN INTERIOR DETAIL, Center: COMPLETE TRACTOR CABIN & CHASSIS, Right: TRACTOR REAR VIEW
+const pointPositionsBobtail = [
+  // TRACTOR POINTS ONLY (1-10) - All points on tractor
+  { id: 1, x: 48, y: 75, label: 'Defensa' },            // Bumper - front of tractor center view
+  { id: 2, x: 62, y: 85, label: 'Llantas' },            // Tires - rear tandem
+  { id: 3, x: 18, y: 75, label: 'Piso' },               // Floor - cabin interior left
+  { id: 4, x: 55, y: 55, label: 'Tanques Diesel' },     // Fuel tanks - side of tractor
+  { id: 5, x: 12, y: 25, label: 'Cabina' },             // Cab compartments - dashboard panel
+  { id: 6, x: 70, y: 70, label: 'Tanques Aire' },       // Air tanks - chassis section
+  { id: 7, x: 72, y: 55, label: 'Quinta Rueda' },       // Fifth wheel coupler
+  { id: 8, x: 65, y: 75, label: 'Ejes Trans.' },        // Chassis section
+  { id: 9, x: 50, y: 25, label: 'Escape' },             // Exhaust - top of cab
+  { id: 10, x: 88, y: 55, label: 'Motor' },             // Engine/Battery - rear view
+]
+
 export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   const { language } = useLanguage()
   const { points, unitInfo } = useInspection()
   
-  // Select the appropriate truck image based on inspection type
+  // Select the appropriate truck image based on inspection type and trailer type
   const truckImage = useMemo(() => {
+    // BOBTAIL uses its own image
+    if (unitInfo?.inspectionType === 'BOBTAIL') {
+      return truckImageBobtail
+    }
+    // FLATBED uses its own image
+    if (unitInfo?.trailerType === 'FLATBED') {
+      return truckImageFlatbed
+    }
+    // Container/Box types
     switch (unitInfo?.inspectionType) {
       case 'EMPTY':
         return truckImageEmpty
@@ -55,7 +107,18 @@ export default function TruckDiagramVisual({ onPointClick, compact = false }) {
       default:
         return truckImageLoaded
     }
-  }, [unitInfo?.inspectionType])
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType])
+  
+  // Select the appropriate point positions based on inspection type and trailer type
+  const pointPositions = useMemo(() => {
+    if (unitInfo?.inspectionType === 'BOBTAIL') {
+      return pointPositionsBobtail
+    }
+    if (unitInfo?.trailerType === 'FLATBED') {
+      return pointPositionsFlatbed
+    }
+    return pointPositionsDefault
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType])
   
   // Get applicable points based on inspection type
   const applicablePoints = useMemo(() => {
