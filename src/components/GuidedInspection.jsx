@@ -30,6 +30,18 @@ export default function GuidedInspection() {
 
   // Check if unit info is valid
   useEffect(() => {
+    // For BOBTAIL: only need driverName and location (no trailer, no container, no seal)
+    if (unitInfo?.inspectionType === 'BOBTAIL') {
+      const required = ['driverName', 'location']
+      const isValid = required.every(field => unitInfo[field] && unitInfo[field].trim() !== '')
+      setUnitInfoValid(isValid)
+      // Auto-complete flow for BOBTAIL since there's no trailer info to capture
+      if (isValid && !unitInfoFlowComplete) {
+        setUnitInfoFlowComplete(true)
+      }
+      return
+    }
+    
     const required = ['trailerNumber', 'driverName', 'location', 'tractorNumber']
     const optional = []
     
@@ -39,7 +51,7 @@ export default function GuidedInspection() {
     
     const isValid = required.every(field => unitInfo[field] && unitInfo[field].trim() !== '')
     setUnitInfoValid(isValid)
-  }, [unitInfo, hasSeal, hasContainer, hasLock])
+  }, [unitInfo, hasSeal, hasContainer, hasLock, unitInfoFlowComplete])
 
   // Auto-advance stages
   useEffect(() => {

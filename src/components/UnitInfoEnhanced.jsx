@@ -1271,7 +1271,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If all steps completed, show minimal info card (inspection points will be shown by parent)
-  if (!containerNumberEntered || (inspectionType === 'LOADED' && !sealLockEntered) || !tractorNumberEntered) {
+  // For BOBTAIL: skip container/seal/tractor checks - go directly to operator search
+  const isBobtailReady = inspectionType === 'BOBTAIL'
+  const isOtherReady = containerNumberEntered && (inspectionType !== 'LOADED' || sealLockEntered) && tractorNumberEntered
+  
+  if (!isBobtailReady && !isOtherReady) {
     // This shouldn't happen, but just in case
     return null
   }
@@ -1319,37 +1323,39 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         </button>
       </div>
       <div className="card-body">
-        {/* Summary of entered info */}
-        <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <div>
-              <span className="text-slate-500 text-xs">{getTrailerNumberLabel()}:</span>
-              <div className="font-bold text-slate-800">{unitInfo.trailerNumber || '-'}</div>
-            </div>
-            {trailerType === 'CONTAINER' && (
+        {/* Summary of entered info - hide for BOBTAIL since there's no trailer info */}
+        {inspectionType !== 'BOBTAIL' && (
+          <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
               <div>
-                <span className="text-slate-500 text-xs">{language === 'es' ? 'CHASIS' : 'CHASSIS'}:</span>
-                <div className="font-bold text-slate-800">{unitInfo.chassisNumber || '-'}</div>
+                <span className="text-slate-500 text-xs">{getTrailerNumberLabel()}:</span>
+                <div className="font-bold text-slate-800">{unitInfo.trailerNumber || '-'}</div>
               </div>
-            )}
-            {inspectionType === 'LOADED' && hasSeal && (
+              {trailerType === 'CONTAINER' && (
+                <div>
+                  <span className="text-slate-500 text-xs">{language === 'es' ? 'CHASIS' : 'CHASSIS'}:</span>
+                  <div className="font-bold text-slate-800">{unitInfo.chassisNumber || '-'}</div>
+                </div>
+              )}
+              {inspectionType === 'LOADED' && hasSeal && (
+                <div>
+                  <span className="text-slate-500 text-xs">{language === 'es' ? 'SELLO' : 'SEAL'}:</span>
+                  <div className="font-bold text-slate-800">{unitInfo.sealNumber || '-'}</div>
+                </div>
+              )}
+              {inspectionType === 'LOADED' && hasLock && (
+                <div>
+                  <span className="text-slate-500 text-xs">{language === 'es' ? 'CANDADO' : 'LOCK'}:</span>
+                  <div className="font-bold text-slate-800">{unitInfo.lockNumber || '-'}</div>
+                </div>
+              )}
               <div>
-                <span className="text-slate-500 text-xs">{language === 'es' ? 'SELLO' : 'SEAL'}:</span>
-                <div className="font-bold text-slate-800">{unitInfo.sealNumber || '-'}</div>
+                <span className="text-slate-500 text-xs">{language === 'es' ? 'TRACTOR' : 'TRACTOR'}:</span>
+                <div className="font-bold text-slate-800">{unitInfo.tractorNumber || '-'}</div>
               </div>
-            )}
-            {inspectionType === 'LOADED' && hasLock && (
-              <div>
-                <span className="text-slate-500 text-xs">{language === 'es' ? 'CANDADO' : 'LOCK'}:</span>
-                <div className="font-bold text-slate-800">{unitInfo.lockNumber || '-'}</div>
-              </div>
-            )}
-            <div>
-              <span className="text-slate-500 text-xs">{language === 'es' ? 'TRACTOR' : 'TRACTOR'}:</span>
-              <div className="font-bold text-slate-800">{unitInfo.tractorNumber || '-'}</div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Operator Search Section - Enhanced with multiple options */}
