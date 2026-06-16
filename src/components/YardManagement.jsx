@@ -178,9 +178,9 @@ export default function YardManagement() {
 
   const getCapacityStatus = (current, max, min) => {
     const percentage = max > 0 ? (current / max) * 100 : 0
-    if (percentage >= 90) return { color: 'text-red-600', bg: 'bg-red-50', status: 'Llena' }
-    if (percentage >= 70) return { color: 'text-amber-600', bg: 'bg-amber-50', status: 'Medio' }
-    return { color: 'text-emerald-600', bg: 'bg-emerald-50', status: 'Disponible' }
+    if (percentage >= 90) return { color: 'text-red-600', bg: 'bg-red-50', status: 'Llena', percentage }
+    if (percentage >= 70) return { color: 'text-amber-600', bg: 'bg-amber-50', status: 'Medio', percentage }
+    return { color: 'text-emerald-600', bg: 'bg-emerald-50', status: 'Disponible', percentage }
   }
 
   if (loading) {
@@ -324,7 +324,7 @@ export default function YardManagement() {
                                   status.color === 'text-red-600' ? 'bg-red-500' :
                                   status.color === 'text-amber-600' ? 'bg-amber-500' : 'bg-emerald-500'
                                 }`}
-                                style={{ width: `${Math.min(percentage, 100)}%` }}
+                                style={{ width: `${Math.min(status.percentage, 100)}%` }}
                               />
                             </div>
                             <div className="text-xs text-slate-400">
