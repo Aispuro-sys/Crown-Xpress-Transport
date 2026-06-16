@@ -7,7 +7,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply font-sans bg-dark-bg text-dark-text min-h-screen;
+    @apply font-sans bg-gradient-to-br from-white via-slate-50 to-stone-100 text-slate-900 min-h-screen;
   }
   
   /* Force uppercase on all inputs and text (except login) */
@@ -27,62 +27,62 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-dark-secondary/20;
+    @apply bg-slate-100;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-dark-secondary/60 rounded-full;
+    @apply bg-crown-navy/30 rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-dark-secondary/80;
+    @apply bg-crown-navy/50;
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-dark-primary text-white hover:bg-blue-600 shadow-md hover:shadow-lg active:scale-95;
+    @apply btn bg-crown-navy text-white hover:bg-crown-navy-dark shadow-lg hover:shadow-xl active:scale-95 border-2 border-crown-navy-dark;
   }
   .btn-gold {
-    @apply btn bg-crown-gold text-white hover:bg-crown-gold-dark shadow-md hover:shadow-lg active:scale-95;
+    @apply btn bg-crown-gold text-white hover:bg-crown-gold-dark shadow-lg hover:shadow-xl active:scale-95 border-2 border-crown-gold-dark;
   }
   .btn-secondary {
-    @apply btn bg-dark-secondary text-dark-text border-2 border-dark-secondary/50 hover:border-dark-primary hover:bg-dark-primary/10;
+    @apply btn bg-white text-crown-navy border-3 border-crown-navy/40 hover:border-crown-navy hover:bg-crown-navy/10 shadow-md;
   }
   .btn-success {
-    @apply btn bg-dark-success text-white hover:bg-green-600 shadow-md hover:shadow-lg;
+    @apply btn bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg hover:shadow-xl border-2 border-emerald-700;
   }
   .btn-danger {
-    @apply btn bg-dark-error text-white hover:bg-red-600 shadow-md hover:shadow-lg;
+    @apply btn bg-rose-600 text-white hover:bg-rose-700 shadow-lg hover:shadow-xl border-2 border-rose-700;
   }
   .btn-ghost {
-    @apply btn text-dark-text-secondary hover:bg-dark-secondary/50;
+    @apply btn text-slate-600 hover:bg-slate-100;
   }
 
   .card {
-    @apply bg-dark-panel rounded-2xl shadow-crown border border-dark-secondary/30 overflow-hidden;
+    @apply bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden;
   }
   .card-header {
-    @apply px-6 py-4 border-b border-dark-secondary/50 bg-gradient-to-r from-dark-primary to-blue-600 text-white;
+    @apply px-8 py-5 border-b-2 border-slate-200 bg-gradient-to-r from-crown-navy-dark to-crown-navy text-white;
   }
   .card-body {
-    @apply p-6;
+    @apply p-8;
   }
 
   .input {
-    @apply w-full px-4 py-2.5 rounded-lg border-2 border-dark-secondary/50 bg-dark-panel text-dark-text transition-all duration-200 focus:border-dark-primary focus:ring-4 focus:ring-dark-primary/20 focus:outline-none placeholder:text-dark-text-secondary;
+    @apply w-full px-5 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-lg font-semibold transition-all duration-200 focus:border-crown-navy focus:ring-4 focus:ring-crown-navy/20 focus:outline-none placeholder:text-slate-500;
   }
   .label {
-    @apply block text-sm font-semibold text-dark-text mb-1.5;
+    @apply block text-base font-bold text-slate-800 mb-2;
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold;
   }
-  .badge-good { @apply badge bg-dark-success/20 text-dark-success border border-dark-success/30; }
-  .badge-bad { @apply badge bg-dark-error/20 text-dark-error border border-dark-error/30; }
-  .badge-pending { @apply badge bg-dark-secondary/30 text-dark-text-secondary border border-dark-secondary/50; }
+  .badge-good { @apply badge bg-emerald-200 text-emerald-800 border border-emerald-300; }
+  .badge-bad { @apply badge bg-rose-200 text-rose-800 border border-rose-300; }
+  .badge-pending { @apply badge bg-slate-200 text-slate-700 border border-slate-300; }
 }
 
 /* Print styles */

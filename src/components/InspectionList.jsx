@@ -97,12 +97,12 @@ export default function InspectionList() {
       </div>
       
       {/* TODO OK Button */}
-      <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-white">
+      <div className="px-6 py-4 border-b-2 border-slate-200 bg-gradient-to-r from-emerald-100 to-white">
         <button
           onClick={() => setShowConfirmAllOk(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] border-2 border-emerald-700"
         >
-          <CheckCheck className="w-5 h-5" />
+          <CheckCheck className="w-6 h-6" />
           {hasBadPoints 
             ? (language === 'es' ? 'MARCAR RESTO EN BUENO' : 'MARK REST AS GOOD')
             : (language === 'es' ? 'MARCAR TODO COMO BUENO' : 'MARK ALL AS GOOD')
@@ -113,18 +113,18 @@ export default function InspectionList() {
       {/* Confirmation Modal */}
       {showConfirmAllOk && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-5 py-4 text-white text-center">
-              <CheckCheck className="w-10 h-10 mx-auto mb-2" />
-              <h3 className="font-bold text-lg">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border-2 border-slate-200">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-5 text-white text-center">
+              <CheckCheck className="w-12 h-12 mx-auto mb-3" />
+              <h3 className="font-bold text-xl">
                 {hasBadPoints 
                   ? (language === 'es' ? '¿MARCAR RESTO EN BUENO?' : 'MARK REST AS GOOD?')
                   : (language === 'es' ? '¿MARCAR TODO COMO BUENO?' : 'MARK ALL AS GOOD?')
                 }
               </h3>
             </div>
-            <div className="p-5">
-              <p className="text-center text-slate-600 mb-4">
+            <div className="p-6">
+              <p className="text-center text-slate-700 text-lg mb-6">
                 {hasBadPoints 
                   ? (language === 'es' 
                       ? `ESTO MARCARÁ SOLO LOS PUNTOS NO MARCADOS COMO "MALO" COMO "BUENO". ¿ESTÁ SEGURO?` 
@@ -134,18 +134,18 @@ export default function InspectionList() {
                       : `THIS WILL MARK ALL ${applicablePoints.length} INSPECTION POINTS AS "GOOD". ARE YOU SURE?`)
                 }
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   onClick={() => setShowConfirmAllOk(false)}
-                  className="flex-1 py-3 px-4 border-2 border-slate-300 rounded-xl text-slate-600 font-semibold hover:bg-slate-50 transition"
+                  className="flex-1 py-4 px-5 border-3 border-slate-300 rounded-xl text-slate-700 font-bold text-lg hover:bg-slate-100 transition"
                 >
                   {language === 'es' ? 'CANCELAR' : 'CANCEL'}
                 </button>
                 <button
                   onClick={handleMarkAllGood}
-                  className="flex-1 py-3 px-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                  className="flex-1 py-4 px-5 bg-emerald-600 text-white rounded-xl font-bold text-lg hover:bg-emerald-700 transition flex items-center justify-center gap-3 border-2 border-emerald-700"
                 >
-                  <CheckCheck className="w-4 h-4" />
+                  <CheckCheck className="w-5 h-5" />
                   {language === 'es' ? 'SÍ, CONFIRMAR' : 'YES, CONFIRM'}
                 </button>
               </div>

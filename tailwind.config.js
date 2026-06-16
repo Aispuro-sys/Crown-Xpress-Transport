@@ -7,18 +7,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Industrial dark theme colors
-        'dark-bg': '#0F172A',      // Fondo principal
-        'dark-panel': '#1E293B',   // Paneles/Tarjetas
-        'dark-text': '#FFFFFF',    // Texto principal
-        'dark-text-secondary': '#CBD5E1', // Texto secundario
-        'dark-primary': '#2563EB', // Botón principal
-        'dark-secondary': '#475569', // Botón secundario
-        'dark-success': '#22C55E', // Éxito
-        'dark-warning': '#F59E0B', // Advertencia
-        'dark-error': '#EF4444',   // Error crítico
-        
-        // Keep existing crown colors for compatibility
         crown: {
           gold: '#c9a961',
           'gold-light': '#d4bc7a',
