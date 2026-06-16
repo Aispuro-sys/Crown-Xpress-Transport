@@ -35,18 +35,20 @@ export default function SubmitBar({ onSuccess }) {
     setShowSignatureModal(true)
   }
 
-  // Step 2: Operator signs -> Generate PDF (signature is optional)
+  // Step 2: Operator signs -> Generate PDF (signature is required)
   const handleSignAndGenerate = async () => {
-    // Operator signature is optional - can be empty
-    let signatureData = null
-    if (sigRef.current && !sigRef.current.isEmpty()) {
-      signatureData = sigRef.current.toDataURL('image/png')
-      setOperatorSignature({
-        name: unitInfo.driverName?.toUpperCase() || '',
-        signature: signatureData,
-        signedAt: new Date().toISOString()
-      })
+    // Operator signature is required - must not be empty
+    if (!sigRef.current || sigRef.current.isEmpty()) {
+      alert(t('operatorSignatureRequired') || 'Operator signature is required')
+      return
     }
+    
+    const signatureData = sigRef.current.toDataURL('image/png')
+    setOperatorSignature({
+      name: unitInfo.driverName?.toUpperCase() || '',
+      signature: signatureData,
+      signedAt: new Date().toISOString()
+    })
 
     setShowSignatureModal(false)
     setGenerating(true)
@@ -61,11 +63,11 @@ export default function SubmitBar({ onSuccess }) {
           sealPhoto: ctx.sealPhoto,
           guardSignature: ctx.guardSignature,
           auditorSignature: ctx.auditorSignature,
-          operatorSignature: signatureData ? {
+          operatorSignature: {
             name: unitInfo.driverName?.toUpperCase() || '',
             signature: signatureData,
             signedAt: new Date().toISOString()
-          } : null,
+          },
           language,
         })
         const pdfBase64 = pdfResult.doc.output('datauristring')
