@@ -116,7 +116,6 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   
   const T = language === 'es' ? {
     title: 'INSPECCIÓN DE 20 PUNTOS',
-    subtitle: 'Crown Xpress Transport · Logistics',
     formCode: 'CSC-FINS20P-01',
     unitInfo: 'INFORMACIÓN DE LA UNIDAD',
     trailerNumber: 'No. Trailer / Contenedor',
@@ -155,7 +154,6 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     generated: 'Generado'
   } : {
     title: '20 POINT INSPECTION',
-    subtitle: 'Crown Xpress Transport · Logistics',
     formCode: 'CSC-FINS20P-01',
     unitInfo: 'UNIT INFORMATION',
     trailerNumber: 'Trailer / Container No.',
@@ -494,11 +492,11 @@ function drawHeader(doc, T, pageWidth, margin, logoBase64 = null, ctpatLogoBase6
   doc.setFillColor(...COLORS.gold)
   doc.rect(0, 28, pageWidth, 1.5, 'F')
 
-  // Crown Xpress Logo (PNG image)
-  const logoWidth = 55
-  const logoHeight = 20
+  // Crown Xpress Logo (PNG image) - made larger
+  const logoWidth = 80
+  const logoHeight = 30
   const logoX = margin
-  const logoY = 4
+  const logoY = 2
   
   if (logoBase64) {
     try {
@@ -515,8 +513,8 @@ function drawHeader(doc, T, pageWidth, margin, logoBase64 = null, ctpatLogoBase6
   // C-TPAT Logo (PNG image) - positioned to the right of Crown logo
   const ctpatLogoWidth = 35
   const ctpatLogoHeight = 20
-  const ctpatLogoX = logoX + logoWidth + 8
-  const ctpatLogoY = logoY
+  const ctpatLogoX = logoX + logoWidth + 10
+  const ctpatLogoY = logoY + 5
   
   if (ctpatLogoBase64) {
     try {
@@ -552,21 +550,15 @@ function drawHeader(doc, T, pageWidth, margin, logoBase64 = null, ctpatLogoBase6
 
 // Fallback logo when PNG is not available
 function drawFallbackLogo(doc, margin) {
-  // Draw simple crown shape
+  // Draw larger crown shape
   doc.setFillColor(...COLORS.gold)
-  const cx = margin + 10
+  const cx = margin + 20
   const cy = 14
-  doc.triangle(cx - 8, cy + 6, cx, cy - 6, cx + 8, cy + 6, 'F')
+  // Make the crown bigger
+  doc.triangle(cx - 12, cy + 8, cx, cy - 8, cx + 12, cy + 8, 'F')
   
-  // Title text
-  doc.setTextColor(255, 255, 255)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(14)
-  doc.text('CROWN XPRESS', margin + 22, 13)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7)
-  doc.setTextColor(201, 169, 97)
-  doc.text('TRANSPORT · LOGISTICS', margin + 22, 18)
+  // Add base to the crown
+  doc.rect(cx - 14, cy + 8, 28, 3, 'F')
 }
 
 function drawFooter(doc, T, pageWidth, pageHeight, margin) {
