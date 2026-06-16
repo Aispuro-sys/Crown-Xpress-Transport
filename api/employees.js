@@ -168,17 +168,30 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, employee: updateQuery[0] })
     }
 
-    // DELETE - Deactivate employee (soft delete)
+    // DELETE - Deactivate or permanently delete employee
     if (req.method === 'DELETE') {
-      const { id } = req.query
+      const { id, permanent } = req.query
 
       if (!id) {
         return res.status(400).json({ error: 'Employee ID required' })
       }
 
-      await sql`UPDATE employees SET active = false, updated_at = NOW() WHERE id = ${parseInt(id)}`
-
-      return res.status(200).json({ success: true })
+      if (permanent === 'true') {
+        // Permanent delete - only allowed for inactive users
+        const [employee] = await sql`SELECT active FROM employees WHERE id = ${parseInt(id)}`
+        if (!employee) {
+          return res.status(404).json({ error: 'Employee not found' })
+        }
+        if (employee.active === true) {
+          return res.status(400).json({ error: 'Cannot permanently delete active user. Deactivate first.' })
+        }
+        await sql`DELETE FROM employees WHERE id = ${parseInt(id)}`
+        return res.status(200).json({ success: true, message: 'Employee permanently deleted' })
+      } else {
+        // Soft delete - just deactivate
+        await sql`UPDATE employees SET active = false, updated_at = NOW() WHERE id = ${parseInt(id)}`
+        return res.status(200).json({ success: true })
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' })

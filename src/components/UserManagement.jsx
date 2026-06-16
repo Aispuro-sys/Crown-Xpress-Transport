@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle, RefreshCw, Key, EyeOff, Copy, UserX } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -39,6 +39,11 @@ export default function UserManagement() {
   const [successModal, setSuccessModal] = useState({ show: false, message: '', isEdit: false })
   const [confirmModal, setConfirmModal] = useState({ show: false, type: '', data: null })
   const [saving, setSaving] = useState(false)
+  const [showPassword, setShowPassword] = useState({})
+  const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, employee: null })
+  const [newPassword, setNewPassword] = useState('')
+  const [permanentDeleteModal, setPermanentDeleteModal] = useState({ show: false, employee: null })
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   useEffect(() => {
     loadEmployees()
@@ -139,6 +144,87 @@ export default function UserManagement() {
     })
   }
 
+  const handleActivateClick = (emp) => {
+    setConfirmModal({
+      show: true,
+      type: 'activate',
+      data: emp
+    })
+  }
+
+  const handleActivate = async (id) => {
+    setSaving(true)
+    try {
+      const emp = employees.find(e => e.id === id)
+      const res = await fetch(`${API_BASE}/employees`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...emp, id, active: true })
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      await loadEmployees()
+      setSuccessModal({
+        show: true,
+        message: language === 'es' ? '¡Usuario reactivado!' : 'User reactivated!',
+        isEdit: false
+      })
+    } catch (err) {
+      alert(`Error: ${err.message}`)
+    } finally {
+      setSaving(false)
+      setConfirmModal({ show: false, type: '', data: null })
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!newPassword || newPassword.length < 4) {
+      alert(language === 'es' ? 'La contraseña debe tener al menos 4 caracteres' : 'Password must be at least 4 characters')
+      return
+    }
+    setSaving(true)
+    try {
+      const emp = resetPasswordModal.employee
+      const res = await fetch(`${API_BASE}/employees`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: emp.id,
+          username: emp.username,
+          full_name: emp.full_name,
+          role: emp.role,
+          location_id: emp.location_id,
+          location_name: emp.location_name,
+          password: newPassword,
+          active: emp.active
+        })
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      await loadEmployees()
+      setResetPasswordModal({ show: false, employee: null })
+      setNewPassword('')
+      setSuccessModal({
+        show: true,
+        message: language === 'es' ? '¡Contraseña actualizada!' : 'Password updated!',
+        isEdit: true
+      })
+    } catch (err) {
+      alert(`Error: ${err.message}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const togglePasswordVisibility = (empId) => {
+    setShowPassword(prev => ({ ...prev, [empId]: !prev[empId] }))
+  }
+
+  const copyPassword = (password) => {
+    navigator.clipboard.writeText(password)
+    alert(language === 'es' ? 'Contraseña copiada' : 'Password copied')
+  }
+
   const handleDelete = async (id) => {
     setSaving(true)
     try {
@@ -156,6 +242,31 @@ export default function UserManagement() {
     } finally {
       setSaving(false)
       setConfirmModal({ show: false, type: '', data: null })
+    }
+  }
+
+  const handlePermanentDelete = async () => {
+    if (deleteConfirmText !== 'ELIMINAR') {
+      alert(language === 'es' ? 'Debes escribir ELIMINAR para confirmar' : 'You must type ELIMINAR to confirm')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch(`${API_BASE}/employees?id=${permanentDeleteModal.employee.id}&permanent=true`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      await loadEmployees()
+      setPermanentDeleteModal({ show: false, employee: null })
+      setDeleteConfirmText('')
+      setSuccessModal({
+        show: true,
+        message: language === 'es' ? '¡Usuario eliminado permanentemente!' : 'User permanently deleted!',
+        isEdit: false
+      })
+    } catch (err) {
+      alert(`Error: ${err.message}`)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -259,8 +370,27 @@ export default function UserManagement() {
                       <div className="text-xs text-slate-500">
                         @{emp.username} · {roleInfo.label[language]} · {emp.location_name || '—'}
                       </div>
-                      <div className="text-xs text-slate-400 font-mono">
-                        🔑 {emp.password_hash || '—'}
+                      <div className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                        <Key className="w-3 h-3" />
+                        <span className="select-all">
+                          {showPassword[emp.id] ? (emp.password_hash || '—') : '••••••••'}
+                        </span>
+                        <button
+                          onClick={() => togglePasswordVisibility(emp.id)}
+                          className="p-0.5 hover:bg-slate-200 rounded"
+                          title={showPassword[emp.id] ? (language === 'es' ? 'Ocultar' : 'Hide') : (language === 'es' ? 'Ver' : 'Show')}
+                        >
+                          {showPassword[emp.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        </button>
+                        {showPassword[emp.id] && emp.password_hash && (
+                          <button
+                            onClick={() => copyPassword(emp.password_hash)}
+                            className="p-0.5 hover:bg-slate-200 rounded"
+                            title={language === 'es' ? 'Copiar' : 'Copy'}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        )}
                       </div>
                       {emp.active === false && (
                         <div className="text-xs text-rose-500 font-medium">
@@ -269,7 +399,14 @@ export default function UserManagement() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setResetPasswordModal({ show: true, employee: emp })}
+                      className="p-2 rounded-lg hover:bg-amber-100 text-amber-600"
+                      title={language === 'es' ? 'Restablecer Contraseña' : 'Reset Password'}
+                    >
+                      <Key className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleEdit(emp)}
                       className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
@@ -277,13 +414,32 @@ export default function UserManagement() {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDeleteClick(emp)}
-                      className="p-2 rounded-lg hover:bg-rose-100 text-rose-500"
-                      title={language === 'es' ? 'Desactivar' : 'Deactivate'}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {emp.active === false ? (
+                      <>
+                        <button
+                          onClick={() => handleActivateClick(emp)}
+                          className="p-2 rounded-lg hover:bg-emerald-100 text-emerald-600"
+                          title={language === 'es' ? 'Reactivar' : 'Reactivate'}
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setPermanentDeleteModal({ show: true, employee: emp })}
+                          className="p-2 rounded-lg hover:bg-rose-100 text-rose-600"
+                          title={language === 'es' ? 'Eliminar Permanentemente' : 'Delete Permanently'}
+                        >
+                          <UserX className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => handleDeleteClick(emp)}
+                        className="p-2 rounded-lg hover:bg-rose-100 text-rose-500"
+                        title={language === 'es' ? 'Desactivar' : 'Deactivate'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               )
@@ -399,31 +555,41 @@ export default function UserManagement() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm animate-scale-up">
             <div className="p-6 text-center">
               <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                confirmModal.type === 'delete' ? 'bg-rose-100' : 'bg-amber-100'
+                confirmModal.type === 'delete' ? 'bg-rose-100' : confirmModal.type === 'activate' ? 'bg-emerald-100' : 'bg-amber-100'
               }`}>
-                <AlertTriangle className={`w-8 h-8 ${
-                  confirmModal.type === 'delete' ? 'text-rose-500' : 'text-amber-500'
-                }`} />
+                {confirmModal.type === 'activate' ? (
+                  <RefreshCw className="w-8 h-8 text-emerald-500" />
+                ) : (
+                  <AlertTriangle className={`w-8 h-8 ${
+                    confirmModal.type === 'delete' ? 'text-rose-500' : 'text-amber-500'
+                  }`} />
+                )}
               </div>
               <h3 className="text-lg font-bold text-slate-800 mb-2">
                 {confirmModal.type === 'delete' 
                   ? (language === 'es' ? '¿Desactivar Usuario?' : 'Deactivate User?')
-                  : confirmModal.type === 'update'
-                    ? (language === 'es' ? '¿Guardar Cambios?' : 'Save Changes?')
-                    : (language === 'es' ? '¿Crear Usuario?' : 'Create User?')}
+                  : confirmModal.type === 'activate'
+                    ? (language === 'es' ? '¿Reactivar Usuario?' : 'Reactivate User?')
+                    : confirmModal.type === 'update'
+                      ? (language === 'es' ? '¿Guardar Cambios?' : 'Save Changes?')
+                      : (language === 'es' ? '¿Crear Usuario?' : 'Create User?')}
               </h3>
               <p className="text-slate-500 text-sm mb-6">
                 {confirmModal.type === 'delete' 
                   ? (language === 'es' 
-                      ? `¿Estás seguro de desactivar a "${confirmModal.data?.full_name}"?` 
-                      : `Are you sure you want to deactivate "${confirmModal.data?.full_name}"?`)
-                  : confirmModal.type === 'update'
+                      ? `¿Estás seguro de desactivar a "${confirmModal.data?.full_name}"? No podrá iniciar sesión.` 
+                      : `Are you sure you want to deactivate "${confirmModal.data?.full_name}"? They won't be able to log in.`)
+                  : confirmModal.type === 'activate'
                     ? (language === 'es' 
-                        ? `¿Guardar los cambios para "${formData.full_name}"?${formData.password ? ' (Se actualizará la contraseña)' : ''}` 
-                        : `Save changes for "${formData.full_name}"?${formData.password ? ' (Password will be updated)' : ''}`)
-                    : (language === 'es' 
-                        ? `¿Crear el usuario "${formData.full_name}" con usuario "${formData.username}"?` 
-                        : `Create user "${formData.full_name}" with username "${formData.username}"?`)}
+                        ? `¿Reactivar a "${confirmModal.data?.full_name}"? Podrá volver a iniciar sesión.` 
+                        : `Reactivate "${confirmModal.data?.full_name}"? They will be able to log in again.`)
+                    : confirmModal.type === 'update'
+                      ? (language === 'es' 
+                          ? `¿Guardar los cambios para "${formData.full_name}"?${formData.password ? ' (Se actualizará la contraseña)' : ''}` 
+                          : `Save changes for "${formData.full_name}"?${formData.password ? ' (Password will be updated)' : ''}`)
+                      : (language === 'es' 
+                          ? `¿Crear el usuario "${formData.full_name}" con usuario "${formData.username}"?` 
+                          : `Create user "${formData.full_name}" with username "${formData.username}"?`)}
               </p>
               <div className="flex gap-3">
                 <button
@@ -437,23 +603,169 @@ export default function UserManagement() {
                   onClick={() => {
                     if (confirmModal.type === 'delete') {
                       handleDelete(confirmModal.data.id)
+                    } else if (confirmModal.type === 'activate') {
+                      handleActivate(confirmModal.data.id)
                     } else {
                       handleSubmit()
                     }
                   }}
                   disabled={saving}
                   className={`flex-1 px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2 ${
-                    confirmModal.type === 'delete' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-crown-navy hover:bg-crown-navy-dark'
+                    confirmModal.type === 'delete' ? 'bg-rose-500 hover:bg-rose-600' : confirmModal.type === 'activate' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-crown-navy hover:bg-crown-navy-dark'
                   }`}
                 >
                   {saving ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
-                      {confirmModal.type === 'delete' ? <Trash2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                      {confirmModal.type === 'delete' ? <Trash2 className="w-4 h-4" /> : confirmModal.type === 'activate' ? <RefreshCw className="w-4 h-4" /> : <Save className="w-4 h-4" />}
                       {confirmModal.type === 'delete' 
                         ? (language === 'es' ? 'Desactivar' : 'Deactivate')
-                        : (language === 'es' ? 'Confirmar' : 'Confirm')}
+                        : confirmModal.type === 'activate'
+                          ? (language === 'es' ? 'Reactivar' : 'Reactivate')
+                          : (language === 'es' ? 'Confirmar' : 'Confirm')}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetPasswordModal.show && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
+            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Key className="w-5 h-5 text-amber-500" />
+                {language === 'es' ? 'Restablecer Contraseña' : 'Reset Password'}
+              </h3>
+              <button 
+                onClick={() => { setResetPasswordModal({ show: false, employee: null }); setNewPassword('') }}
+                className="p-1 hover:bg-slate-100 rounded"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="bg-slate-50 rounded-lg p-3">
+                <div className="text-sm text-slate-500">{language === 'es' ? 'Usuario' : 'User'}</div>
+                <div className="font-semibold text-slate-800">{resetPasswordModal.employee?.full_name}</div>
+                <div className="text-xs text-slate-400">@{resetPasswordModal.employee?.username}</div>
+              </div>
+              <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
+                <div className="text-sm text-amber-700 font-medium mb-1">
+                  {language === 'es' ? 'Contraseña Actual' : 'Current Password'}
+                </div>
+                <div className="font-mono text-amber-800 text-lg select-all">
+                  {resetPasswordModal.employee?.password_hash || '—'}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {language === 'es' ? 'Nueva Contraseña' : 'New Password'}
+                </label>
+                <input
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={language === 'es' ? 'Mínimo 4 caracteres' : 'Minimum 4 characters'}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono text-lg"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setResetPasswordModal({ show: false, employee: null }); setNewPassword('') }}
+                  className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"
+                >
+                  {language === 'es' ? 'Cancelar' : 'Cancel'}
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  disabled={saving || !newPassword || newPassword.length < 4}
+                  className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Key className="w-4 h-4" />
+                      {language === 'es' ? 'Actualizar' : 'Update'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Permanent Delete Modal */}
+      {permanentDeleteModal.show && (
+        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="px-4 py-3 border-b border-rose-200 bg-rose-50 flex items-center justify-between rounded-t-xl">
+              <h3 className="font-bold text-rose-700 flex items-center gap-2">
+                <UserX className="w-5 h-5" />
+                {language === 'es' ? '⚠️ Eliminar Permanentemente' : '⚠️ Delete Permanently'}
+              </h3>
+              <button 
+                onClick={() => { setPermanentDeleteModal({ show: false, employee: null }); setDeleteConfirmText('') }}
+                className="p-1 hover:bg-rose-100 rounded"
+              >
+                <X className="w-5 h-5 text-rose-500" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 text-center">
+                <UserX className="w-12 h-12 text-rose-500 mx-auto mb-2" />
+                <div className="font-bold text-rose-700 text-lg">{permanentDeleteModal.employee?.full_name}</div>
+                <div className="text-sm text-rose-600">@{permanentDeleteModal.employee?.username}</div>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-3">
+                <p className="text-amber-800 text-sm font-medium">
+                  {language === 'es' 
+                    ? '⚠️ Esta acción es IRREVERSIBLE. El usuario será eliminado permanentemente de la base de datos.'
+                    : '⚠️ This action is IRREVERSIBLE. The user will be permanently deleted from the database.'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {language === 'es' 
+                    ? 'Para confirmar, escribe ELIMINAR:' 
+                    : 'To confirm, type ELIMINAR:'}
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value.toUpperCase())}
+                  placeholder="ELIMINAR"
+                  className="w-full px-3 py-2 border-2 border-rose-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-mono text-lg text-center uppercase"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setPermanentDeleteModal({ show: false, employee: null }); setDeleteConfirmText('') }}
+                  className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"
+                >
+                  {language === 'es' ? 'Cancelar' : 'Cancel'}
+                </button>
+                <button
+                  onClick={handlePermanentDelete}
+                  disabled={saving || deleteConfirmText !== 'ELIMINAR'}
+                  className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      {language === 'es' ? 'Eliminar' : 'Delete'}
                     </>
                   )}
                 </button>

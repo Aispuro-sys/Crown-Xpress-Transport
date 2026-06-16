@@ -1615,17 +1615,29 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               </span>
               {getFieldIcon('location')}
             </label>
-            <select
-              value={unitInfo.location || ''}
-              onChange={e => update('location', e.target.value)}
-              className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('location')}`}
-              required
-            >
-              <option value="">{language === 'es' ? 'SELECCIONE...' : 'SELECT...'}</option>
-              {YARDS.map(yard => (
-                <option key={yard.id} value={yard.name}>{yard.name.toUpperCase()}</option>
-              ))}
-            </select>
+            {user?.location_id ? (
+              // User has assigned yard - show as readonly
+              <div className="w-full px-3 py-2 border-2 border-emerald-300 bg-emerald-50 rounded-lg text-slate-800 font-medium flex items-center justify-between">
+                <span>{unitInfo.location?.toUpperCase() || YARDS.find(y => y.id === user.location_id)?.name?.toUpperCase()}</span>
+                <span className="text-xs text-emerald-600 flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  {language === 'es' ? 'ASIGNADA' : 'ASSIGNED'}
+                </span>
+              </div>
+            ) : (
+              // No assigned yard - allow selection
+              <select
+                value={unitInfo.location || ''}
+                onChange={e => update('location', e.target.value)}
+                className={`w-full px-3 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 transition-colors ${validateField('location')}`}
+                required
+              >
+                <option value="">{language === 'es' ? 'SELECCIONE...' : 'SELECT...'}</option>
+                {YARDS.map(yard => (
+                  <option key={yard.id} value={yard.name}>{yard.name.toUpperCase()}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 
