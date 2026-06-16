@@ -90,7 +90,7 @@ export default async function handler(req, res) {
       // GET - List assignments
       if (method === 'GET') {
         const { employee_id, yard_id } = query
-        let query = `
+        let sqlQuery = `
           SELECT ya.*, e.full_name as employee_name, y.name as yard_name, y.type as yard_type
           FROM yard_assignments ya
           JOIN employees e ON ya.employee_id = e.id
@@ -98,11 +98,11 @@ export default async function handler(req, res) {
           WHERE ya.is_active = true
         `
         
-        if (employee_id) query += ` AND ya.employee_id = ${employee_id}`
-        if (yard_id) query += ` AND ya.yard_id = ${yard_id}`
-        query += ` ORDER BY ya.assigned_at DESC`
+        if (employee_id) sqlQuery += ` AND ya.employee_id = ${employee_id}`
+        if (yard_id) sqlQuery += ` AND ya.yard_id = ${yard_id}`
+        sqlQuery += ` ORDER BY ya.assigned_at DESC`
         
-        const assignments = await sql(query)
+        const assignments = await sql(sqlQuery)
         return res.status(200).json({ success: true, data: assignments })
       }
 
