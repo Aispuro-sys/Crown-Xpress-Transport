@@ -86,14 +86,14 @@ export default function StepByStepInspection({ onAllCompleted }) {
       // Jump to the last point after marking
       setCurrentStep(totalPoints - 1)
       
-      // Show alert after modal is closed
+      // Show alert after modal is closed and state has updated
       setTimeout(() => {
         alert(
           language === 'es' 
             ? `✅ Se marcaron como BUENOS:\n${goodPointNames}\n\n❌ Se mantienen como MALOS:\n${badPointNames}`
             : `✅ Marked as GOOD:\n${goodPointNames}\n\n❌ Kept as BAD:\n${badPointNames}`
         )
-      }, 100)
+      }, 300)
     } else {
       // Mark all points as good (original behavior)
       applicablePoints.forEach(point => {
