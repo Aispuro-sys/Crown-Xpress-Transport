@@ -16,6 +16,7 @@ export default function SubmitBar({ onSuccess }) {
   const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [pdfUrl, setPdfUrl] = useState(null)
   const [pdfFilename, setPdfFilename] = useState('')
+  const [hasOperatorSigned, setHasOperatorSigned] = useState(false)
   const sigRef = useRef(null)
 
   const issues = []
@@ -32,7 +33,14 @@ export default function SubmitBar({ onSuccess }) {
   // Step 1: Click "Generate PDF" -> Show signature modal
   const handleGenerateClick = () => {
     if (!canSubmit) return
+    setHasOperatorSigned(false) // Reset signature state when opening modal
     setShowSignatureModal(true)
+  }
+
+  // Handle operator signature change
+  const handleSignatureChange = () => {
+    const hasSignature = sigRef.current && !sigRef.current.isEmpty()
+    setHasOperatorSigned(hasSignature)
   }
 
   // Step 2: Operator signs -> Generate PDF (signature is required)
@@ -99,6 +107,7 @@ export default function SubmitBar({ onSuccess }) {
   const clearSignature = () => {
     if (sigRef.current) {
       sigRef.current.clear()
+      setHasOperatorSigned(false) // Reset signature state when clearing
     }
   }
 
@@ -246,6 +255,7 @@ export default function SubmitBar({ onSuccess }) {
               <div className="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden">
                 <SignatureCanvas
                   ref={sigRef}
+                  onEnd={handleSignatureChange}
                   canvasProps={{
                     className: 'w-full h-40 bg-white',
                     style: { width: '100%', height: '160px' }
@@ -264,7 +274,8 @@ export default function SubmitBar({ onSuccess }) {
                 </button>
                 <button
                   onClick={handleSignAndGenerate}
-                  className="flex-1 py-3 px-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center justify-center gap-2"
+                  disabled={!hasOperatorSigned || generating}
+                  className="flex-1 py-3 px-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed"
                 >
                   <FileText className="w-4 h-4" />
                   {language === 'es' ? 'GENERAR PDF' : 'GENERATE PDF'}
