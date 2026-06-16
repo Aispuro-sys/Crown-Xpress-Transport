@@ -188,7 +188,7 @@ export default function YardManagement() {
       <div className="card">
         <div className="card-body text-center py-12">
           <div className="animate-spin w-8 h-8 border-2 border-crown-navy/30 border-t-crown-navy rounded-full mx-auto mb-3" />
-          <p className="text-slate-500">{language === 'es' ? 'Cargando yardas...' : 'Loading yards...'}</p>
+          <p className="text-dark-text-secondary">{language === 'es' ? 'Cargando yardas...' : 'Loading yards...'}</p>
         </div>
       </div>
     )
