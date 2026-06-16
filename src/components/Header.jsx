@@ -31,12 +31,12 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+        <div className="flex items-center flex-shrink-0">
       <img
         src="/crown-logo.png"
         alt="Crown Xpress"
-        className="w-20 h-20 object-contain drop-shadow-sm"
+        className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-sm"
       />
     </div>
         
