@@ -61,14 +61,14 @@ export const translations = {
     // Signatures
     signaturesTitle: 'Firmas',
     guardSignature: 'Firma del Guardia',
-    auditorSignature: 'Firma del Auditor',
+    supervisorSignature: 'Firma del Supervisor',
     operatorSignature: 'Firma del Operador',
     operatorSignatureRequired: 'La firma del operador es obligatoria',
     guardName: 'Nombre del Guardia',
-    auditorName: 'Nombre del Auditor',
+    supervisorName: 'Nombre del Supervisor',
     clear: 'Limpiar',
     sign: 'Firmar aquí',
-    auditorOptional: '(Se puede firmar después)',
+    supervisorOptional: '(Se puede firmar después)',
     guardRequired: 'Firma del guardia obligatoria',
     
     // Actions
@@ -155,14 +155,14 @@ export const translations = {
     
     signaturesTitle: 'Signatures',
     guardSignature: 'Guard Signature',
-    auditorSignature: 'Auditor Signature',
+    supervisorSignature: 'Supervisor Signature',
     operatorSignature: 'Operator Signature',
     operatorSignatureRequired: 'Operator signature is required',
     guardName: 'Guard Name',
-    auditorName: 'Auditor Name',
+    supervisorName: 'Supervisor Name',
     clear: 'Clear',
     sign: 'Sign here',
-    auditorOptional: '(Can be signed later)',
+    supervisorOptional: '(Can be signed later)',
     guardRequired: 'Guard signature required',
     
     submit: 'Submit Inspection',

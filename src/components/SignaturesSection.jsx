@@ -11,10 +11,10 @@ export default function SignaturesSection() {
   const { user } = useAuth()
   const { 
     guardSignature, setGuardSignature, 
-    auditorSignature, setAuditorSignature,
+    supervisorSignature, setSupervisorSignature,
     unitInfo, completedCount
   } = useInspection()
-  const [enableAuditor, setEnableAuditor] = useState(false)
+  const [enableSupervisor, setEnableSupervisor] = useState(false)
   
   // Check if all points are completed
   const applicablePoints = useMemo(() => {
@@ -69,44 +69,44 @@ export default function SignaturesSection() {
           nameReadOnly={true}
         />
         
-        {/* Auditor Signature Checkbox */}
+        {/* Supervisor Signature Checkbox */}
         <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                checked={enableAuditor}
-                onChange={(e) => setEnableAuditor(e.target.checked)}
+                checked={enableSupervisor}
+                onChange={(e) => setEnableSupervisor(e.target.checked)}
                 className="w-5 h-5 rounded border-slate-300 text-crown-gold focus:ring-crown-gold cursor-pointer"
               />
               <div className="flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-crown-gold" />
                 <span className="font-semibold text-slate-700">
-                  {language === 'es' ? '¿Requiere firma de auditor?' : 'Requires auditor signature?'}
+                  {language === 'es' ? '¿Requiere firma de supervisor?' : 'Requires supervisor signature?'}
                 </span>
               </div>
             </label>
           </div>
           
-          {/* Auditor Signature - Only if enabled */}
-          {enableAuditor && (
+          {/* Supervisor Signature - Only if enabled */}
+          {enableSupervisor && (
             <SignatureBox
               label={
                 <span className="inline-flex items-center gap-1.5">
-                  <UserCheck className="w-4 h-4" /> {t('auditorSignature').toUpperCase()}
+                  <UserCheck className="w-4 h-4" /> {t('supervisorSignature').toUpperCase()}
                 </span>
               }
-              name={auditorSignature.name}
-              onNameChange={(name) => setAuditorSignature(prev => ({ ...prev, name: name.toUpperCase() }))}
-              namePlaceholder={t('auditorName').toUpperCase()}
-              value={auditorSignature.signature}
-              onChange={(sig) => setAuditorSignature(prev => ({
+              name={supervisorSignature.name}
+              onNameChange={(name) => setSupervisorSignature(prev => ({ ...prev, name: name.toUpperCase() }))}
+              namePlaceholder={t('supervisorName').toUpperCase()}
+              value={supervisorSignature.signature}
+              onChange={(sig) => setSupervisorSignature(prev => ({
                 ...prev,
                 signature: sig,
                 signedAt: sig ? new Date().toISOString() : null
               }))}
               accent="gold"
               optional
-              optionalLabel={t('auditorOptional').toUpperCase()}
+              optionalLabel={t('supervisorOptional').toUpperCase()}
             />
           )}
       </div>

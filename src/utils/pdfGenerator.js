@@ -108,7 +108,7 @@ async function loadTruckDiagramImage(inspectionType) {
   }
 }
 
-export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guardSignature, auditorSignature, operatorSignature, language = 'es' }) {
+export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guardSignature, supervisorSignature, operatorSignature, language = 'es' }) {
   // Pre-load images (pass inspection type to get correct diagram)
   const logoBase64 = await loadLogoImage()
   const ctpatLogoBase64 = await loadCtpatLogoImage()
@@ -141,7 +141,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     sealPhoto: 'FOTO DEL SELLO',
     signatures: 'FIRMAS',
     guardSig: 'GUARDIA',
-    auditorSig: 'AUDITOR',
+    supervisorSig: 'SUPERVISOR',
     operatorSig: 'OPERADOR',
     signedAt: 'Firmado',
     notSigned: 'No firmado',
@@ -180,7 +180,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     sealPhoto: 'SEAL PHOTO',
     signatures: 'SIGNATURES',
     guardSig: 'GUARD',
-    auditorSig: 'AUDITOR',
+    supervisorSig: 'SUPERVISOR',
     operatorSig: 'OPERATOR',
     signedAt: 'Signed',
     notSigned: 'Not signed',
@@ -466,12 +466,12 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   doc.text(T.signatures, margin + 2, sigY + 4)
   sigY += 10
 
-  // Signatures (3 columns: operator, guard, auditor)
+  // Signatures (3 columns: operator, guard, supervisor)
   const sigBoxW3 = (pageWidth - margin * 2 - 8) / 3
   const sigBoxH = 45
   drawSignatureBox(doc, margin, sigY, sigBoxW3, sigBoxH, T.operatorSig, operatorSignature, T)
   drawSignatureBox(doc, margin + sigBoxW3 + 4, sigY, sigBoxW3, sigBoxH, T.guardSig, guardSignature, T)
-  drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigY, sigBoxW3, sigBoxH, T.auditorSig, auditorSignature, T)
+  drawSignatureBox(doc, margin + (sigBoxW3 + 4) * 2, sigY, sigBoxW3, sigBoxH, T.supervisorSig, supervisorSignature, T)
 
   // ===== FOOTER =====
   drawFooter(doc, T, pageWidth, pageHeight, margin)

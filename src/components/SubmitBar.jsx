@@ -70,7 +70,7 @@ export default function SubmitBar({ onSuccess }) {
           points: ctx.points,
           sealPhoto: ctx.sealPhoto,
           guardSignature: ctx.guardSignature,
-          auditorSignature: ctx.auditorSignature,
+          supervisorSignature: ctx.supervisorSignature,
           operatorSignature: {
             name: unitInfo.driverName?.toUpperCase() || '',
             signature: signatureData,

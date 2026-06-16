@@ -34,7 +34,7 @@ export function InspectionProvider({ children }) {
 
   // Signatures
   const [guardSignature, setGuardSignature] = useState({ name: '', signature: null, signedAt: null })
-  const [auditorSignature, setAuditorSignature] = useState({ name: '', signature: null, signedAt: null })
+  const [supervisorSignature, setSupervisorSignature] = useState({ name: '', signature: null, signedAt: null })
   const [operatorSignature, setOperatorSignature] = useState({ name: '', signature: null, signedAt: null })
 
   // Helpers
@@ -82,7 +82,7 @@ export function InspectionProvider({ children }) {
     setPoints(initialPoints())
     setSealPhoto(null)
     setGuardSignature({ name: '', signature: null, signedAt: null })
-    setAuditorSignature({ name: '', signature: null, signedAt: null })
+    setSupervisorSignature({ name: '', signature: null, signedAt: null })
     setOperatorSignature({ name: '', signature: null, signedAt: null })
   }, [])
 
@@ -129,7 +129,7 @@ export function InspectionProvider({ children }) {
       points, setPointStatus, setPointIssue, setPointPhoto,
       sealPhoto, setSealPhoto,
       guardSignature, setGuardSignature,
-      auditorSignature, setAuditorSignature,
+      supervisorSignature, setSupervisorSignature,
       operatorSignature, setOperatorSignature,
       resetInspection,
       completedCount, failedCount, goodCount, progressPercent,

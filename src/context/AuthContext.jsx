@@ -160,7 +160,7 @@ export function AuthProvider({ children }) {
   }
 
   const canEdit = () => user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
-  const canViewAll = () => user?.role === 'auditor' || user?.role === 'admin'
+  const canViewAll = () => user?.role === 'supervisor' || user?.role === 'admin'
   const canReconfirm = () => user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
 
   return (

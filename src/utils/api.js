@@ -56,13 +56,13 @@ export async function downloadPdf(id) {
   return blob
 }
 
-/** Add auditor signature later (optional) */
-export async function signAuditor(id, { name, signedAt }) {
-  const res = await fetchJson(`${API_BASE}/inspections/${id}/sign-auditor`, {
+/** Add supervisor signature later (optional) */
+export async function signSupervisor(id, { name, signedAt }) {
+  const res = await fetchJson(`${API_BASE}/inspections/${id}/sign-supervisor`, {
     method: 'POST',
     body: JSON.stringify({ name, signedAt }),
   })
-  return res // { success, id, auditor_name, auditor_signed_at, status }
+  return res // { success, id, supervisor_name, supervisor_signed_at, status }
 }
 
 /** Health check */
@@ -146,7 +146,7 @@ export async function compressImage(base64Image, maxWidth = 800, quality = 0.6) 
 
 /** Build payload for createInspection (with aggressive image compression) */
 export async function buildPayload(ctx, pdfBase64, pdfFilename) {
-  const { unitInfo, points, sealPhoto, guardSignature, auditorSignature, completedCount, failedCount, goodCount } = ctx
+  const { unitInfo, points, sealPhoto, guardSignature, supervisorSignature, completedCount, failedCount, goodCount } = ctx
   
   // Compress seal photo more aggressively (400px, 40% quality)
   const compressedSealPhoto = sealPhoto ? await compressImage(sealPhoto, 400, 0.4) : null
@@ -167,8 +167,8 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   const compressedGuardSig = guardSignature?.signature 
     ? await compressImage(guardSignature.signature, 300, 0.4) 
     : null
-  const compressedAuditorSig = auditorSignature?.signature 
-    ? await compressImage(auditorSignature.signature, 300, 0.4) 
+  const compressedSupervisorSig = supervisorSignature?.signature 
+    ? await compressImage(supervisorSignature.signature, 300, 0.4) 
     : null
   
   // Don't send the full PDF - it's too large. Backend can regenerate if needed.
@@ -177,7 +177,7 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
     unitInfo,
     points: pointsPayload,
     guardSignature: { ...guardSignature, signature: compressedGuardSig },
-    auditorSignature: { ...auditorSignature, signature: compressedAuditorSig },
+    supervisorSignature: { ...supervisorSignature, signature: compressedSupervisorSig },
     sealPhoto: compressedSealPhoto,
     language: 'es',
     pdfGenerated: true,  // Flag instead of full PDF

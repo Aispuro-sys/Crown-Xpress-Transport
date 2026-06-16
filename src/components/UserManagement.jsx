@@ -14,7 +14,7 @@ const LOCATIONS = [
 const ROLES = [
   { id: 'guard', label: { es: 'Guardia', en: 'Guard' }, icon: Shield, color: 'bg-blue-500' },
   { id: 'inspector', label: { es: 'Inspector', en: 'Inspector' }, icon: Eye, color: 'bg-emerald-500' },
-  { id: 'auditor', label: { es: 'Auditor', en: 'Auditor' }, icon: UserCheck, color: 'bg-purple-500' },
+  { id: 'supervisor', label: { es: 'Supervisor', en: 'Supervisor' }, icon: UserCheck, color: 'bg-purple-500' },
   { id: 'admin', label: { es: 'Administrador', en: 'Admin' }, icon: Crown, color: 'bg-amber-500' },
 ]
 
