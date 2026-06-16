@@ -144,26 +144,8 @@ export function AuthProvider({ children }) {
       localStorage.setItem('crown_user', JSON.stringify(session))
       return session
     } catch (err) {
-      // Fallback to mock users if API fails (for development)
-      const mockUsers = [
-        { id: 101, username: 'guardia01', password: '1234', full_name: 'Carlos Mendoza', role: 'guard', location_id: 1, location_name: 'Yard A - Laredo' },
-        { id: 401, username: 'admin', password: 'admin', full_name: 'Admin Crown', role: 'admin', location_id: 1, location_name: 'Yard A - Laredo' },
-      ]
-      
-      const found = mockUsers.find(u => u.username === username && u.password === password)
-      if (!found) throw new Error(err.message || 'Usuario o contraseña incorrectos')
-
-      const session = {
-        id: found.id,
-        username: found.username,
-        full_name: found.full_name,
-        role: found.role,
-        location_id: found.location_id,
-        location_name: found.location_name,
-      }
-      setUser(session)
-      localStorage.setItem('crown_user', JSON.stringify(session))
-      return session
+      // Re-throw the error - no fallback in production
+      throw new Error(err.message || 'Usuario o contraseña incorrectos')
     }
   }
 

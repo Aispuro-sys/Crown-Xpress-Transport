@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ClipboardCheck, History, Home, ShieldCheck, FileText, Users } from 'lucide-react'
+import { ClipboardCheck, History, Home, ShieldCheck, FileText, Users, MapPin } from 'lucide-react'
 import GuidedInspection from './GuidedInspection'
 import UnitInfo from './UnitInfoEnhanced'
 import TruckDiagram from './TruckDiagram'
@@ -12,6 +12,7 @@ import InspectionHistory from './InspectionHistory'
 import GuardHistory from './GuardHistory'
 import AuditorView from './AuditorView'
 import UserManagement from './UserManagement'
+import YardManagement from './YardManagement'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { useAuth } from '../context/AuthContext'
@@ -60,6 +61,7 @@ export default function Router() {
     canEdit() && { id: 'my-history', label: language === 'es' ? 'Mi Historial' : 'My History', icon: History },
     canViewAll() && { id: 'auditor', label: language === 'es' ? 'Vista Auditor' : 'Auditor View', icon: ShieldCheck },
     isAdmin && { id: 'users', label: language === 'es' ? 'Usuarios' : 'Users', icon: Users },
+    isAdmin && { id: 'yards', label: language === 'es' ? 'Yardas' : 'Yards', icon: MapPin },
   ].filter(Boolean)
 
   const Nav = () => (
@@ -130,6 +132,7 @@ export default function Router() {
         {page === 'my-history' && canEdit() && <GuardHistory />}
         {page === 'auditor' && canViewAll() && <AuditorView />}
         {page === 'users' && isAdmin && <UserManagement />}
+        {page === 'yards' && isAdmin && <YardManagement />}
       </div>
 
       <footer className="border-t border-slate-200 bg-white/50 backdrop-blur py-4 mt-2 no-print">

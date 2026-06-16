@@ -17,17 +17,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Username and password required' })
       }
 
+      // First check if user exists with correct password
       const users = await sql`
-        SELECT id, username, full_name, role, location_id, location_name
+        SELECT id, username, full_name, role, location_id, location_name, active
         FROM employees
-        WHERE username = ${username} AND password_hash = ${password} AND active = true
+        WHERE username = ${username} AND password_hash = ${password}
       `
 
       if (users.length === 0) {
         return res.status(401).json({ error: 'Invalid credentials' })
       }
 
+      // Check if user is active
       const user = users[0]
+      if (user.active === false) {
+        return res.status(401).json({ error: 'Usuario desactivado. Contacte al administrador.' })
+      }
+
       return res.status(200).json({
         success: true,
         user: {

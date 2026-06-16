@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle, RefreshCw, Key, EyeOff, Copy, UserX } from 'lucide-react'
+import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle, RefreshCw, Key, EyeOff, Copy, UserX, MapPin } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -21,6 +21,8 @@ const ROLES = [
 export default function UserManagement() {
   const { language } = useLanguage()
   const [employees, setEmployees] = useState([])
+  const [yards, setYards] = useState([])
+  const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
@@ -46,8 +48,35 @@ export default function UserManagement() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   useEffect(() => {
-    loadEmployees()
+    loadData()
   }, [])
+
+  async function loadData() {
+    setLoading(true)
+    try {
+      const [employeesRes, yardsRes, assignmentsRes] = await Promise.all([
+        fetch(`${API_BASE}/employees`),
+        fetch(`${API_BASE}/yards`),
+        fetch(`${API_BASE}/yard-assignments`)
+      ])
+
+      const employeesData = await employeesRes.json()
+      const yardsData = await yardsRes.json()
+      const assignmentsData = await assignmentsRes.json()
+
+      if (employeesData.error) throw new Error(employeesData.error)
+      if (yardsData.error) throw new Error(yardsData.error)
+      if (assignmentsData.error) throw new Error(assignmentsData.error)
+
+      setEmployees(employeesData.data || [])
+      setYards(yardsData.data || [])
+      setAssignments(assignmentsData.data || [])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function loadEmployees() {
     setLoading(true)
@@ -72,8 +101,17 @@ export default function UserManagement() {
     return matchesSearch && matchesRole && matchesActive
   })
 
+  const getEmployeeYard = (employeeId) => {
+    const assignment = assignments.find(a => a.employee_id === employeeId)
+    if (assignment) {
+      const yard = yards.find(y => y.id === assignment.yard_id)
+      return yard
+    }
+    return null
+  }
+
   const handleLocationChange = (locationId) => {
-    const loc = LOCATIONS.find(l => l.id === parseInt(locationId))
+    const loc = yards.find(l => l.id === parseInt(locationId))
     setFormData(prev => ({
       ...prev,
       location_id: parseInt(locationId),
@@ -131,6 +169,8 @@ export default function UserManagement() {
       role: emp.role,
       location_id: emp.location_id || 1,
       location_name: emp.location_name || '',
+      current_password: emp.password_hash || '',
+      active: emp.active !== false,
     })
     setEditingId(emp.id)
     setShowForm(true)
@@ -368,32 +408,32 @@ export default function UserManagement() {
                     <div>
                       <div className="font-semibold text-slate-800">{emp.full_name}</div>
                       <div className="text-xs text-slate-500">
-                        @{emp.username} · {roleInfo.label[language]} · {emp.location_name || '—'}
+                        @{emp.username} · {roleInfo.label[language]}
                       </div>
-                      <div className="text-xs text-slate-400 font-mono flex items-center gap-1">
-                        <Key className="w-3 h-3" />
-                        <span className="select-all">
-                          {showPassword[emp.id] ? (emp.password_hash || '—') : '••••••••'}
-                        </span>
-                        <button
-                          onClick={() => togglePasswordVisibility(emp.id)}
-                          className="p-0.5 hover:bg-slate-200 rounded"
-                          title={showPassword[emp.id] ? (language === 'es' ? 'Ocultar' : 'Hide') : (language === 'es' ? 'Ver' : 'Show')}
-                        >
-                          {showPassword[emp.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        </button>
-                        {showPassword[emp.id] && emp.password_hash && (
-                          <button
-                            onClick={() => copyPassword(emp.password_hash)}
-                            className="p-0.5 hover:bg-slate-200 rounded"
-                            title={language === 'es' ? 'Copiar' : 'Copy'}
-                          >
-                            <Copy className="w-3 h-3" />
-                          </button>
-                        )}
+                      <div className="flex items-center gap-2 text-xs text-slate-600 mt-1">
+                        <MapPin className="w-3 h-3" />
+                        {(() => {
+                          const assignedYard = getEmployeeYard(emp.id)
+                          if (assignedYard) {
+                            return (
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                assignedYard.type === 'PHYSICAL' 
+                                  ? 'bg-blue-100 text-blue-700' 
+                                  : 'bg-purple-100 text-purple-700'
+                              }`}>
+                                {assignedYard.name}
+                              </span>
+                            )
+                          }
+                          return (
+                            <span className="text-slate-400">
+                              {language === 'es' ? 'Sin yarda asignada' : 'No yard assigned'}
+                            </span>
+                          )
+                        })()}
                       </div>
                       {emp.active === false && (
-                        <div className="text-xs text-rose-500 font-medium">
+                        <div className="text-xs text-rose-500 font-medium mt-1">
                           {language === 'es' ? 'INACTIVO' : 'INACTIVE'}
                         </div>
                       )}
@@ -401,45 +441,12 @@ export default function UserManagement() {
                   </div>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setResetPasswordModal({ show: true, employee: emp })}
-                      className="p-2 rounded-lg hover:bg-amber-100 text-amber-600"
-                      title={language === 'es' ? 'Restablecer Contraseña' : 'Reset Password'}
-                    >
-                      <Key className="w-4 h-4" />
-                    </button>
-                    <button
                       onClick={() => handleEdit(emp)}
                       className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
                       title={language === 'es' ? 'Editar' : 'Edit'}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    {emp.active === false ? (
-                      <>
-                        <button
-                          onClick={() => handleActivateClick(emp)}
-                          className="p-2 rounded-lg hover:bg-emerald-100 text-emerald-600"
-                          title={language === 'es' ? 'Reactivar' : 'Reactivate'}
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setPermanentDeleteModal({ show: true, employee: emp })}
-                          className="p-2 rounded-lg hover:bg-rose-100 text-rose-600"
-                          title={language === 'es' ? 'Eliminar Permanentemente' : 'Delete Permanently'}
-                        >
-                          <UserX className="w-4 h-4" />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleDeleteClick(emp)}
-                        className="p-2 rounded-lg hover:bg-rose-100 text-rose-500"
-                        title={language === 'es' ? 'Desactivar' : 'Deactivate'}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
                   </div>
                 </div>
               )
@@ -451,8 +458,8 @@ export default function UserManagement() {
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="font-bold text-slate-800">
                 {editingId 
                   ? (language === 'es' ? 'Editar Usuario' : 'Edit User')
@@ -487,9 +494,45 @@ export default function UserManagement() {
                   required
                 />
               </div>
+
+              {/* Current Password - Only show when editing */}
+              {editingId && formData.current_password && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <label className="block text-sm font-medium text-amber-700 mb-1 flex items-center gap-1">
+                    <Key className="w-3 h-3" />
+                    {language === 'es' ? 'Contraseña Actual' : 'Current Password'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type={showPassword['current'] ? 'text' : 'password'}
+                      value={formData.current_password}
+                      readOnly
+                      className="flex-1 px-3 py-2 bg-white border border-amber-300 rounded-lg font-mono text-amber-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('current')}
+                      className="p-2 hover:bg-amber-100 rounded-lg text-amber-600"
+                    >
+                      {showPassword['current'] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => copyPassword(formData.current_password)}
+                      className="p-2 hover:bg-amber-100 rounded-lg text-amber-600"
+                      title={language === 'es' ? 'Copiar' : 'Copy'}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {language === 'es' ? 'Contraseña' : 'Password'} {editingId ? '' : '*'}
+                  {editingId 
+                    ? (language === 'es' ? 'Nueva Contraseña' : 'New Password')
+                    : (language === 'es' ? 'Contraseña' : 'Password')} {editingId ? '' : '*'}
                 </label>
                 <input
                   type="password"
@@ -523,11 +566,76 @@ export default function UserManagement() {
                   onChange={(e) => handleLocationChange(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20"
                 >
-                  {LOCATIONS.map(loc => (
-                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  <option value="">{language === 'es' ? 'Seleccionar yarda...' : 'Select yard...'}</option>
+                  {yards.map(yard => (
+                    <option key={yard.id} value={yard.id}>
+                      {yard.name} ({yard.type === 'PHYSICAL' ? 'Física' : 'Virtual'})
+                    </option>
                   ))}
                 </select>
               </div>
+
+              {/* Status and Actions - Only show when editing */}
+              {editingId && (
+                <div className="border-t border-slate-200 pt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-700">
+                      {language === 'es' ? 'Estado del Usuario' : 'User Status'}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      formData.active 
+                        ? 'bg-emerald-100 text-emerald-700' 
+                        : 'bg-rose-100 text-rose-700'
+                    }`}>
+                      {formData.active 
+                        ? (language === 'es' ? 'ACTIVO' : 'ACTIVE')
+                        : (language === 'es' ? 'INACTIVO' : 'INACTIVE')}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {formData.active ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetForm()
+                          handleDeleteClick({ id: editingId, full_name: formData.full_name })
+                        }}
+                        className="flex-1 px-3 py-2 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 flex items-center justify-center gap-2 text-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        {language === 'es' ? 'Desactivar' : 'Deactivate'}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetForm()
+                            handleActivateClick({ id: editingId, full_name: formData.full_name })
+                          }}
+                          className="flex-1 px-3 py-2 border border-emerald-300 text-emerald-600 rounded-lg hover:bg-emerald-50 flex items-center justify-center gap-2 text-sm"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          {language === 'es' ? 'Reactivar' : 'Reactivate'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetForm()
+                            setPermanentDeleteModal({ show: true, employee: { id: editingId, full_name: formData.full_name, username: formData.username } })
+                          }}
+                          className="flex-1 px-3 py-2 border border-rose-300 text-rose-600 rounded-lg hover:bg-rose-50 flex items-center justify-center gap-2 text-sm"
+                        >
+                          <UserX className="w-4 h-4" />
+                          {language === 'es' ? 'Eliminar' : 'Delete'}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -624,75 +732,6 @@ export default function UserManagement() {
                         : confirmModal.type === 'activate'
                           ? (language === 'es' ? 'Reactivar' : 'Reactivate')
                           : (language === 'es' ? 'Confirmar' : 'Confirm')}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reset Password Modal */}
-      {resetPasswordModal.show && (
-        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm">
-            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <Key className="w-5 h-5 text-amber-500" />
-                {language === 'es' ? 'Restablecer Contraseña' : 'Reset Password'}
-              </h3>
-              <button 
-                onClick={() => { setResetPasswordModal({ show: false, employee: null }); setNewPassword('') }}
-                className="p-1 hover:bg-slate-100 rounded"
-              >
-                <X className="w-5 h-5 text-slate-500" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div className="bg-slate-50 rounded-lg p-3">
-                <div className="text-sm text-slate-500">{language === 'es' ? 'Usuario' : 'User'}</div>
-                <div className="font-semibold text-slate-800">{resetPasswordModal.employee?.full_name}</div>
-                <div className="text-xs text-slate-400">@{resetPasswordModal.employee?.username}</div>
-              </div>
-              <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-                <div className="text-sm text-amber-700 font-medium mb-1">
-                  {language === 'es' ? 'Contraseña Actual' : 'Current Password'}
-                </div>
-                <div className="font-mono text-amber-800 text-lg select-all">
-                  {resetPasswordModal.employee?.password_hash || '—'}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {language === 'es' ? 'Nueva Contraseña' : 'New Password'}
-                </label>
-                <input
-                  type="text"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={language === 'es' ? 'Mínimo 4 caracteres' : 'Minimum 4 characters'}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono text-lg"
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => { setResetPasswordModal({ show: false, employee: null }); setNewPassword('') }}
-                  className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"
-                >
-                  {language === 'es' ? 'Cancelar' : 'Cancel'}
-                </button>
-                <button
-                  onClick={handleResetPassword}
-                  disabled={saving || !newPassword || newPassword.length < 4}
-                  className="flex-1 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {saving ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Key className="w-4 h-4" />
-                      {language === 'es' ? 'Actualizar' : 'Update'}
                     </>
                   )}
                 </button>
