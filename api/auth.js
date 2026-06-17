@@ -1,4 +1,4 @@
-import sql from './_lib/db.js'
+import { getSql } from './_lib/db.js'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -21,6 +21,7 @@ export default async function handler(req, res) {
       }
 
       // First check if user exists with correct password
+      const sql = getSql()
       const users = await sql`
         SELECT id, username, full_name, role, location_id, location_name, active, profile_photo
         FROM employees

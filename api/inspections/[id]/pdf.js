@@ -1,4 +1,4 @@
-import sql from '../../_lib/db.js'
+import { getSql } from '../../_lib/db.js'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -11,6 +11,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      const sql = getSql()
       const id = req.query.id || req.url.split('/')[3]
       
       const [inspection] = await sql`

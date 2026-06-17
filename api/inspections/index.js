@@ -1,4 +1,4 @@
-import sql from '../_lib/db.js'
+import { getSql } from '../_lib/db.js'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -11,6 +11,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const sql = getSql()
+    
     if (req.method === 'GET') {
       // List inspections
       const limit = parseInt(req.query.limit) || 50

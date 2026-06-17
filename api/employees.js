@@ -1,4 +1,4 @@
-import sql from './_lib/db.js'
+import { getSql } from './_lib/db.js'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -10,6 +10,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const sql = getSql()
+    
     // GET - List employees OR search operator by employee_number OR search by name OR list all operators
     if (req.method === 'GET') {
       const { employee_number, search_name, list_operators } = req.query
