@@ -201,8 +201,8 @@ export default async function handler(req, res) {
           ${output.EL || ''},
           ${output.SEAL || ''},
           ${''},
-          ${output.DRVCODE || ''},
-          ${output.DRVCODE || ''},
+          ${output.DRVCODE || ''}, -- driver_name (temporalmente usa DRVCODE)
+          ${output.DRVCODE || ''}, -- driver_code
           ${0},
           ${output.FROMCITY || ''},
           ${new Date().toISOString()},
@@ -221,7 +221,7 @@ export default async function handler(req, res) {
           ${output.DELDATE ? new Date(output.DELDATE).toISOString() : null},
           ${output.TIMEARRV || ''},
           ${output.TIMEDEPAR || ''},
-          ${output.OPER || ''},
+          ${output.OPER || ''}, -- operator_name (desde campo OPER de tpr)
           ${output.TRUCKID || ''},
           ${output.INSTRUC1 || ''},
           ${output.INSTRUC2 || ''},
