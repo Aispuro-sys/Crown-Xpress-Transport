@@ -59,24 +59,32 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Name and signedAt are required' })
         }
 
-        // Update inspection with supervisor signature
-        const result = await sql`
-          UPDATE inspections 
-          SET supervisor_signature = ${name}, 
-              supervisor_signed_at = ${signedAt},
-              updated_at = NOW()
-          WHERE id = ${parseInt(id)}
-          RETURNING *
-        `
+        try {
+          // Update inspection with supervisor signature
+          const result = await sql`
+            UPDATE inspections 
+            SET supervisor_signature = ${name}, 
+                supervisor_signed_at = ${signedAt},
+                updated_at = NOW()
+            WHERE id = ${parseInt(id)}
+            RETURNING *
+          `
 
-        if (result.length === 0) {
-          return res.status(404).json({ error: 'Inspection not found' })
+          if (result.length === 0) {
+            return res.status(404).json({ error: 'Inspection not found' })
+          }
+
+          return res.status(200).json({ 
+            message: 'Supervisor signature added successfully',
+            inspection: result[0]
+          })
+        } catch (dbError) {
+          console.error('Database error in supervisor signature:', dbError)
+          return res.status(500).json({ 
+            error: 'Failed to update supervisor signature',
+            details: dbError.message 
+          })
         }
-
-        return res.status(200).json({ 
-          message: 'Supervisor signature added successfully',
-          inspection: result[0]
-        })
       }
       
       // Handle other POST requests if needed
@@ -87,12 +95,18 @@ export default async function handler(req, res) {
     if (req.url.includes('pdf')) {
       try {
         const pdfBuffer = await generatePDF(parseInt(id))
+        if (!pdfBuffer) {
+          return res.status(500).json({ error: 'PDF generation failed - no data returned' })
+        }
         res.setHeader('Content-Type', 'application/pdf')
         res.setHeader('Content-Disposition', `attachment; filename="inspection-${id}.pdf"`)
         return res.status(200).send(pdfBuffer)
       } catch (error) {
         console.error('PDF generation error:', error)
-        return res.status(500).json({ error: 'Failed to generate PDF' })
+        return res.status(500).json({ 
+          error: 'Failed to generate PDF',
+          details: error.message 
+        })
       }
     }
 
