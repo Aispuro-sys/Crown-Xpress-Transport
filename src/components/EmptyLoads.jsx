@@ -38,7 +38,15 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
       }
     } catch (err) {
       console.log('Exception in loadMovements:', err)
-      setError(err.message || (language === 'es' ? 'Error de conexión' : 'Connection error'))
+      const errorMsg = err.message || ''
+      if (errorMsg.includes('DATABASE_URL_NBCW')) {
+        setError(language === 'es' 
+          ? 'Base de datos NBCW no configurada. Configure la variable DATABASE_URL_NBCW en Vercel.' 
+          : 'NBCW database not configured. Please set DATABASE_URL_NBCW environment variable in Vercel.'
+        )
+      } else {
+        setError(err.message || (language === 'es' ? 'Error de conexión' : 'Connection error'))
+      }
     } finally {
       console.log('Setting loading to false')
       setLoading(false)
