@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { getApplicablePoints } from '../data/inspectionPoints'
 import UnitInfoEnhanced from './UnitInfoEnhanced'
+import EmptyLoads from './EmptyLoads'
 import StepByStepInspection from './StepByStepInspection'
 import SealPhotoSection from './SealPhotoSection'
 import SignatureSection from './SignatureSection'
@@ -19,6 +20,7 @@ export default function GuidedInspection() {
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
   const [unitInfoFlowComplete, setUnitInfoFlowComplete] = useState(false)
+  const [showEmptyLoads, setShowEmptyLoads] = useState(false)
 
   // Get applicable points based on inspection type
   const applicablePoints = useMemo(() => {
@@ -152,6 +154,7 @@ export default function GuidedInspection() {
             onContainerChange={setHasContainer}
             onSealChange={setHasSeal}
             onLockChange={setHasLock}
+            onOpenNbcwModal={() => setShowEmptyLoads(true)}
             onFlowComplete={setUnitInfoFlowComplete}
           />
           {unitInfoValid && unitInfoFlowComplete && (

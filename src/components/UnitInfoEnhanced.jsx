@@ -543,6 +543,14 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             </button>
           </div>
         </div>
+
+        {/* NBCW Modal - Inside main selection screen */}
+        {showEmptyLoads && (
+          <EmptyLoads
+            onSelectMovement={handleSelectEmptyLoad}
+            onClose={() => setShowEmptyLoads(false)}
+          />
+        )}
       </section>
     )
   }

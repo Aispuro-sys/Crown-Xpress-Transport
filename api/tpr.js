@@ -1,93 +1,5 @@
 import { getSql } from './_lib/db.js'
 
-// Datos de prueba para cuando no hay conexión a base de datos
-const MOCK_DATA = [
-  {
-    driver_code: '1455',
-    work_order: '785237',
-    bill_of_lading: '2',
-    date: '6/11/2026',
-    from_code: 'GLO11552',
-    from_city: 'TIJUANA',
-    from_state: 'BCN',
-    to_code: 'AVERY',
-    to_city: 'TIJUANA',
-    to_state: 'BCN',
-    movement_type: 'L',
-    status: 'OPEN',
-    equipment_type: 'L',
-    equipment_code: 'ABBA-008',
-    delivery_date: '6/11/2026',
-    customer: 'AVERYLA',
-    arrival_time: '',
-    departure_time: '',
-    operator: 'JOSE ROSENDO LEAL',
-    truck_id: '357',
-    seal: '',
-    instructions_1: null,
-    instructions_2: null,
-    amount: '12.00',
-    table_code: 'LOC/TJL',
-    table_code: 'MOV'
-  },
-  {
-    driver_code: '3208',
-    work_order: '785236',
-    bill_of_lading: '1',
-    date: '6/11/2026',
-    from_code: 'FAB58',
-    from_city: 'MEXICALI',
-    from_state: 'BCN',
-    to_code: 'HON280',
-    to_city: 'CALEXICO',
-    to_state: 'CA',
-    movement_type: '3',
-    status: 'OPEN',
-    equipment_type: 'L',
-    equipment_code: 'D24154',
-    delivery_date: '6/11/2026',
-    customer: 'COR3',
-    arrival_time: '',
-    departure_time: '',
-    operator: 'ANA BERTHA DE LA CRU',
-    truck_id: '432',
-    seal: '',
-    instructions_1: null,
-    instructions_2: null,
-    amount: '35.00',
-    table_code: 'CRUCE/L',
-    table_code: 'MOV'
-  },
-  {
-    driver_code: '926',
-    work_order: '785209',
-    bill_of_lading: '3',
-    date: '6/11/2026',
-    from_code: 'SEA11002',
-    from_city: 'TIJUANA',
-    from_state: 'BCN',
-    to_code: 'CXT6',
-    to_city: 'TIJUANA',
-    to_state: 'BCN',
-    movement_type: 'L',
-    status: 'OPEN',
-    equipment_type: 'L',
-    equipment_code: 'CXT-5809',
-    delivery_date: '6/11/2026',
-    customer: 'HEN67',
-    arrival_time: '14:17',
-    departure_time: '',
-    operator: 'CELESTE RODRIGUEZ',
-    truck_id: '294',
-    seal: '',
-    instructions_1: null,
-    instructions_2: null,
-    amount: '12.00',
-    table_code: 'LOC/TJL',
-    table_code: 'MOV'
-  }
-]
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -105,28 +17,10 @@ export default async function handler(req, res) {
       const externalUrl = process.env.DATABASE_URL_NBCW
       
       if (!externalUrl) {
-        console.warn('DATABASE_URL_NBCW not configured, returning mock data')
-        // Retornar datos de prueba para demostración
-        let filteredData = [...MOCK_DATA]
-        
-        if (type === 'pending') {
-          filteredData = filteredData.filter(m => m.status === 'OPEN')
-        } else if (type === 'empty') {
-          filteredData = filteredData.filter(m => 
-            m.equipment_code?.includes('** Botada **') || m.table_code === 'BOTADA'
-          )
-        }
-        
-        if (date) {
-          filteredData = filteredData.filter(m => m.date === date)
-        }
-        
-        return res.status(200).json({
-          success: true,
-          data: filteredData,
-          count: filteredData.length,
-          warning: 'Using mock data - DATABASE_URL_NBCW not configured',
-          mock: true
+        console.error('DATABASE_URL_NBCW not configured')
+        return res.status(500).json({
+          error: 'DATABASE_URL_NBCW not configured',
+          details: 'Please configure the DATABASE_URL_NBCW environment variable in Vercel to connect to the NBCW database'
         })
       }
 
@@ -191,14 +85,9 @@ export default async function handler(req, res) {
         })
       } catch (dbError) {
         console.error('Database connection error:', dbError)
-        // Si falla la conexión, retornar datos de prueba
-        return res.status(200).json({
-          success: true,
-          data: MOCK_DATA,
-          count: MOCK_DATA.length,
-          warning: 'Database connection failed, using mock data',
-          mock: true,
-          error: dbError.message
+        return res.status(500).json({
+          error: 'Failed to connect to NBCW database',
+          details: dbError.message
         })
       }
 
