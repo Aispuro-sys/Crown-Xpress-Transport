@@ -1,5 +1,5 @@
 import { getSql } from './_lib/db.js'
-import { neon } from '@neondatabase/serverless'
+import { Client } from '@neondatabase/serverless'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -26,8 +26,9 @@ export default async function handler(req, res) {
       }
 
       // Si hay URL configurada, intentar conectar a la base de datos real
+      const client = new Client(externalUrl)
       try {
-        const externalSql = neon(externalUrl)
+        await client.connect()
         
         let query = `
           SELECT 
@@ -75,9 +76,11 @@ export default async function handler(req, res) {
         // Ordenar por fecha y hora
         query += ` ORDER BY fecha DESC, timearrv DESC`
 
-        // Ejecutar query en base de datos externa
-        // neon() requiere formato tagged-template, para queries dinamicas usamos array
-        const movements = await externalSql([query])
+        // Ejecutar query usando Client.query() para queries dinamicas
+        const result = await client.query(query)
+        const movements = result.rows
+
+        await client.end()
 
         return res.status(200).json({
           success: true,
@@ -85,6 +88,7 @@ export default async function handler(req, res) {
           count: movements.length
         })
       } catch (dbError) {
+        await client.end().catch(() => {})
         console.error('Database connection error:', dbError)
         return res.status(500).json({
           error: 'Failed to connect to NBCW database',
