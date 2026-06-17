@@ -27,7 +27,6 @@ export default async function handler(req, res) {
 
       // Si hay URL configurada, intentar conectar a la base de datos real
       try {
-        const { neon } = require('@neondatabase/serverless')
         const externalSql = neon(externalUrl)
         
         let query = `
