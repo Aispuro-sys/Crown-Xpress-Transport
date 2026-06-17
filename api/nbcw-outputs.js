@@ -41,53 +41,175 @@ export default async function handler(req, res) {
       const nbcwSql = getNbcwSql()
       
       // Query NBCW outputs for this user
-      const outputs = await nbcwSql`
-        SELECT 
-          DRVCODE as driverCode,
-          WONO as workOrderNumber,
-          BLNO as billOfLadingNumber,
-          FECHA as date,
-          FROMD as fromCode,
-          FROMCITY as fromCity,
-          FROMEDO as fromState,
-          TOD as toCode,
-          TOCITY as toCity,
-          TOEDO as toState,
-          TIPMOV as movementType,
-          STATUS as status,
-          EL as equipmentCode,
-          EQPCODE as equipmentTypeCode,
-          DELDATE as deliveryDate,
-          CSTMER as customer,
-          TIMEARRV as arrivalTime,
-          TIMEDEPAR as departureTime,
-          OPER as operator,
-          USTIMEIN as usTimeIn,
-          USTIMEOUT as usTimeOut,
-          MXMXCSTIN as mxCustomerTimeIn,
-          MXUSCSTIN as mxUsCustomerTimeIn,
-          MXTIMEOUT as mxTimeOut,
-          TRUCKID as truckId,
-          BLTIME as billTime,
-          TARRFROM as tariffFrom,
-          USRUPDD as userUpdateDate,
-          USRUPDT as userUpdateTime,
-          USRADD as userAdd,
-          USRADDD as userAddDate,
-          USRADDT as userAddTime,
-          INSTRUC1 as instructions1,
-          INSTRUC2 as instructions2,
-          RL as rlCode,
-          AMOUNT as amount,
-          TABLECODE as tableCode,
-          TRXCODE as transactionCode,
-          SEAL as seal
-        FROM NBCW_OUTPUTS 
-        WHERE DRVCODE = ${userKey} OR OPER = ${userKey}
-        AND STATUS IN ('PENDING', 'PENDIENTE')
-        ORDER BY FECHA DESC, TIMEARRV DESC
-        LIMIT 50
-      `
+      // Try different possible table names
+      let outputs = []
+      let tableName = null
+      
+      try {
+        // Try NBCW_OUTPUTS (uppercase)
+        tableName = 'tpr'
+        outputs = await nbcwSql`
+          SELECT 
+            DRVCODE as driverCode,
+            WONO as workOrderNumber,
+            BLNO as billOfLadingNumber,
+            FECHA as date,
+            FROMD as fromCode,
+            FROMCITY as fromCity,
+            FROMEDO as fromState,
+            TOD as toCode,
+            TOCITY as toCity,
+            TOEDO as toState,
+            TIPMOV as movementType,
+            STATUS as status,
+            EL as equipmentCode,
+            EQPCODE as equipmentTypeCode,
+            DELDATE as deliveryDate,
+            CSTMER as customer,
+            TIMEARRV as arrivalTime,
+            TIMEDEPAR as departureTime,
+            OPER as operator,
+            USTIMEIN as usTimeIn,
+            USTIMEOUT as usTimeOut,
+            MXMXCSTIN as mxCustomerTimeIn,
+            MXUSCSTIN as mxUsCustomerTimeIn,
+            MXTIMEOUT as mxTimeOut,
+            TRUCKID as truckId,
+            BLTIME as billTime,
+            TARRFROM as tariffFrom,
+            USRUPDD as userUpdateDate,
+            USRUPDT as userUpdateTime,
+            USRADD as userAdd,
+            USRADDD as userAddDate,
+            USRADDT as userAddTime,
+            INSTRUC1 as instructions1,
+            INSTRUC2 as instructions2,
+            RL as rlCode,
+            AMOUNT as amount,
+            TABLECODE as tableCode,
+            TRXCODE as transactionCode,
+            SEAL as seal
+          FROM tpr 
+          WHERE DRVCODE = ${userKey} OR OPER = ${userKey}
+          AND (STATUS = 'PENDING' OR STATUS = 'PENDIENTE')
+          ORDER BY FECHA DESC, TIMEARRV DESC
+          LIMIT 50
+        `
+      } catch (e) {
+        console.log('Table NBCW_OUTPUTS not found, trying NBCW_outputs...')
+        try {
+          // Try NBCW_outputs (mixed case)
+          tableName = 'NBCW_outputs'
+          outputs = await nbcwSql`
+            SELECT 
+              DRVCODE as driverCode,
+              WONO as workOrderNumber,
+              BLNO as billOfLadingNumber,
+              FECHA as date,
+              FROMD as fromCode,
+              FROMCITY as fromCity,
+              FROMEDO as fromState,
+              TOD as toCode,
+              TOCITY as toCity,
+              TOEDO as toState,
+              TIPMOV as movementType,
+              STATUS as status,
+              EL as equipmentCode,
+              EQPCODE as equipmentTypeCode,
+              DELDATE as deliveryDate,
+              CSTMER as customer,
+              TIMEARRV as arrivalTime,
+              TIMEDEPAR as departureTime,
+              OPER as operator,
+              USTIMEIN as usTimeIn,
+              USTIMEOUT as usTimeOut,
+              MXMXCSTIN as mxCustomerTimeIn,
+              MXUSCSTIN as mxUsCustomerTimeIn,
+              MXTIMEOUT as mxTimeOut,
+              TRUCKID as truckId,
+              BLTIME as billTime,
+              TARRFROM as tariffFrom,
+              USRUPDD as userUpdateDate,
+              USRUPDT as userUpdateTime,
+              USRADD as userAdd,
+              USRADDD as userAddDate,
+              USRADDT as userAddTime,
+              INSTRUC1 as instructions1,
+              INSTRUC2 as instructions2,
+              RL as rlCode,
+              AMOUNT as amount,
+              TABLECODE as tableCode,
+              TRXCODE as transactionCode,
+              SEAL as seal
+            FROM NBCW_outputs 
+            WHERE DRVCODE = ${userKey} OR OPER = ${userKey}
+            AND STATUS IN ('PENDING', 'PENDIENTE')
+            ORDER BY FECHA DESC, TIMEARRV DESC
+            LIMIT 50
+          `
+        } catch (e2) {
+          console.log('Table NBCW_outputs not found, trying nbcw_outputs...')
+          try {
+            // Try nbcw_outputs (lowercase)
+            tableName = 'nbcw_outputs'
+            outputs = await nbcwSql`
+              SELECT 
+                DRVCODE as driverCode,
+                WONO as workOrderNumber,
+                BLNO as billOfLadingNumber,
+                FECHA as date,
+                FROMD as fromCode,
+                FROMCITY as fromCity,
+                FROMEDO as fromState,
+                TOD as toCode,
+                TOCITY as toCity,
+                TOEDO as toState,
+                TIPMOV as movementType,
+                STATUS as status,
+                EL as equipmentCode,
+                EQPCODE as equipmentTypeCode,
+                DELDATE as deliveryDate,
+                CSTMER as customer,
+                TIMEARRV as arrivalTime,
+                TIMEDEPAR as departureTime,
+                OPER as operator,
+                USTIMEIN as usTimeIn,
+                USTIMEOUT as usTimeOut,
+                MXMXCSTIN as mxCustomerTimeIn,
+                MXUSCSTIN as mxUsCustomerTimeIn,
+                MXTIMEOUT as mxTimeOut,
+                TRUCKID as truckId,
+                BLTIME as billTime,
+                TARRFROM as tariffFrom,
+                USRUPDD as userUpdateDate,
+                USRUPDT as userUpdateTime,
+                USRADD as userAdd,
+                USRADDD as userAddDate,
+                USRADDT as userAddTime,
+                INSTRUC1 as instructions1,
+                INSTRUC2 as instructions2,
+                RL as rlCode,
+                AMOUNT as amount,
+                TABLECODE as tableCode,
+                TRXCODE as transactionCode,
+                SEAL as seal
+              FROM nbcw_outputs 
+              WHERE DRVCODE = ${userKey} OR OPER = ${userKey}
+              AND STATUS IN ('PENDING', 'PENDIENTE')
+              ORDER BY FECHA DESC, TIMEARRV DESC
+              LIMIT 50
+            `
+          } catch (e3) {
+            console.error('None of the expected NBCW tables found:', e3.message)
+            return res.status(500).json({ 
+              error: 'NBCW outputs table not found. Expected tables: NBCW_OUTPUTS, NBCW_outputs, nbcw_outputs',
+              details: e3.message 
+            })
+          }
+        }
+      }
+      
+      console.log(`Successfully queried table: ${tableName}, found ${outputs.length} outputs`)
 
       return res.status(200).json({
         success: true,
@@ -120,9 +242,27 @@ export default async function handler(req, res) {
 
       // Get the NBCW output details
       const nbcwSql = getNbcwSql()
-      const [output] = await nbcwSql`
-        SELECT * FROM NBCW_OUTPUTS WHERE id = ${outputId}
-      `
+      let output = null
+      
+      // Try the same table names as in GET
+      try {
+        output = await nbcwSql`SELECT * FROM NBCW_OUTPUTS WHERE id = ${outputId}`
+      } catch (e) {
+        try {
+          output = await nbcwSql`SELECT * FROM NBCW_outputs WHERE id = ${outputId}`
+        } catch (e2) {
+          try {
+            output = await nbcwSql`SELECT * FROM nbcw_outputs WHERE id = ${outputId}`
+          } catch (e3) {
+            return res.status(500).json({ 
+              error: 'NBCW outputs table not found. Expected tables: NBCW_OUTPUTS, NBCW_outputs, nbcw_outputs',
+              details: e3.message 
+            })
+          }
+        }
+      }
+      
+      output = output[0] // Get first result
 
       if (!output) {
         return res.status(404).json({ error: 'NBCW output not found' })
