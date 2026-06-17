@@ -23,11 +23,11 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
   const loadMovements = async () => {
     try {
       setLoading(true)
-      const res = await getTprMovements({ type: 'empty' })
+      const res = await getTprMovements({ type: 'pending' })
       if (res.success) {
         setMovements(res.data || [])
       } else {
-        setError(language === 'es' ? 'Error al cargar movimientos' : 'Error loading movements')
+        setError(language === 'es' ? 'Error al cargar salidas pendientes' : 'Error loading pending outputs')
       }
     } catch (err) {
       setError(err.message || (language === 'es' ? 'Error de conexión' : 'Connection error'))
@@ -107,7 +107,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-2 border-crown-navy border-t-transparent rounded-full animate-spin mr-3" />
             <span className="text-crown-navy">
-              {language === 'es' ? 'Cargando movimientos...' : 'Loading movements...'}
+              {language === 'es' ? 'Cargando salidas pendientes...' : 'Loading pending outputs...'}
             </span>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-crown-navy">
-            {language === 'es' ? 'Botadas y Salidas Vacías' : 'Empty Loads and Empty Movements'}
+            {language === 'es' ? 'Salidas Pendientes NBCW' : 'NBCW Pending Outputs'}
           </h2>
           <button
             onClick={onClose}
@@ -137,7 +137,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder={language === 'es' ? 'Buscar por orden, camión, conductor...' : 'Search by order, truck, driver...'}
+              placeholder={language === 'es' ? 'Buscar salidas pendientes por orden, camión, conductor...' : 'Search pending outputs by order, truck, driver...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20"
@@ -169,11 +169,11 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
               <p className="text-slate-500">
                 {language === 'es' 
                   ? (searchTerm || selectedDate 
-                      ? 'No se encontraron movimientos con los filtros aplicados' 
-                      : 'No hay movimientos disponibles')
+                      ? 'No se encontraron salidas pendientes con los filtros aplicados' 
+                      : 'No hay salidas pendientes disponibles')
                   : (searchTerm || selectedDate 
-                      ? 'No movements found with applied filters' 
-                      : 'No movements available')
+                      ? 'No pending outputs found with applied filters' 
+                      : 'No pending outputs available')
                 }
               </p>
             </div>
@@ -284,8 +284,8 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
         <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between text-sm text-slate-500">
           <span>
             {language === 'es' 
-              ? `${filteredMovements.length} movimiento${filteredMovements.length !== 1 ? 's' : ''} encontrado${filteredMovements.length !== 1 ? 's' : ''}`
-              : `${filteredMovements.length} movement${filteredMovements.length !== 1 ? 's' : ''} found`
+              ? `${filteredMovements.length} salida${filteredMovements.length !== 1 ? 's' : ''} pendiente${filteredMovements.length !== 1 ? 's' : ''} encontrada${filteredMovements.length !== 1 ? 's' : ''}`
+              : `${filteredMovements.length} pending output${filteredMovements.length !== 1 ? 's' : ''} found`
             }
           </span>
           <button

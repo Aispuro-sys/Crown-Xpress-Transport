@@ -51,8 +51,10 @@ export default async function handler(req, res) {
 
       const params = []
 
-      // Filtrar por tipo de movimiento (botadas = vacías)
-      if (type === 'empty') {
+      // Filtrar por tipo de movimiento (salidas pendientes)
+      if (type === 'pending') {
+        query += ` AND status = 'OPEN'`
+      } else if (type === 'empty') {
         query += ` AND (eqpcode LIKE '%** Botada **%' OR tablecode = 'BOTADA')`
       }
 

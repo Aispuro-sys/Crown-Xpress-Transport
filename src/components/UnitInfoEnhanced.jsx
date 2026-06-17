@@ -521,21 +521,21 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
             <button
               type="button"
               onClick={() => setShowEmptyLoads(true)}
-              className="p-6 border-2 border-slate-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all flex flex-col items-center gap-3 group"
+              className="p-6 border-2 border-slate-200 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                <PackageX className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                <PackageX className="w-8 h-8 text-red-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'SALIDAS NBCW' : 'NBCW OUTPUTS'}
               </span>
               <span className="text-xs text-slate-500 text-center">
                 {language === 'es' 
-                  ? 'Movimientos de salida vacía desde sistema TPR' 
-                  : 'Empty load movements from TPR system'}
+                  ? 'Salidas pendientes desde sistema TPR' 
+                  : 'Pending outputs from TPR system'}
               </span>
-              <span className="text-xs font-semibold text-purple-600">
-                {language === 'es' ? 'Botadas' : 'Empty Loads'}
+              <span className="text-xs font-semibold text-red-600">
+                {language === 'es' ? 'Salidas Pendientes' : 'Pending Outputs'}
               </span>
             </button>
           </div>
