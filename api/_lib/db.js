@@ -15,9 +15,6 @@ export function getSql() {
   return sqlInstance
 }
 
-// Export default for compatibility with existing imports
-export default getSql()
-
 /** Quick helper for SELECT one */
 export async function queryOne(strings, ...values) {
   const sql = getSql()

@@ -100,7 +100,7 @@ export default function SupervisorView() {
       const url = URL.createObjectURL(blob)
       window.open(url, '_blank')
     } catch (e) {
-      alert(language === 'es' ? 'Error abriendo PDF' : 'Error opening PDF')
+      alert(language === 'es' ? 'Error al ver PDF' : 'Error viewing PDF')
     }
   }
 
@@ -368,27 +368,25 @@ export default function SupervisorView() {
                         }`}>
                           {insp.status === 'audited' ? (language === 'es' ? 'Supervisada' : 'Supervised') : insp.status}
                         </span>
-                        {insp.status === 'completed' && (
-                          <>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleViewPdf(insp.id) }}
-                              className="p-1.5 rounded-lg hover:bg-blue-100 transition-colors"
-                              title={language === 'es' ? 'Ver PDF antes de firmar' : 'View PDF before signing'}
-                            >
-                              <Eye className="w-4 h-4 text-blue-600" />
-                            </button>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleSignSupervisor(insp) }}
-                              className="p-1.5 rounded-lg hover:bg-emerald-100 transition-colors"
-                              title={language === 'es' ? 'Firmar como supervisor' : 'Sign as supervisor'}
-                            >
-                              <PenTool className="w-4 h-4 text-emerald-600" />
-                            </button>
-                          </>
+                        {(insp.status === 'completed' || insp.status === 'audited') && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleSignSupervisor(insp) }}
+                            className="p-1 rounded hover:bg-emerald-200"
+                            title={language === 'es' ? 'Firmar como supervisor' : 'Sign as supervisor'}
+                          >
+                            <PenTool className="w-4 h-4 text-emerald-600" />
+                          </button>
                         )}
                         <button
+                          onClick={(e) => { e.stopPropagation(); handleViewPdf(insp.id) }}
+                          className="p-1 rounded hover:bg-blue-200"
+                          title={language === 'es' ? 'Ver PDF' : 'View PDF'}
+                        >
+                          <Eye className="w-4 h-4 text-blue-600" />
+                        </button>
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleDownload(insp.id, insp.pdf_filename) }}
-                          className="p-1.5 rounded-lg hover:bg-slate-200 transition-colors"
+                          className="p-1 rounded hover:bg-slate-200"
                           title={language === 'es' ? 'Descargar PDF' : 'Download PDF'}
                         >
                           <Download className="w-4 h-4 text-slate-600" />
