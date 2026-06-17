@@ -1590,26 +1590,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                 </div>
               )}
 
-              {/* Empty Loads Button */}
-              <div className="mt-4 pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setShowEmptyLoads(true)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 flex items-center justify-center gap-2 transition-all shadow-lg"
-                >
-                  <PackageX className="w-5 h-5" />
-                  <span className="font-semibold">
-                    {language === 'es' ? 'Botadas Cargado/Vacío' : 'Empty Loads Movement'}
-                  </span>
-                </button>
-                <p className="text-xs text-slate-500 mt-2 text-center">
-                  {language === 'es' 
-                    ? 'Ver movimientos de salida vacía desde sistema TPR' 
-                    : 'View empty load movements from TPR system'
-                  }
-                </p>
-              </div>
-
               {/* Selected Operator Display */}
               {operatorFound && (
                 <div className="mt-4 p-3 bg-emerald-50 border-2 border-emerald-400 rounded-lg">
@@ -1632,6 +1612,26 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                   </div>
                 </div>
               )}
+
+              {/* Empty Loads Button - Always Visible */}
+              <div className="mt-6 pt-6 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowEmptyLoads(true)}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 flex items-center justify-center gap-2 transition-all shadow-lg"
+                >
+                  <PackageX className="w-5 h-5" />
+                  <span className="font-semibold">
+                    {language === 'es' ? 'Botadas Cargado/Vacío - Salidas NBCW' : 'Empty Loads - NBCW Outputs'}
+                  </span>
+                </button>
+                <p className="text-xs text-slate-500 mt-2 text-center">
+                  {language === 'es' 
+                    ? 'Ver movimientos de salida vacía desde sistema TPR' 
+                    : 'View empty load movements from TPR system'
+                  }
+                </p>
+              </div>
             </div>
           </div>
       </div>
