@@ -106,13 +106,16 @@ export function InspectionProvider({ children }) {
   const goodCount = applicablePointIds.filter(id => points[id]?.status === 'good').length
   const progressPercent = applicablePoints.length > 0 ? Math.round((completedCount / applicablePoints.length) * 100) : 0
 
+  // Determine if seal is required based on inspection type
+  const requiresSeal = unitInfo?.inspectionType === 'LOADED'
+
   // Validation
   const validation = {
     allPointsEvaluated: completedCount === applicablePoints.length,
     failuresHaveIssue: applicablePointIds.every(id => points[id]?.status !== 'bad' || points[id]?.issueId),
     failuresHavePhoto: applicablePointIds.every(id => points[id]?.status !== 'bad' || points[id]?.photo),
     hasSealPhoto: !!sealPhoto,
-    sealPhotoValid: !!sealPhoto,
+    sealPhotoValid: requiresSeal ? !!sealPhoto : true,
     guardSigned: !!(guardSignature.signature && guardSignature.name.trim()),
     operatorSigned: !!(operatorSignature.signature && operatorSignature.name.trim()),
   }
