@@ -10,14 +10,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/api/inspections",
-      "destination": "/api/inspections/index.js"
-    },
-    {
-      "source": "/api/inspections/:id",
-      "destination": "/api/inspections/[id].js"
-    },
-    {
       "source": "/api/inspections/:id/pdf",
       "destination": "/api/inspections/[id].js"
     },
@@ -26,12 +18,24 @@
       "destination": "/api/inspections/[id].js"
     },
     {
+      "source": "/api/inspections/:id",
+      "destination": "/api/inspections/[id].js"
+    },
+    {
+      "source": "/api/inspections",
+      "destination": "/api/inspections/index.js"
+    },
+    {
       "source": "/api/employees",
       "destination": "/api/employees.js"
     },
     {
       "source": "/api/auth",
       "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/test",
+      "destination": "/api/test.js"
     },
     {
       "source": "/(.*)",
