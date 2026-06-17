@@ -71,7 +71,7 @@ export default async function handler(req, res) {
           inspection_id: parseInt(id), 
           action: "created", 
           actor_name: "Test User", 
-          details: { counts: { bad: 0, good: 10, pending: 0 } }, 
+          details: null, 
           created_at: new Date().toISOString() 
         }
       ]
