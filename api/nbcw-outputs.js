@@ -21,12 +21,12 @@ export default async function handler(req, res) {
           const token = authHeader.replace('Bearer ', '')
           const userSql = getSql()
           const [user] = await userSql`
-            SELECT id, username, full_name, employee_number, location_id
+            SELECT id, username, full_name, location_id
             FROM employees 
             WHERE id = ${token} OR username = ${token}
           `
           if (user) {
-            userKey = user.employee_number || user.username
+            userKey = user.username
           }
         } catch (e) {
           console.error('Error getting user info:', e)
