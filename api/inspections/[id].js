@@ -1,4 +1,5 @@
 import sql from '../db.js'
+import { generatePDF } from '../_lib/pdf-generator.js'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -80,6 +81,19 @@ export default async function handler(req, res) {
       
       // Handle other POST requests if needed
       return res.status(405).json({ error: 'Method not allowed' })
+    }
+
+    // Handle PDF generation
+    if (req.url.includes('pdf')) {
+      try {
+        const pdfBuffer = await generatePDF(parseInt(id))
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', `attachment; filename="inspection-${id}.pdf"`)
+        return res.status(200).send(pdfBuffer)
+      } catch (error) {
+        console.error('PDF generation error:', error)
+        return res.status(500).json({ error: 'Failed to generate PDF' })
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' })
