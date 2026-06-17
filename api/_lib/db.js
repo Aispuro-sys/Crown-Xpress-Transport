@@ -4,7 +4,6 @@ import { neon, neonConfig } from '@neondatabase/serverless'
 neonConfig.fetchConnectionCache = true
 
 let sqlInstance = null
-let nbcwSqlInstance = null
 
 export function getSql() {
   if (sqlInstance) return sqlInstance
@@ -15,6 +14,8 @@ export function getSql() {
   sqlInstance = neon(url)
   return sqlInstance
 }
+
+let nbcwSqlInstance = null
 
 export function getNbcwSql() {
   if (nbcwSqlInstance) return nbcwSqlInstance

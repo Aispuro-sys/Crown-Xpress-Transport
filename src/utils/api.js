@@ -70,26 +70,10 @@ export async function healthCheck() {
   return await fetchJson(`${API_BASE}/health`)
 }
 
-/** Get NBCW outputs for logged user */
-export async function getNbcwOutputs() {
-  const token = localStorage.getItem('user_token') || localStorage.getItem('user_id')
-  const res = await fetchJson(`${API_BASE}/nbcw-outputs`, {
-    headers: { 
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  })
-  return res // { success, outputs }
-}
-
-/** Create inspection from NBCW output */
-export async function createInspectionFromNbcw(outputId, inspectionData) {
-  const res = await fetchJson(`${API_BASE}/nbcw-outputs`, {
-    method: 'POST',
-    body: JSON.stringify({ outputId, inspectionData }),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  return res // { success, inspection }
+/** Get NBCW outputs for user's yard */
+export async function getNbcwOutputs(userLocation) {
+  const res = await fetchJson(`${API_BASE}/nbcw-outputs?location=${encodeURIComponent(userLocation)}`)
+  return res // { success, yardCode, data, count }
 }
 
 /** Search operator by employee number */
