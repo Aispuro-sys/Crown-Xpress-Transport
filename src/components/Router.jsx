@@ -154,6 +154,21 @@ export default function Router() {
                 </div>
               </div>
             )}
+
+            {/* NBCW Outputs Button - Always visible */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleNbcwOutputs}
+                disabled={loadingNbcw}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition-colors shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Truck className="w-5 h-5" />
+                {loadingNbcw 
+                  ? (language === 'es' ? 'Cargando...' : 'Loading...') 
+                  : (language === 'es' ? 'SALIDAS NBCW' : 'NBCW OUTPUTS')
+                }
+              </button>
+            </div>
             {/* Only show inspection components after clicking the button (or directly for BOBTAIL) */}
             {inspectionTypeSelected && unitInfoFlowComplete && (showInspectionPoints || unitInfo?.inspectionType === 'BOBTAIL') && (
               <>
