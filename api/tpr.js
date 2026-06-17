@@ -62,10 +62,11 @@ export default async function handler(req, res) {
         `
 
         // Filtrar por tipo de movimiento (salidas pendientes)
+        // Usar TRIM() porque status es VARCHAR con espacios de padding
         if (type === 'pending') {
-          query += ` AND status = 'OPEN'`
+          query += ` AND TRIM(status) = 'OPEN'`
         } else if (type === 'empty') {
-          query += ` AND (eqpcode LIKE '%** Botada **%' OR tablecode = 'BOTADA')`
+          query += ` AND (eqpcode LIKE '%** Botada **%' OR TRIM(tablecode) = 'BOTADA')`
         }
 
         // Filtrar por fecha si se proporciona
