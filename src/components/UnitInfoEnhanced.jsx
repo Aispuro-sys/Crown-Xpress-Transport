@@ -476,27 +476,49 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         } else if (isBox) {
           setTrailerType('BOX')
           updateUnitInfo('trailerType', 'BOX')
-          
+
           // Rabones (R###) son típicamente mas cortos
           const isRabon = /^R\d{3}/.test(eqpUpper)
           const boxSize = isRabon ? '28' : '53'
           setTrailerSize(boxSize)
           updateUnitInfo('trailerSize', boxSize)
-          
+
+          // Extraer numero de caja/rabon del eqpcode
+          let boxNumber = ''
+          if (eqpUpper.startsWith('CXT')) {
+            const match = eqpCode.match(/CXT[-\s]?(\d+)/i)
+            boxNumber = match ? match[1] : ''
+          } else if (eqpUpper.startsWith('RBX')) {
+            const match = eqpCode.match(/RBX[-\s]?(\d+)/i)
+            boxNumber = match ? match[1] : ''
+          } else if (eqpUpper.startsWith('ABBA')) {
+            const match = eqpCode.match(/ABBA[-\s]?(\d+)/i)
+            boxNumber = match ? match[1] : ''
+          } else if (eqpUpper.startsWith('JGB')) {
+            const match = eqpCode.match(/JGB[-\s]?(\d+)/i)
+            boxNumber = match ? match[1] : ''
+          } else if (/^R\d{3}/.test(eqpUpper)) {
+            boxNumber = eqpUpper.match(/^R(\d{3})/)?.[1] || ''
+          } else if (/^D\d{5}/.test(eqpUpper)) {
+            boxNumber = eqpUpper.match(/^D(\d{5})/)?.[1] || ''
+          }
+          updateUnitInfo('trailerNumber', boxNumber)
+          setContainerNumberEntered(!!boxNumber)
+
           // Determinar propietario para cajas
-          const isCrownBox = eqpUpper.startsWith('CXT') || eqpUpper.startsWith('RBX') || 
+          const isCrownBox = eqpUpper.startsWith('CXT') || eqpUpper.startsWith('RBX') ||
                              eqpUpper.startsWith('ABBA') || eqpUpper.startsWith('JGB')
-          
+
           if (isCrownBox) {
             setEquipmentOwner('CROWN')
             updateUnitInfo('equipmentOwner', 'CROWN')
-            
+
             let fleet = ''
             if (eqpUpper.startsWith('CXT')) fleet = 'CXT'
             else if (eqpUpper.startsWith('RBX')) fleet = 'RBX'
             else if (eqpUpper.startsWith('ABBA')) fleet = 'ABBA'
             else if (eqpUpper.startsWith('JGB')) fleet = 'JGB'
-            
+
             setCrownFleet(fleet)
             updateUnitInfo('crownFleet', fleet)
           } else {
