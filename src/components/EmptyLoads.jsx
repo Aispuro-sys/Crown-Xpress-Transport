@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Truck, Calendar, MapPin, Package, Clock, User, ArrowRight, X } from 'lucide-react'
+import { Search, Filter, Truck, Calendar, MapPin, Package, Clock, User, ArrowRight, X, Eye, FileText, ClipboardCheck } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { getTprMovements } from '../utils/api'
+
+// Helper component for detail rows
+function DetailRow({ label, value }) {
+  const displayValue = value?.toString().trim() || '-'
+  return (
+    <div>
+      <span className="text-xs text-slate-500 block">{label}</span>
+      <span className="text-sm font-medium text-slate-800">{displayValue}</span>
+    </div>
+  )
+}
 
 export default function EmptyLoads({ onSelectMovement, onClose }) {
   console.log('EmptyLoads component rendered')
@@ -14,6 +25,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
   const [filteredMovements, setFilteredMovements] = useState([])
+  const [selectedMovement, setSelectedMovement] = useState(null)
 
   useEffect(() => {
     console.log('EmptyLoads useEffect triggered, loading movements...')
@@ -225,11 +237,10 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
               {filteredMovements.map((movement, index) => (
                 <div
                   key={index}
-                  className="border border-slate-200 rounded-lg p-4 hover:border-crown-navy/30 hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => handleSelectMovement(movement)}
+                  className="border border-slate-200 rounded-lg p-4 hover:border-crown-navy/30 hover:shadow-md transition-all"
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 cursor-pointer" onClick={() => setSelectedMovement(movement)}>
                       {/* Header */}
                       <div className="flex items-center gap-4 mb-3">
                         <div className="flex items-center gap-2">
@@ -255,7 +266,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
                           const el = movement.equipment_type?.trim()
                           const eqp = movement.equipment_code?.trim() || ''
                           const eqpUpper = eqp.toUpperCase()
-                          
+
                           // Detectar tipo de equipo basado en eqpcode
                           let tipoEquipo = ''
                           if (eqp.includes('Botada') || eqp.includes('BOTADA')) {
@@ -269,7 +280,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
                           } else {
                             tipoEquipo = 'CAJA'
                           }
-                          
+
                           // Color segun tipo
                           if (tipoEquipo === 'BOTADO') {
                             return <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">BOTADO</span>
@@ -343,8 +354,19 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
                       )}
                     </div>
 
-                    <div className="ml-4">
-                      <button className="px-3 py-1 bg-crown-navy text-white text-sm rounded-lg hover:bg-crown-navy/90 transition-colors">
+                    <div className="ml-4 flex flex-col gap-2">
+                      <button
+                        onClick={() => setSelectedMovement(movement)}
+                        className="flex items-center gap-1 px-3 py-1.5 border border-slate-300 text-slate-700 text-sm rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        {language === 'es' ? 'Ver detalles' : 'View details'}
+                      </button>
+                      <button
+                        onClick={() => handleSelectMovement(movement)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-crown-navy text-white text-sm rounded-lg hover:bg-crown-navy/90 transition-colors"
+                      >
+                        <ClipboardCheck className="w-3.5 h-3.5" />
                         {language === 'es' ? 'Inspeccionar' : 'Inspect'}
                       </button>
                     </div>
@@ -358,7 +380,7 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
         {/* Footer */}
         <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between text-sm text-slate-500">
           <span>
-            {language === 'es' 
+            {language === 'es'
               ? `${filteredMovements.length} salida${filteredMovements.length !== 1 ? 's' : ''} pendiente${filteredMovements.length !== 1 ? 's' : ''} encontrada${filteredMovements.length !== 1 ? 's' : ''}`
               : `${filteredMovements.length} pending output${filteredMovements.length !== 1 ? 's' : ''} found`
             }
@@ -371,6 +393,114 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      {selectedMovement && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[85vh] overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-crown-navy flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                {language === 'es' ? 'Detalles de la Salida' : 'Output Details'}
+              </h3>
+              <button
+                onClick={() => setSelectedMovement(null)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* General info */}
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wide">
+                  {language === 'es' ? 'Información General' : 'General Information'}
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <DetailRow label={language === 'es' ? 'Orden de Trabajo' : 'Work Order'} value={selectedMovement.work_order} />
+                  <DetailRow label={language === 'es' ? 'BL/Guía' : 'BL No.'} value={selectedMovement.bill_of_lading} />
+                  <DetailRow label={language === 'es' ? 'Fecha' : 'Date'} value={selectedMovement.date} />
+                  <DetailRow label={language === 'es' ? 'Tipo Movimiento' : 'Movement Type'} value={selectedMovement.movement_type} />
+                  <DetailRow label={language === 'es' ? 'Estado' : 'Status'} value={selectedMovement.status} />
+                  <DetailRow label={language === 'es' ? 'Operador' : 'Operator'} value={selectedMovement.operator} />
+                </div>
+              </div>
+
+              {/* Equipment */}
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wide">
+                  {language === 'es' ? 'Equipo y Vehículo' : 'Equipment & Vehicle'}
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <DetailRow label={language === 'es' ? 'Camión (Truck ID)' : 'Truck ID'} value={selectedMovement.truck_id} />
+                  <DetailRow label={language === 'es' ? 'Código Conductor' : 'Driver Code'} value={selectedMovement.driver_code} />
+                  <DetailRow label={language === 'es' ? 'Equipo' : 'Equipment'} value={selectedMovement.equipment_code} />
+                  <DetailRow label={language === 'es' ? 'Tipo Equipo (EL)' : 'Equip. Type (EL)'} value={selectedMovement.equipment_type} />
+                  <DetailRow label={language === 'es' ? 'Sello' : 'Seal'} value={selectedMovement.seal} />
+                  <DetailRow label={language === 'es' ? 'Tabla Código' : 'Table Code'} value={selectedMovement.table_code} />
+                </div>
+              </div>
+
+              {/* Route */}
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wide">
+                  {language === 'es' ? 'Ruta' : 'Route'}
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <DetailRow label={language === 'es' ? 'Origen (Código)' : 'From (Code)'} value={selectedMovement.from_code} />
+                  <DetailRow label={language === 'es' ? 'Origen (Ciudad)' : 'From (City)'} value={selectedMovement.from_city} />
+                  <DetailRow label={language === 'es' ? 'Origen (Estado)' : 'From (State)'} value={selectedMovement.from_state} />
+                  <DetailRow label={language === 'es' ? 'Destino (Código)' : 'To (Code)'} value={selectedMovement.to_code} />
+                  <DetailRow label={language === 'es' ? 'Destino (Ciudad)' : 'To (City)'} value={selectedMovement.to_city} />
+                  <DetailRow label={language === 'es' ? 'Destino (Estado)' : 'To (State)'} value={selectedMovement.to_state} />
+                </div>
+              </div>
+
+              {/* Customer & Instructions */}
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wide">
+                  {language === 'es' ? 'Cliente e Instrucciones' : 'Customer & Instructions'}
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <DetailRow label={language === 'es' ? 'Cliente' : 'Customer'} value={selectedMovement.customer} />
+                  <DetailRow label={language === 'es' ? 'Monto' : 'Amount'} value={selectedMovement.amount} />
+                  <DetailRow label={language === 'es' ? 'Hora Arribo' : 'Arrival Time'} value={selectedMovement.arrival_time} />
+                  <DetailRow label={language === 'es' ? 'Hora Salida' : 'Departure Time'} value={selectedMovement.departure_time} />
+                </div>
+                {(selectedMovement.instructions_1 || selectedMovement.instructions_2) && (
+                  <div className="mt-3 p-2 bg-white rounded border border-slate-200">
+                    <span className="text-xs font-semibold text-slate-500 uppercase">{language === 'es' ? 'Instrucciones' : 'Instructions'}</span>
+                    <p className="text-sm text-slate-700 mt-1">
+                      {[selectedMovement.instructions_1, selectedMovement.instructions_2].filter(Boolean).join(' | ').trim()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setSelectedMovement(null)}
+                className="flex-1 py-2.5 px-4 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                {language === 'es' ? 'Cerrar' : 'Close'}
+              </button>
+              <button
+                onClick={() => {
+                  handleSelectMovement(selectedMovement)
+                  setSelectedMovement(null)
+                }}
+                className="flex-1 py-2.5 px-4 bg-crown-navy text-white rounded-lg hover:bg-crown-navy/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <ClipboardCheck className="w-4 h-4" />
+                {language === 'es' ? 'Iniciar Inspección' : 'Start Inspection'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
