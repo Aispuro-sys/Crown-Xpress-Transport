@@ -1,25 +1,25 @@
-// Image Verification Service using AI (Groq - LLaMA Vision)
+// Image Verification Service using AI (Google Gemini)
 // This service validates that captured photos match the expected inspection point
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
 
 /**
- * Verify if an image matches the expected inspection point using Groq
+ * Verify if an image matches the expected inspection point using Google Gemini
  * @param {string} imageBase64 - Base64 encoded image data
  * @param {object} point - Inspection point object with id, es, en, keywords
  * @param {string} language - Current language ('es' or 'en')
  * @returns {Promise<{valid: boolean, confidence: number, message: string, suggestedIssues: number[]}>}
  */
 export async function verifyInspectionImage(imageBase64, point, language = 'es') {
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY
-  
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+
   if (!apiKey) {
-    console.warn('Groq API key not configured, skipping image verification')
+    console.warn('Gemini API key not configured, skipping image verification')
     return {
       valid: true,
       confidence: 0,
-      message: language === 'es' 
-        ? 'Verificación de IA no disponible' 
+      message: language === 'es'
+        ? 'Verificación de IA no disponible'
         : 'AI verification not available',
       suggestedIssues: []
     }
@@ -29,7 +29,7 @@ export async function verifyInspectionImage(imageBase64, point, language = 'es')
   const keywords = point.keywords || []
   const issues = point.issues || []
 
-  const prompt = language === 'es' 
+  const prompt = language === 'es'
     ? `Eres un inspector de seguridad de transporte. Analiza esta imagen para el punto de inspección: "${pointName}".
 Palabras clave: ${keywords.join(', ')}
 Posibles fallas: ${issues.map((i, idx) => `${idx + 1}. ${i.es}`).join(', ')}
@@ -53,52 +53,55 @@ Respond ONLY with valid JSON (no markdown):
         await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
       }
 
-      // Ensure proper base64 format with data URI
-      const imageUrl = imageBase64.startsWith('data:') 
-        ? imageBase64 
-        : `data:image/jpeg;base64,${imageBase64}`
+      // Extract pure base64 data (remove data:image/... prefix if present)
+      let base64Data = imageBase64
+      if (imageBase64.startsWith('data:')) {
+        base64Data = imageBase64.split(',')[1]
+      }
 
-      const response = await fetch(GROQ_API_URL, {
+      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.2-90b-vision-preview',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: prompt },
-                { type: 'image_url', image_url: { url: imageUrl } }
-              ]
-            }
-          ],
-          max_tokens: 300,
-          temperature: 0.1
+          contents: [{
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: 'image/jpeg',
+                  data: base64Data
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            maxOutputTokens: 300,
+            temperature: 0.1
+          }
         })
       })
 
       if (response.status === 429) {
-        console.warn(`Groq rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
+        console.warn(`Gemini rate limited (attempt ${attempt + 1}/${maxRetries + 1})`)
         lastError = new Error('Rate limited')
         continue
       }
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Groq API error: ${response.status} - ${errorText}`)
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
-      const textResponse = data.choices?.[0]?.message?.content || ''
-      
+      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+
       // Clean response (remove markdown if present)
       const cleanJson = textResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       const result = JSON.parse(cleanJson)
 
-      console.log('Groq verification result:', result)
+      console.log('Gemini verification result:', result)
 
       return {
         valid: result.valid ?? true,
@@ -108,18 +111,18 @@ Respond ONLY with valid JSON (no markdown):
         recommendation: result.recommendation || ''
       }
     } catch (error) {
-      console.error(`Groq verification error (attempt ${attempt + 1}):`, error)
+      console.error(`Gemini verification error (attempt ${attempt + 1}):`, error)
       lastError = error
     }
   }
 
   // All retries failed - return graceful fallback
-  console.warn('Groq verification unavailable, skipping')
+  console.warn('Gemini verification unavailable, skipping')
   return {
     valid: true,
     confidence: 0,
-    message: language === 'es' 
-      ? 'Verificación IA no disponible' 
+    message: language === 'es'
+      ? 'Verificación IA no disponible'
       : 'AI verification unavailable',
     suggestedIssues: [],
     skipped: true
