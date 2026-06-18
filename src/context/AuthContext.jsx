@@ -161,12 +161,41 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const refreshUser = useCallback(async () => {
+    if (!user?.id) return null
+    const API_BASE = import.meta.env.VITE_API_URL || '/api'
+    try {
+      const res = await fetch(`${API_BASE}/employees?id=${user.id}`)
+      const data = await res.json()
+      if (data.data) {
+        const emp = data.data
+        const refreshed = {
+          id: emp.id,
+          username: emp.username,
+          full_name: emp.full_name,
+          role: emp.role,
+          location_id: emp.location_id,
+          location_name: emp.location_name,
+          location_code: emp.location_code,
+          active: emp.active,
+          profile_photo: emp.profile_photo
+        }
+        setUser(refreshed)
+        localStorage.setItem('crown_user', JSON.stringify(refreshed))
+        return refreshed
+      }
+    } catch (err) {
+      console.error('refreshUser error:', err)
+    }
+    return null
+  }, [user?.id])
+
   const canEdit = () => user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
   const canViewAll = () => user?.role === 'supervisor' || user?.role === 'admin'
   const canReconfirm = () => user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, canEdit, canViewAll, canReconfirm }}>
+    <AuthContext.Provider value={{ user, login, logout, refreshUser, loading, canEdit, canViewAll, canReconfirm }}>
       {children}
     </AuthContext.Provider>
   )

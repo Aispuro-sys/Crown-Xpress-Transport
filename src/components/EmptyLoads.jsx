@@ -18,7 +18,7 @@ function DetailRow({ label, value }) {
 export default function EmptyLoads({ onSelectMovement, onClose }) {
   console.log('EmptyLoads component rendered')
   const { t, language } = useLanguage()
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
   const [movements, setMovements] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -40,7 +40,12 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
     console.log('loadMovements called')
     try {
       setLoading(true)
-      const yardCode = user?.location_code
+      // Refresh user data to ensure yard code is current
+      let refreshedUser = user
+      if (refreshUser) {
+        refreshedUser = await refreshUser() || user
+      }
+      const yardCode = refreshedUser?.location_code
       console.log('Calling getTprMovements with type: pending, yardCode:', yardCode)
       const res = await getTprMovements({ type: 'pending', yardCode })
       console.log('getTprMovements response:', res)
@@ -55,8 +60,8 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
       console.log('Exception in loadMovements:', err)
       const errorMsg = err.message || ''
       if (errorMsg.includes('DATABASE_URL_NBCW')) {
-        setError(language === 'es' 
-          ? 'Base de datos NBCW no configurada. Configure la variable DATABASE_URL_NBCW en Vercel.' 
+        setError(language === 'es'
+          ? 'Base de datos NBCW no configurada. Configure la variable DATABASE_URL_NBCW en Vercel.'
           : 'NBCW database not configured. Please set DATABASE_URL_NBCW environment variable in Vercel.'
         )
       } else {

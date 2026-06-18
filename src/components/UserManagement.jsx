@@ -101,9 +101,9 @@ export default function UserManagement() {
   })
 
   const getEmployeeYard = (employeeId) => {
-    const assignment = assignments.find(a => a.employee_id === employeeId)
-    if (assignment) {
-      const yard = yards.find(y => y.id === assignment.yard_id)
+    const employee = employees.find(e => e.id === employeeId)
+    if (employee?.location_id) {
+      const yard = yards.find(y => y.id === employee.location_id)
       return yard
     }
     return null

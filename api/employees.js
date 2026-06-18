@@ -92,6 +92,19 @@ export default async function handler(req, res) {
         })
       }
       
+      // If id is provided, get single employee
+      if (req.query.id) {
+        const [employee] = await sql`
+          SELECT id, username, password_hash, full_name, role, location_id, location_name, active, created_at, profile_photo
+          FROM employees
+          WHERE id = ${parseInt(req.query.id)}
+        `
+        if (!employee) {
+          return res.status(404).json({ error: 'Employee not found' })
+        }
+        return res.status(200).json({ data: employee })
+      }
+      
       // Otherwise, list all employees
       const employees = await sql`
         SELECT id, username, password_hash, full_name, role, location_id, location_name, active, created_at, profile_photo
