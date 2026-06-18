@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { type, date } = req.query
+      const { type, date, yardCode } = req.query
 
       // Verificar si DATABASE_URL_NBCW está configurada
       const externalUrl = process.env.DATABASE_URL_NBCW
@@ -67,6 +67,11 @@ export default async function handler(req, res) {
           query += ` AND TRIM(status) = 'OPEN'`
         } else if (type === 'empty') {
           query += ` AND (eqpcode LIKE '%** Botada **%' OR TRIM(tablecode) = 'BOTADA')`
+        }
+
+        // Filtrar por yarda (fromd) si se proporciona
+        if (yardCode) {
+          query += ` AND TRIM(fromd) = '${yardCode.toUpperCase()}'`
         }
 
         // Filtrar por fecha si se proporciona

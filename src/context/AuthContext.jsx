@@ -148,6 +148,7 @@ export function AuthProvider({ children }) {
         role: data.user.role,
         location_id: data.user.location_id,
         location_name: data.user.location_name,
+        location_code: data.user.location_code,
         active: data.user.active,
         profile_photo: data.user.profile_photo
       }

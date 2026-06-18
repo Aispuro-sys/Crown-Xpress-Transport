@@ -71,9 +71,10 @@ export async function healthCheck() {
 }
 
 /** Get TPR movements (empty loads) */
-export async function getTprMovements({ type = 'empty', date = null } = {}) {
+export async function getTprMovements({ type = 'empty', date = null, yardCode = null } = {}) {
   const params = new URLSearchParams({ type })
   if (date) params.append('date', date)
+  if (yardCode) params.append('yardCode', yardCode)
   const res = await fetchJson(`${API_BASE}/tpr?${params}`)
   return res // { success, data, count }
 }

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Truck, Calendar, MapPin, Package, Clock, User, ArrowRight, X } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 import { getTprMovements } from '../utils/api'
 
 export default function EmptyLoads({ onSelectMovement, onClose }) {
   console.log('EmptyLoads component rendered')
   const { t, language } = useLanguage()
+  const { user } = useAuth()
   const [movements, setMovements] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -26,8 +28,9 @@ export default function EmptyLoads({ onSelectMovement, onClose }) {
     console.log('loadMovements called')
     try {
       setLoading(true)
-      console.log('Calling getTprMovements with type: pending')
-      const res = await getTprMovements({ type: 'pending' })
+      const yardCode = user?.location_code
+      console.log('Calling getTprMovements with type: pending, yardCode:', yardCode)
+      const res = await getTprMovements({ type: 'pending', yardCode })
       console.log('getTprMovements response:', res)
       if (res.success) {
         console.log('Success, setting movements:', res.data)
