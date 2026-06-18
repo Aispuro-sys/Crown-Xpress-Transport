@@ -36,8 +36,10 @@ export async function createInspection(payload) {
 }
 
 /** List inspections (paginated) */
-export async function listInspections({ limit = 50, offset = 0 } = {}) {
-  const qs = new URLSearchParams({ limit, offset })
+export async function listInspections({ limit = 50, offset = 0, yardCode = '' } = {}) {
+  const params = { limit, offset }
+  if (yardCode) params.yardCode = yardCode
+  const qs = new URLSearchParams(params)
   const res = await fetchJson(`${API_BASE}/inspections?${qs}`)
   return res // { data, limit, offset }
 }

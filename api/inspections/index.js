@@ -17,22 +17,44 @@ export default async function handler(req, res) {
       // List inspections
       const limit = parseInt(req.query.limit) || 50
       const offset = parseInt(req.query.offset) || 0
+      const yardCode = req.query.yardCode
 
-      const inspections = await sql`
-        SELECT 
-          id, uuid, trailer_number, container_number, seal_number, lock_number,
-          driver_name, odometer, location, inspection_date,
-          high_security_seal, seal_affixed,
-          guard_name, guard_signed_at,
-          auditor_name, auditor_signed_at,
-          good_count, bad_count, pending_count,
-          status, language, created_at, original_inspection_id
-        FROM inspections
-        ORDER BY created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
+      let inspections
+      let countResult
 
-      const countResult = await sql`SELECT COUNT(*) as total FROM inspections`
+      if (yardCode) {
+        inspections = await sql`
+          SELECT
+            id, uuid, trailer_number, container_number, seal_number, lock_number,
+            driver_name, odometer, location, inspection_date,
+            high_security_seal, seal_affixed,
+            guard_name, guard_signed_at,
+            auditor_name, auditor_signed_at,
+            good_count, bad_count, pending_count,
+            status, language, created_at, original_inspection_id
+          FROM inspections
+          WHERE location = ${yardCode}
+          ORDER BY created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+        countResult = await sql`SELECT COUNT(*) as total FROM inspections WHERE location = ${yardCode}`
+      } else {
+        inspections = await sql`
+          SELECT
+            id, uuid, trailer_number, container_number, seal_number, lock_number,
+            driver_name, odometer, location, inspection_date,
+            high_security_seal, seal_affixed,
+            guard_name, guard_signed_at,
+            auditor_name, auditor_signed_at,
+            good_count, bad_count, pending_count,
+            status, language, created_at, original_inspection_id
+          FROM inspections
+          ORDER BY created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+        countResult = await sql`SELECT COUNT(*) as total FROM inspections`
+      }
+
       const total = parseInt(countResult[0]?.total || 0)
 
       return res.status(200).json({

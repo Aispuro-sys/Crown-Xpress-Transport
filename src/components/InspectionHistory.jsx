@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { FileText, Search, Download, Eye, ChevronDown, ChevronRight } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 import { listInspections, downloadPdf } from '../utils/api'
 import AuditTrail from './AuditTrail'
 
 export default function InspectionHistory() {
   const { t, language } = useLanguage()
+  const { user } = useAuth()
   const [inspections, setInspections] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -19,7 +21,7 @@ export default function InspectionHistory() {
       setLoading(true)
       setError(null)
       try {
-        const res = await listInspections({ limit: 200 })
+        const res = await listInspections({ limit: 200, yardCode: user?.location_name || '' })
         console.log('Inspections loaded:', res)
         setInspections(Array.isArray(res.data) ? res.data : [])
       } catch (err) {
@@ -29,7 +31,7 @@ export default function InspectionHistory() {
         setLoading(false)
       }
     }
-  }, [])
+  }, [user?.location_name])
 
   const filtered = inspections.filter(i =>
     i.trailer_number?.toLowerCase().includes(search.toLowerCase()) ||

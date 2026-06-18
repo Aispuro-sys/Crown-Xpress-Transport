@@ -124,6 +124,12 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     odometer: 'Odómetro',
     location: 'Ubicación',
     date: 'Fecha y Hora',
+    workOrder: 'Orden de Trabajo',
+    origin: 'Origen',
+    destination: 'Destino',
+    customer: 'Cliente',
+    equipment: 'Equipo',
+    tractorNumber: 'No. Tractor',
     highSecuritySeal: 'Sello Alta Seguridad',
     sealAffixed: 'Sello Verificado',
     yes: 'Sí',
@@ -162,6 +168,12 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     odometer: 'Odometer',
     location: 'Location',
     date: 'Date & Time',
+    workOrder: 'Work Order',
+    origin: 'Origin',
+    destination: 'Destination',
+    customer: 'Customer',
+    equipment: 'Equipment',
+    tractorNumber: 'Tractor No.',
     highSecuritySeal: 'High Security Seal',
     sealAffixed: 'Seal Verified',
     yes: 'Yes',
@@ -235,11 +247,30 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   
   // Row 2: Driver and Date
   infoRows.push([T.driverName, unitInfo.driverName || '—', T.date, formatDate(unitInfo.inspectionDate)])
-  
+
   // Row 3: Location
   infoRows.push([T.location, unitInfo.location || '—', '', ''])
-  
-  // Row 4: Seal info only for LOADED
+
+  // Row 4: Work Order
+  if (unitInfo.workOrder) {
+    infoRows.push([T.workOrder, unitInfo.workOrder, '', ''])
+  }
+
+  // Row 5: Origin and Destination
+  const originText = unitInfo.origin?.city ? `${unitInfo.origin.city}${unitInfo.origin.state ? `, ${unitInfo.origin.state}` : ''}` : '—'
+  const destinationText = unitInfo.destination?.city ? `${unitInfo.destination.city}${unitInfo.destination.state ? `, ${unitInfo.destination.state}` : ''}` : '—'
+  infoRows.push([T.origin, originText, T.destination, destinationText])
+
+  // Row 6: Customer
+  if (unitInfo.customer) {
+    infoRows.push([T.customer, unitInfo.customer, '', ''])
+  }
+
+  // Row 7: Equipment and Tractor
+  const equipmentText = unitInfo.equipmentNomenclature || unitInfo.trailerNumber || '—'
+  infoRows.push([T.equipment, equipmentText, T.tractorNumber, unitInfo.tractorNumber || '—'])
+
+  // Row 8: Seal info only for LOADED
   if (inspectionType === 'LOADED') {
     infoRows.push([T.highSecuritySeal, unitInfo.highSecuritySeal === 'yes' ? T.yes : 'N/A', T.sealAffixed, unitInfo.sealAffixed === 'yes' ? T.yes : 'N/A'])
   }

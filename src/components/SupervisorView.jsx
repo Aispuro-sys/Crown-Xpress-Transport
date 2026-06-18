@@ -30,7 +30,7 @@ export default function SupervisorView() {
       setLoading(true)
       setError(null)
       try {
-        const res = await listInspections({ limit: 500 })
+        const res = await listInspections({ limit: 500, yardCode: user?.location_name || '' })
         setInspections(res.data || [])
       } catch (err) {
         setError(err.message)
@@ -38,7 +38,7 @@ export default function SupervisorView() {
         setLoading(false)
       }
     }
-  }, [])
+  }, [user?.location_name])
 
   // Unique values for filter dropdowns
   const yards = useMemo(() => [...new Set(inspections.map(i => i.location).filter(Boolean))].sort(), [inspections])

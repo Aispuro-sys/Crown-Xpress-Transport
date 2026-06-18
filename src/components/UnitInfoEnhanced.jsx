@@ -260,7 +260,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('inspectionDate', today)
     // Guard name is auto-assigned from logged in user
     updateUnitInfo('guardName', user?.full_name || '')
-    updateUnitInfo('location', user?.location_id ? YARDS.find(y => y.id === user.location_id)?.name || '' : '')
+    updateUnitInfo('location', user?.location_name || '')
   }, [user, updateUnitInfo])
 
   // Load all operators when list mode is selected
