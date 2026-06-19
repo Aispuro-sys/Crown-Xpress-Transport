@@ -3,6 +3,12 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { createInspection, listInspections, getInspection, downloadPdf, signAuditor, healthCheck, reconfirmInspection, getInspectionChain } from './api/_lib/handlers.js'
+import authHandler from './api/auth.js'
+import employeesHandler from './api/employees.js'
+import yardManagementHandler from './api/yard-management.js'
+import tprHandler from './api/tpr.js'
+import tprV2Handler from './api/tpr-v2.js'
+import verifyImageHandler from './api/verify-image.js'
 
 dotenv.config()
 const app = express()
@@ -23,6 +29,16 @@ function adaptHandler(handler) {
 
 // Routes (same as Vercel)
 app.get('/api/health', adaptHandler(healthCheck))
+app.post('/api/auth', adaptHandler(authHandler))
+app.get('/api/employees', adaptHandler(employeesHandler))
+app.put('/api/employees', adaptHandler(employeesHandler))
+app.delete('/api/employees', adaptHandler(employeesHandler))
+app.get('/api/yard-management', adaptHandler(yardManagementHandler))
+app.post('/api/yard-management', adaptHandler(yardManagementHandler))
+app.delete('/api/yard-management', adaptHandler(yardManagementHandler))
+app.get('/api/tpr', adaptHandler(tprHandler))
+app.get('/api/tpr-v2', adaptHandler(tprV2Handler))
+app.post('/api/verify-image', adaptHandler(verifyImageHandler))
 app.post('/api/inspections', adaptHandler(createInspection))
 app.get('/api/inspections', adaptHandler(listInspections))
 app.get('/api/inspections/:id', adaptHandler((req, res, id) => getInspection(req, res, id)))

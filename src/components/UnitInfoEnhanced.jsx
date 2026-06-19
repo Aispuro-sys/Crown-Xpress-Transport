@@ -190,6 +190,12 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setTrailerSize(null) // Reset size when changing type
     updateUnitInfo('trailerType', type)
     updateUnitInfo('trailerSize', null)
+
+    // Set inspectionType to FLATBED when flatbed is selected
+    if (type === 'FLATBED') {
+      setInspectionType('FLATBED')
+      updateUnitInfo('inspectionType', 'FLATBED')
+    }
   }
 
   // Handle trailer size selection
@@ -274,11 +280,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   useEffect(() => {
     // FLATBED doesn't require seal/lock
     const sealLockRequired = inspectionType === 'LOADED' && trailerType !== 'FLATBED'
-    const isFlowComplete = (inspectionType === 'BOBTAIL') || 
-      (containerNumberEntered && 
-       (inspectionType === 'EMPTY' || sealLockEntered || !sealLockRequired) && 
+    const isFlowComplete = (inspectionType === 'BOBTAIL') || (inspectionType === 'FLATBED') ||
+      (containerNumberEntered &&
+       (inspectionType === 'EMPTY' || sealLockEntered || !sealLockRequired) &&
        tractorNumberEntered)
-    
+
     if (onFlowComplete) {
       onFlowComplete(isFlowComplete)
     }

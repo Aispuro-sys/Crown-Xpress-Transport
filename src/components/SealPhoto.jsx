@@ -20,9 +20,9 @@ export default function SealPhoto() {
   const totalPoints = applicablePoints.length
   const allPointsCompleted = completedCount === totalPoints
 
-  // Hide seal photo for EMPTY and BOBTAIL inspections
+  // Hide seal photo for EMPTY, BOBTAIL, and FLATBED inspections
   const inspectionType = unitInfo?.inspectionType
-  if (inspectionType === 'EMPTY' || inspectionType === 'BOBTAIL') {
+  if (inspectionType === 'EMPTY' || inspectionType === 'BOBTAIL' || inspectionType === 'FLATBED') {
     return null
   }
   

@@ -27,14 +27,15 @@ export default function Router() {
   const [showInspectionPoints, setShowInspectionPoints] = useState(false)
   
   // Check if inspection type and trailer info has been selected
-  // For BOBTAIL: only need inspectionType
+  // For BOBTAIL/FLATBED: only need inspectionType
   // For LOADED/EMPTY: need inspectionType + trailerType + trailerSize + equipmentOwner
   // For CROWN owner: also need crownFleet
   // For CUSTOMER with CONTAINER: also need customerPrefix
   const inspectionTypeSelected = !!unitInfo?.inspectionType && (
-    unitInfo.inspectionType === 'BOBTAIL' || 
-    (!!unitInfo?.trailerType && !!unitInfo?.trailerSize && !!unitInfo?.equipmentOwner && 
-      (unitInfo.equipmentOwner === 'CROWN' ? !!unitInfo?.crownFleet : 
+    unitInfo.inspectionType === 'BOBTAIL' ||
+    unitInfo.inspectionType === 'FLATBED' ||
+    (!!unitInfo?.trailerType && !!unitInfo?.trailerSize && !!unitInfo?.equipmentOwner &&
+      (unitInfo.equipmentOwner === 'CROWN' ? !!unitInfo?.crownFleet :
         (unitInfo.trailerType === 'CONTAINER' ? !!unitInfo?.customerPrefix : true)))
   )
 
@@ -99,7 +100,7 @@ export default function Router() {
             <UnitInfo onFlowComplete={setUnitInfoFlowComplete} />
             {/* For BOBTAIL: go directly to 20 points, no button needed */}
             {/* For LOADED/EMPTY: Show "Start Inspection" button after unit info is complete */}
-            {inspectionTypeSelected && unitInfoFlowComplete && !showInspectionPoints && unitInfo?.inspectionType !== 'BOBTAIL' && (
+            {inspectionTypeSelected && unitInfoFlowComplete && !showInspectionPoints && unitInfo?.inspectionType !== 'BOBTAIL' && unitInfo?.inspectionType !== 'FLATBED' && (
               <div className="flex justify-center">
                 <button
                   onClick={() => {
@@ -112,8 +113,8 @@ export default function Router() {
                 </button>
               </div>
             )}
-            {/* Only show inspection components after clicking the button (or directly for BOBTAIL) */}
-            {inspectionTypeSelected && unitInfoFlowComplete && (showInspectionPoints || unitInfo?.inspectionType === 'BOBTAIL') && (
+            {/* Only show inspection components after clicking the button (or directly for BOBTAIL/FLATBED) */}
+            {inspectionTypeSelected && unitInfoFlowComplete && (showInspectionPoints || unitInfo?.inspectionType === 'BOBTAIL' || unitInfo?.inspectionType === 'FLATBED') && (
               <>
                 <TruckDiagram />
                 <InspectionList />

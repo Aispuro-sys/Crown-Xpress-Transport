@@ -35,6 +35,18 @@ export const INSPECTION_TYPES = {
     requiresSealOrLock: false,
     hasContainer: false,
     applicablePoints: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Solo puntos del tractor
+  },
+  FLATBED: {
+    id: 'flatbed',
+    es: 'PLATAFORMA',
+    en: 'FLATBED',
+    description: {
+      es: 'Plataforma abierta - Sin paredes ni techo',
+      en: 'Open flatbed - No walls or roof'
+    },
+    requiresSealOrLock: false,
+    hasContainer: false,
+    applicablePoints: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 17, 18] // Tractor (1-10) + Chasis (11) + Parte Trasera (12) + Plataforma (14) + Piso Plat. (17) + Patín (18). Excluye: 13, 15, 16 (paredes laterales, frente), 19-20 (refrigeración, limpieza)
   }
 }
 

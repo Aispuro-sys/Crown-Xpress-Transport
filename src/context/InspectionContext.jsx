@@ -107,7 +107,7 @@ export function InspectionProvider({ children }) {
   const progressPercent = applicablePoints.length > 0 ? Math.round((completedCount / applicablePoints.length) * 100) : 0
 
   // Determine if seal is required based on inspection type
-  const requiresSeal = unitInfo?.inspectionType === 'LOADED'
+  const requiresSeal = unitInfo?.inspectionType === 'LOADED' && unitInfo?.trailerType !== 'FLATBED'
 
   // Validation
   const validation = {
@@ -116,6 +116,7 @@ export function InspectionProvider({ children }) {
     failuresHavePhoto: applicablePointIds.every(id => points[id]?.status !== 'bad' || points[id]?.photo),
     hasSealPhoto: !!sealPhoto,
     sealPhotoValid: requiresSeal ? !!sealPhoto : true,
+    sealPhotoRequired: requiresSeal,
     guardSigned: !!(guardSignature.signature && guardSignature.name.trim()),
     operatorSigned: !!(operatorSignature.signature && operatorSignature.name.trim()),
   }
