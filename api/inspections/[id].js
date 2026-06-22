@@ -51,16 +51,17 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST' && req.url.includes('sign-supervisor')) {
       const { name, signedAt } = req.body
-      
+
       if (!name || !signedAt) {
         return res.status(400).json({ error: 'Name and signedAt are required' })
       }
 
-      // Update inspection with supervisor signature
+      // Update inspection with supervisor signature and mark as supervised
       const result = await sql`
-        UPDATE inspections 
-        SET supervisor_signature = ${name}, 
+        UPDATE inspections
+        SET supervisor_signature = ${name},
             supervisor_signed_at = ${signedAt},
+            status = 'supervised',
             updated_at = NOW()
         WHERE id = ${parseInt(id)}
         RETURNING *
@@ -70,7 +71,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Inspection not found' })
       }
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: 'Supervisor signature added successfully',
         inspection: result[0]
       })

@@ -11,29 +11,56 @@ import truckImageBobtail from '../assets/Botado Trailer.jpg'
 // Position definitions for each inspection point on the truck diagram
 // Positions are in percentages relative to the image container
 
-// Default positions for LOADED/EMPTY (Container/Box with trailer)
-const pointPositionsDefault = [
+// Positions for LOADED (Container/Box with trailer)
+const pointPositionsLoaded = [
   // TRACTOR POINTS (1-10) - Based on top views
   { id: 1, x: 13, y: 38, label: 'Defensa' },           // Bumper - front of tractor (top-left view)
   { id: 2, x: 28.5, y: 38, label: 'Llantas' },           // Tires - tractor section (bottom-left)
-  { id: 3, x: 38, y: 47, label: 'Piso' },               // Floor - tractor cab (bottom-left)
+  { id: 3, x: 38.3, y: 47, label: 'Piso' },               // Floor - tractor cab (bottom-left)
   { id: 4, x: 42.5, y: 47, label: 'Tanques Diesel' },    // Fuel tanks - side of tractor
-  { id: 5, x: 26.5, y: 12, label: 'Cabina' },            // Cab compartments - top of cab area
-  { id: 6, x: 40.2, y: 16, label: 'Tanques Aire' },      // Air tanks - under chassis
+  { id: 5, x: 26.58, y: 11, label: 'Cabina' },            // Cab compartments - top of cab area
+  { id: 6, x: 40.4, y: 16, label: 'Tanques Aire' },      // Air tanks - under chassis
   { id: 7, x: 47, y: 27, label: 'Quinta Rueda' },      // Fifth wheel - connection area
   { id: 8, x: 55, y: 45, label: 'Ejes Trans.' },       // Drive shafts - bottom view
-  { id: 9, x: 12, y: 13.5, label: 'Escape' },            // Exhaust - side of cab
+  { id: 9, x: 12, y: 13, label: 'Escape' },            // Exhaust - side of cab
   { id: 10, x: 12, y: 24.2, label: 'Motor' },            // Engine/Battery - front cab area
-  
+
   // TRAILER POINTS (11-20)
-  { id: 11, x: 55.2, y: 26, label: 'Base Remolque' },    // Undercarriage - bottom trailer view
+  { id: 11, x: 55.5, y: 26, label: 'Base Remolque' },    // Undercarriage - bottom trailer view
   { id: 12, x: 19.5, y: 87, label: 'Puertas' },          // Doors - rear view (right side)
-  { id: 13, x: 91, y: 89, label: 'Pared Der.' },       // Right side wall - bottom view
-  { id: 14, x: 85.6, y: 8, label: 'Techo' },            // Roof - top of trailer body
+  { id: 13, x: 90.9, y: 89, label: 'Pared Der.' },       // Right side wall - bottom view
+  { id: 14, x: 85.5, y: 8, label: 'Techo' },            // Roof - top of trailer body
   { id: 15, x: 86.2, y: 89, label: 'Pared Frontal' },    // Front wall - near reefer
   { id: 16, x: 81.5, y: 89, label: 'Pared Izq.' },       // Left side wall - trailer body
   { id: 17, x: 85.5, y: 55, label: 'Piso Interior' },    // Interior floor - bottom view
   { id: 18, x: 55.5, y: 88, label: 'Patín' },            // Landing gear - chassis section
+  { id: 19, x: 50, y: 10, label: 'Refrigeración' },    // Reefer unit - top view
+  { id: 20, x: 9.2, y: 87, label: 'Limpieza' },         // Cleanliness - rear of trailer body
+]
+
+// Positions for5.5PTY (Container/Box with trailer)
+const pointPositionsEmpty = [
+  // TRACTOR POINTS (1-10) - Based on top views
+  { id: 1, x: 13, y: 38, label: 'Defensa' },           // Bumper - front of tractor (top-left view)
+  { id: 2, x: 28.5, y: 38, label: 'Llantas' },           // Tires - tractor section (bottom-left)
+  { id: 3, x: 40, y: 47, label: 'Piso' },               // Floor - tractor cab (bottom-left)
+  { id: 4, x: 44.5, y: 47, label: 'Tanques Diesel' },    // Fuel tanks - side of tractor
+  { id: 5, x: 27.5, y: 12, label: 'Cabina' },            // Cab compartments - top of cab area
+  { id: 6, x: 41.8, y: 16, label: 'Tanques Aire' },      // Air tanks - under chassis
+  { id: 7, x: 48.5, y: 27, label: 'Quinta Rueda' },      // Fifth wheel - connection area
+  { id: 8, x: 56.5, y: 45, label: 'Ejes Trans.' },       // Drive shafts - bottom view
+  { id: 9, x: 12, y: 13, label: 'Escape' },            // Exhaust - side of cab
+  { id: 10, x: 12, y: 24.2, label: 'Motor' },            // Engine/Battery - front cab area
+
+  // TRAILER POINTS (11-20)
+  { id: 11, x: 57.4, y: 26, label: 'Base Remolque' },    // Undercarriage - bottom trailer view
+  { id: 12, x: 20.2, y: 87, label: 'Puertas' },          // Doors - rear view (right side)
+  { id: 13, x: 94.7, y: 89, label: 'Pared Der.' },       // Right side wall - bottom view
+  { id: 14, x: 89, y: 8, label: 'Techo' },            // Roof - top of trailer body
+  { id: 15, x: 86.2, y: 89, label: 'Pared Frontal' },    // Front wall - near reefer
+  { id: 16, x: 85, y: 89, label: 'Pared Izq.' },       // Left side wall - trailer body
+  { id: 17, x: 85.5, y: 55, label: 'Piso Interior' },    // Interior floor - bottom view
+  { id: 18, x: 57.5, y: 88, label: 'Patín' },            // Landing gear - chassis section
   { id: 19, x: 50, y: 10, label: 'Refrigeración' },    // Reefer unit - top view
   { id: 20, x: 9.2, y: 87, label: 'Limpieza' },         // Cleanliness - rear of trailer body
 ]
@@ -119,7 +146,13 @@ export default function TruckDiagramVisual({ onPointClick, compact = false }) {
     if (unitInfo?.trailerType === 'FLATBED') {
       return pointPositionsFlatbed
     }
-    return pointPositionsDefault
+    if (unitInfo?.inspectionType === 'EMPTY') {
+      return pointPositionsEmpty
+    }
+    if (unitInfo?.inspectionType === 'LOADED') {
+      return pointPositionsLoaded
+    }
+    return pointPositionsLoaded
   }, [unitInfo?.inspectionType, unitInfo?.trailerType])
   
   // Get applicable points based on inspection type

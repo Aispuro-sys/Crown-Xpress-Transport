@@ -449,6 +449,17 @@ export default function GuardHistory() {
                   {/* Expanded content */}
                   {expanded[group.original.id] && (
                     <div className="border-t bg-slate-50">
+                      {/* Inspection Details */}
+                      <div className="px-4 py-3 grid grid-cols-2 gap-2 text-center border-b">
+                        <div className="bg-blue-50 rounded-lg py-2">
+                          <div className="text-sm font-bold text-blue-600">{group.original.inspection_type || '—'}</div>
+                          <div className="text-xs text-blue-700">{language === 'es' ? 'Tipo Inspección' : 'Inspection Type'}</div>
+                        </div>
+                        <div className="bg-purple-50 rounded-lg py-2">
+                          <div className="text-sm font-bold text-purple-600">{group.original.trailer_type || '—'}</div>
+                          <div className="text-xs text-purple-700">{language === 'es' ? 'Tipo Remolque' : 'Trailer Type'}</div>
+                        </div>
+                      </div>
                       {/* Stats */}
                       <div className="px-4 py-3 grid grid-cols-3 gap-2 text-center border-b">
                         <div className="bg-emerald-50 rounded-lg py-2">

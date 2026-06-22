@@ -368,7 +368,7 @@ export default function SupervisorView() {
                         }`}>
                           {insp.status === 'audited' ? (language === 'es' ? 'Supervisada' : 'Supervised') : insp.status}
                         </span>
-                        {(insp.status === 'completed' || insp.status === 'audited') && (
+                        {(!insp.auditor_signature || insp.status === 'completed' || insp.status === 'audited') && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSignSupervisor(insp) }}
                             className="p-1 rounded hover:bg-emerald-200"
@@ -395,6 +395,17 @@ export default function SupervisorView() {
                     </button>
                     {selectedId === insp.id && (
                       <div className="px-4 py-4 bg-slate-50">
+                        {/* Inspection Details */}
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <div className="bg-blue-50 rounded-lg py-2 px-3 text-center">
+                            <div className="text-sm font-bold text-blue-600">{insp.inspection_type || '—'}</div>
+                            <div className="text-xs text-blue-700">{language === 'es' ? 'Tipo Inspección' : 'Inspection Type'}</div>
+                          </div>
+                          <div className="bg-purple-50 rounded-lg py-2 px-3 text-center">
+                            <div className="text-sm font-bold text-purple-600">{insp.trailer_type || '—'}</div>
+                            <div className="text-xs text-purple-700">{language === 'es' ? 'Tipo Remolque' : 'Trailer Type'}</div>
+                          </div>
+                        </div>
                         <AuditTrail inspectionId={insp.id} />
                       </div>
                     )}

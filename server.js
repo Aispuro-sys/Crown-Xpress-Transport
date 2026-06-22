@@ -44,7 +44,7 @@ app.get('/api/inspections', adaptHandler(listInspections))
 app.get('/api/inspections/:id', adaptHandler((req, res, id) => getInspection(req, res, id)))
 app.get('/api/inspections/:id/pdf', adaptHandler((req, res, id) => downloadPdf(req, res, id)))
 app.post('/api/inspections/:id/sign-auditor', adaptHandler((req, res, id) => signAuditor(req, res, id)))
-app.post('/api/inspections/:id/reconfirm', adaptHandler((req, res) => reconfirmInspection(req, res, req.params.id)))
+app.post('/api/inspections/:id/reconfirm', adaptHandler((req, res, id) => reconfirmInspection(req, res, id)))
 app.get('/api/inspections/:id/chain', adaptHandler((req, res) => getInspectionChain(req, res, req.params.id)))
 
 // 404
