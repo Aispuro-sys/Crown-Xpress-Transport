@@ -201,10 +201,34 @@ export default function GuardHistory() {
 
   const handleReconfirmSubmit = async (data) => {
     try {
+      // Reconstruct points object from modifications for PDF generation
+      const points = {}
+      const originalPoints = reconfirmTarget?.points || []
+
+      // Start with original points
+      for (const p of originalPoints) {
+        points[p.point_id] = {
+          status: p.status,
+          issueId: p.issue_id,
+          issueText: p.issue_text,
+          photo: p.photo
+        }
+      }
+
+      // Apply modifications
+      for (const mod of data.modifications || []) {
+        points[mod.pointId] = {
+          status: mod.status,
+          issueId: mod.issueId,
+          issueText: mod.issueText,
+          photo: mod.photo
+        }
+      }
+
       // Generate PDF for reconfirmation
       const pdfResult = await generateInspectionPDF({
         unitInfo: data.unitInfo,
-        points: data.points,
+        points,
         sealPhoto: data.sealPhoto,
         guardSignature: data.guardSignature,
         auditorSignature: data.auditorSignature,
