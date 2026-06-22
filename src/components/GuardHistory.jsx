@@ -460,6 +460,25 @@ export default function GuardHistory() {
                           <div className="text-xs text-purple-700">{language === 'es' ? 'Tipo Remolque' : 'Trailer Type'}</div>
                         </div>
                       </div>
+                      {/* Additional Details */}
+                      <div className="px-4 py-3 grid grid-cols-2 gap-2 text-xs border-b">
+                        <div>
+                          <span className="text-slate-500">{language === 'es' ? 'Sello:' : 'Seal:'}</span>
+                          <span className="font-semibold text-slate-700 ml-1">{group.original.seal_number || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">{language === 'es' ? 'Candado:' : 'Lock:'}</span>
+                          <span className="font-semibold text-slate-700 ml-1">{group.original.lock_number || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">{language === 'es' ? 'Operador:' : 'Driver:'}</span>
+                          <span className="font-semibold text-slate-700 ml-1">{group.original.driver_name || '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">{language === 'es' ? 'Ubicación:' : 'Location:'}</span>
+                          <span className="font-semibold text-slate-700 ml-1">{group.original.location || '—'}</span>
+                        </div>
+                      </div>
                       {/* Stats */}
                       <div className="px-4 py-3 grid grid-cols-3 gap-2 text-center border-b">
                         <div className="bg-emerald-50 rounded-lg py-2">

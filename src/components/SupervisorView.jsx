@@ -406,6 +406,25 @@ export default function SupervisorView() {
                             <div className="text-xs text-purple-700">{language === 'es' ? 'Tipo Remolque' : 'Trailer Type'}</div>
                           </div>
                         </div>
+                        {/* Additional Details */}
+                        <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                          <div>
+                            <span className="text-slate-500">{language === 'es' ? 'Sello:' : 'Seal:'}</span>
+                            <span className="font-semibold text-slate-700 ml-1">{insp.seal_number || '—'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500">{language === 'es' ? 'Candado:' : 'Lock:'}</span>
+                            <span className="font-semibold text-slate-700 ml-1">{insp.lock_number || '—'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500">{language === 'es' ? 'Operador:' : 'Driver:'}</span>
+                            <span className="font-semibold text-slate-700 ml-1">{insp.driver_name || '—'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500">{language === 'es' ? 'Guardia:' : 'Guard:'}</span>
+                            <span className="font-semibold text-slate-700 ml-1">{insp.guard_name || '—'}</span>
+                          </div>
+                        </div>
                         <AuditTrail inspectionId={insp.id} />
                       </div>
                     )}
