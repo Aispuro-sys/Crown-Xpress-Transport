@@ -11,6 +11,7 @@ import truckDiagramLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwv
 import truckDiagramEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
 import truckDiagramBobtail from '../assets/Botado Trailer.jpg'
 import truckDiagramFlatbed from '../assets/Plataforma vacia-cargada.jpg'
+import truckDiagramRabon from '../assets/Origen Rabon.png'
 
 const COLORS = {
   navy: [30, 91, 122],
@@ -77,26 +78,30 @@ function drawCtpatLogo(doc, x, y, width = 30, height = 10) {
   }
 }
 
-// Load truck diagram image as base64 based on inspection type
-async function loadTruckDiagramImage(inspectionType) {
+// Load truck diagram image as base64 based on inspection type and trailer type
+async function loadTruckDiagramImage(inspectionType, trailerType) {
   try {
-    // Select the appropriate image based on inspection type
+    // RABON uses a dedicated rigid-truck diagram regardless of loaded/empty
     let truckDiagramImage
-    switch (inspectionType) {
-      case 'BOBTAIL':
-      case 'DROPPED':
-        truckDiagramImage = truckDiagramBobtail
-        break
-      case 'EMPTY':
-        truckDiagramImage = truckDiagramEmpty
-        break
-      case 'FLATBED':
-        truckDiagramImage = truckDiagramFlatbed
-        break
-      case 'LOADED':
-      default:
-        truckDiagramImage = truckDiagramLoaded
-        break
+    if (trailerType === 'RABON') {
+      truckDiagramImage = truckDiagramRabon
+    } else {
+      switch (inspectionType) {
+        case 'BOBTAIL':
+        case 'DROPPED':
+          truckDiagramImage = truckDiagramBobtail
+          break
+        case 'EMPTY':
+          truckDiagramImage = truckDiagramEmpty
+          break
+        case 'FLATBED':
+          truckDiagramImage = truckDiagramFlatbed
+          break
+        case 'LOADED':
+        default:
+          truckDiagramImage = truckDiagramLoaded
+          break
+      }
     }
     
     const response = await fetch(truckDiagramImage)
@@ -117,7 +122,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   // Pre-load images (pass inspection type to get correct diagram)
   const logoBase64 = await loadLogoImage()
   const ctpatLogoBase64 = await loadCtpatLogoImage()
-  const truckDiagramBase64 = await loadTruckDiagramImage(unitInfo?.inspectionType)
+  const truckDiagramBase64 = await loadTruckDiagramImage(unitInfo?.inspectionType, unitInfo?.trailerType)
   
   const T = language === 'es' ? {
     title: 'INSPECCIÓN DE 20 PUNTOS',
@@ -682,7 +687,9 @@ function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramB
       // Center the image vertically in the available space
       const imgY = y + (h - imgHeight - 30) / 2 // Leave space for legend
       
-      doc.addImage(truckDiagramBase64, 'JPEG', x, imgY, imgWidth, imgHeight)
+      // Detect format from data URI (supports both JPEG and PNG diagrams)
+      const imgFormat = truckDiagramBase64.startsWith('data:image/png') ? 'PNG' : 'JPEG'
+      doc.addImage(truckDiagramBase64, imgFormat, x, imgY, imgWidth, imgHeight)
       
       // Point positions matching the TruckDiagramVisual.jsx positions (in percentages)
       // These match the exact positions from the visual component

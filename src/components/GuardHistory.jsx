@@ -469,7 +469,7 @@ export default function GuardHistory() {
                       {expanded[group.original.id] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
                       <div className="min-w-0">
                         <div className="font-semibold text-slate-800 truncate">
-                          {group.original.trailer_number || '—'} · {group.original.guard_name || group.original.driver_name}
+                          {group.original.trailer_number || group.original.tractor_number || `#${group.original.id}`} · {group.original.guard_name || group.original.driver_name}
                         </div>
                         <div className="text-xs text-slate-500 truncate">
                           {new Date(group.original.created_at).toLocaleString()} · {group.original.location}
