@@ -8,11 +8,11 @@ import SignatureCanvas from './SignatureCanvas'
 
 export default function SignatureSection() {
   const { t, language } = useLanguage()
-  const { guardSignature, auditorSignature, setGuardSignature, setAuditorSignature, unitInfo, points, completedCount } = useInspection()
+  const { guardSignature, supervisorSignature, setGuardSignature, setSupervisorSignature, unitInfo, points, completedCount } = useInspection()
   const { user } = useAuth()
   const [showGuardSignature, setShowGuardSignature] = useState(false)
-  const [showAuditorSignature, setShowAuditorSignature] = useState(false)
-  const [enableAuditor, setEnableAuditor] = useState(false)
+  const [showSupervisorSignature, setShowSupervisorSignature] = useState(false)
+  const [enableSupervisor, setEnableSupervisor] = useState(false)
   
   // Check if all points are completed
   const applicablePoints = useMemo(() => {
@@ -31,13 +31,13 @@ export default function SignatureSection() {
     setShowGuardSignature(false)
   }
 
-  const handleAuditorSignatureSave = (signature) => {
-    setAuditorSignature({
-      name: auditorSignature?.name || '',
+  const handleSupervisorSignatureSave = (signature) => {
+    setSupervisorSignature({
+      name: supervisorSignature?.name || '',
       signature,
       signedAt: new Date().toISOString()
     })
-    setShowAuditorSignature(false)
+    setShowSupervisorSignature(false)
   }
 
   return (
@@ -130,45 +130,45 @@ export default function SignatureSection() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-crown-navy" />
               <h3 className="font-semibold text-slate-700">
-                {language === 'es' ? 'Firma del Auditor' : 'Auditor Signature'}
+                {language === 'es' ? 'Firma del Supervisor' : 'Supervisor Signature'}
               </h3>
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={enableAuditor}
-                onChange={(e) => setEnableAuditor(e.target.checked)}
+                checked={enableSupervisor}
+                onChange={(e) => setEnableSupervisor(e.target.checked)}
                 className="w-4 h-4 text-crown-navy focus:ring-crown-navy border-slate-300 rounded"
               />
               <span className="text-xs text-slate-600">
-                {language === 'es' ? 'Requiere auditor' : 'Requires auditor'}
+                {language === 'es' ? 'Requiere supervisor' : 'Requires supervisor'}
               </span>
             </label>
           </div>
           
-          {!enableAuditor ? (
+          {!enableSupervisor ? (
             <div className="text-center py-4 bg-slate-50 rounded-lg">
               <p className="text-sm text-slate-500">
-                {language === 'es' 
-                  ? 'Marque la casilla si esta inspección requiere firma de auditor' 
-                  : 'Check the box if this inspection requires auditor signature'}
+                {language === 'es'
+                  ? 'Marque la casilla si esta inspección requiere firma de supervisor'
+                  : 'Check the box if this inspection requires supervisor signature'}
               </p>
             </div>
-          ) : auditorSignature?.signature ? (
+          ) : supervisorSignature?.signature ? (
             <div className="space-y-3">
               <div className="border border-slate-200 rounded p-2 bg-white">
-                <img 
-                  src={auditorSignature.signature} 
-                  alt="Auditor signature" 
+                <img
+                  src={supervisorSignature.signature}
+                  alt="Supervisor signature"
                   className="h-20 object-contain"
                 />
               </div>
               <div className="text-sm text-slate-600">
-                <p><strong>{language === 'es' ? 'Nombre:' : 'Name:'}</strong> {auditorSignature?.name || '—'}</p>
-                <p><strong>{language === 'es' ? 'Fecha:' : 'Date:'}</strong> {auditorSignature?.signedAt ? new Date(auditorSignature.signedAt).toLocaleString(language === 'es' ? 'es-MX' : 'en-US') : '—'}</p>
+                <p><strong>{language === 'es' ? 'Nombre:' : 'Name:'}</strong> {supervisorSignature?.name || '—'}</p>
+                <p><strong>{language === 'es' ? 'Fecha:' : 'Date:'}</strong> {supervisorSignature?.signedAt ? new Date(supervisorSignature.signedAt).toLocaleString(language === 'es' ? 'es-MX' : 'en-US') : '—'}</p>
               </div>
               <button
-                onClick={() => setShowAuditorSignature(true)}
+                onClick={() => setShowSupervisorSignature(true)}
                 className="btn-secondary text-sm"
               >
                 <PenTool className="w-4 h-4" />
@@ -179,22 +179,22 @@ export default function SignatureSection() {
             <div className="space-y-3">
               <input
                 type="text"
-                value={auditorSignature?.name || ''}
-                onChange={(e) => setAuditorSignature(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={language === 'es' ? 'Nombre del auditor' : 'Auditor name'}
+                value={supervisorSignature?.name || ''}
+                onChange={(e) => setSupervisorSignature(prev => ({ ...prev, name: e.target.value }))}
+                placeholder={language === 'es' ? 'Nombre del supervisor' : 'Supervisor name'}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20"
               />
               <div className="text-center py-2">
                 <p className="text-sm text-slate-600 mb-3">
-                  {language === 'es' ? 'Se requiere firma del auditor' : 'Auditor signature required'}
+                  {language === 'es' ? 'Se requiere firma del supervisor' : 'Supervisor signature required'}
                 </p>
                 <button
-                  onClick={() => setShowAuditorSignature(true)}
-                  disabled={!auditorSignature?.name}
+                  onClick={() => setShowSupervisorSignature(true)}
+                  disabled={!supervisorSignature?.name}
                   className="btn-gold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PenTool className="w-4 h-4" />
-                  {language === 'es' ? 'Firmar como Auditor' : 'Sign as Auditor'}
+                  {language === 'es' ? 'Firmar como Supervisor' : 'Sign as Supervisor'}
                 </button>
               </div>
             </div>
@@ -212,11 +212,11 @@ export default function SignatureSection() {
       />
 
       <SignatureCanvas
-        open={showAuditorSignature}
-        onClose={() => setShowAuditorSignature(false)}
-        onSave={handleAuditorSignatureSave}
-        title={language === 'es' ? 'Firma del Auditor' : 'Auditor Signature'}
-        signerName={auditorSignature?.name || ''}
+        open={showSupervisorSignature}
+        onClose={() => setShowSupervisorSignature(false)}
+        onSave={handleSupervisorSignatureSave}
+        title={language === 'es' ? 'Firma del Supervisor' : 'Supervisor Signature'}
+        signerName={supervisorSignature?.name || ''}
       />
     </section>
   )
