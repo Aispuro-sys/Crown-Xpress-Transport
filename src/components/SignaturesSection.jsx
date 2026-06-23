@@ -9,8 +9,8 @@ import SignatureBox from './SignatureBox'
 export default function SignaturesSection() {
   const { t, language } = useLanguage()
   const { user } = useAuth()
-  const { 
-    guardSignature, setGuardSignature, 
+  const {
+    guardSignature, setGuardSignature,
     supervisorSignature, setSupervisorSignature,
     unitInfo, completedCount
   } = useInspection()
