@@ -31,6 +31,7 @@ export function InspectionProvider({ children }) {
   const [unitInfo, setUnitInfo] = useState({
     trailerNumber: '',
     sealNumber: '',
+    lockNumber: '',
     driverName: '',
     inspectionDate: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Tijuana' }),
     guardName: '',
