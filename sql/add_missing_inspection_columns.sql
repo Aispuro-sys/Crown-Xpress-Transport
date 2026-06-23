@@ -3,6 +3,14 @@
 
 DO $$
 BEGIN
+    -- Add inspection_uuid if missing
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'inspections' AND column_name = 'inspection_uuid'
+    ) THEN
+        ALTER TABLE inspections ADD COLUMN inspection_uuid UUID DEFAULT gen_random_uuid() UNIQUE;
+    END IF;
+
     -- Add operator_name if missing
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns 
