@@ -129,12 +129,20 @@ export default async function handler(req, res) {
         // Pending count = only non-inspected
         const pendingCount = movements.filter(m => !m.already_inspected).length
 
+        // Extract host from connection URL for debugging (strip credentials)
+        let dbHost = 'unknown'
+        try {
+          const urlObj = new URL(externalUrl)
+          dbHost = urlObj.hostname
+        } catch {}
+
         return res.status(200).json({
           success: true,
           data: movements,
           count: movements.length,
           pending_count: pendingCount,
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          _db_host: dbHost // Remove this after confirming correct DB
         })
       } catch (dbError) {
         await client.end().catch(() => {})
