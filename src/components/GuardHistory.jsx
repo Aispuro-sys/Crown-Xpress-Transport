@@ -4,8 +4,33 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { listInspections, downloadPdf, getInspection, reconfirmInspection } from '../utils/api'
 import { generateInspectionPDF } from '../utils/pdfGenerator'
+import { INSPECTION_TYPES } from '../data/inspectionPoints'
 import AuditTrail from './AuditTrail'
 import ReconfirmModal from './ReconfirmModal'
+
+// Localized labels for trailer types
+const TRAILER_TYPE_LABELS = {
+  BOX: { es: 'CAJA', en: 'BOX' },
+  CONTAINER: { es: 'CONTENEDOR', en: 'CONTAINER' },
+  FLATBED: { es: 'PLATAFORMA', en: 'FLATBED' },
+  RABON: { es: 'RABÓN', en: 'RABON' },
+  BOBTAIL: { es: 'BOTADO', en: 'BOBTAIL' },
+  OTHER: { es: 'OTROS', en: 'OTHER' },
+}
+
+// Get localized label for an inspection type code
+const inspectionTypeLabel = (code, lang) => {
+  if (!code) return '—'
+  const cfg = INSPECTION_TYPES[code]
+  return cfg ? cfg[lang] : code
+}
+
+// Get localized label for a trailer type code
+const trailerTypeLabel = (code, lang) => {
+  if (!code) return '—'
+  const cfg = TRAILER_TYPE_LABELS[code]
+  return cfg ? cfg[lang] : code
+}
 
 /**
  * GuardHistory: read-only history of inspections done by the current guard.
@@ -424,9 +449,10 @@ export default function GuardHistory() {
                   className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-crown-navy/20 uppercase"
                 >
                   <option value="">{language === 'es' ? 'TODOS' : 'ALL'}</option>
-                  <option value="LOADED">{language === 'es' ? 'CARGADO' : 'LOADED'}</option>
-                  <option value="EMPTY">{language === 'es' ? 'VACÍO' : 'EMPTY'}</option>
-                  <option value="BOBTAIL">{language === 'es' ? 'BOTADO' : 'BOBTAIL'}</option>
+                  <option value="LOADED">{inspectionTypeLabel('LOADED', language)}</option>
+                  <option value="EMPTY">{inspectionTypeLabel('EMPTY', language)}</option>
+                  <option value="BOBTAIL">{inspectionTypeLabel('BOBTAIL', language)}</option>
+                  <option value="FLATBED">{inspectionTypeLabel('FLATBED', language)}</option>
                 </select>
               </div>
             </div>
@@ -508,11 +534,11 @@ export default function GuardHistory() {
                       {/* Inspection Details */}
                       <div className="px-4 py-3 grid grid-cols-2 gap-2 text-center border-b">
                         <div className="bg-blue-50 rounded-lg py-2">
-                          <div className="text-sm font-bold text-blue-600">{group.original.inspection_type || '—'}</div>
+                          <div className="text-sm font-bold text-blue-600">{inspectionTypeLabel(group.original.inspection_type, language)}</div>
                           <div className="text-xs text-blue-700">{language === 'es' ? 'Tipo Inspección' : 'Inspection Type'}</div>
                         </div>
                         <div className="bg-purple-50 rounded-lg py-2">
-                          <div className="text-sm font-bold text-purple-600">{group.original.trailer_type || '—'}</div>
+                          <div className="text-sm font-bold text-purple-600">{trailerTypeLabel(group.original.trailer_type, language)}</div>
                           <div className="text-xs text-purple-700">{language === 'es' ? 'Tipo Remolque' : 'Trailer Type'}</div>
                         </div>
                       </div>

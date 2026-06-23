@@ -1,4 +1,5 @@
 /** Simple API client for Crown Xpress Inspection */
+import { getApplicablePoints } from '../data/inspectionPoints'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -196,7 +197,7 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
     counts: { 
       good: goodCount || 0, 
       bad: failedCount || 0, 
-      pending: 20 - (completedCount || 0) 
+      pending: Math.max(0, getApplicablePoints(unitInfo?.inspectionType).length - (completedCount || 0))
     },
   }
 }

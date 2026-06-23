@@ -253,7 +253,16 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
   infoRows.push([T.location, unitInfo.location || '—', '', ''])
 
   // Row 4: Equipment Type (CAJA, CONTENEDOR, PLATAFORMA, RABÓN)
-  const trailerTypeLabel = unitInfo.trailerType || '—'
+  const trailerTypeCode = unitInfo.trailerType || '—'
+  const trailerTypeLabels = {
+    BOX: { es: 'CAJA', en: 'BOX' },
+    CONTAINER: { es: 'CONTENEDOR', en: 'CONTAINER' },
+    FLATBED: { es: 'PLATAFORMA', en: 'FLATBED' },
+    RABON: { es: 'RABÓN', en: 'RABON' },
+    BOBTAIL: { es: 'BOTADO', en: 'BOBTAIL' },
+    OTHER: { es: 'OTROS', en: 'OTHER' },
+  }
+  const trailerTypeLabel = trailerTypeLabels[trailerTypeCode]?.[language] || trailerTypeCode
   infoRows.push([language === 'es' ? 'Tipo de Equipo' : 'Equipment Type', trailerTypeLabel, '', ''])
 
   // Row 5: Equipment Nomenclature and Tractor
