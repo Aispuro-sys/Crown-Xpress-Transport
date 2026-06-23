@@ -40,9 +40,9 @@ export default function GuidedInspection() {
       return
     }
 
-    // For BOBTAIL: only need driverName and location (no trailer, no container, no seal)
+    // For BOBTAIL: only need driverName (no trailer, no container, no seal)
     if (unitInfo?.inspectionType === 'BOBTAIL') {
-      const required = ['driverName', 'location']
+      const required = ['driverName']
       const isValid = required.every(field => unitInfo[field] && unitInfo[field].trim() !== '')
       setUnitInfoValid(isValid)
       // Auto-complete flow for BOBBTAIL since there's no trailer info to capture
@@ -52,9 +52,9 @@ export default function GuidedInspection() {
       return
     }
 
-    // For FLATBED: need location, tractorNumber, and trailerNumber (platform number) - driverName is optional
+    // For FLATBED: need tractorNumber, and trailerNumber (platform number) - driverName and location are optional
     if (unitInfo?.inspectionType === 'FLATBED') {
-      const required = ['trailerNumber', 'location', 'tractorNumber']
+      const required = ['trailerNumber', 'tractorNumber']
       const isValid = required.every(field => unitInfo[field] && unitInfo[field].trim() !== '')
       setUnitInfoValid(isValid)
       if (isValid && !unitInfoFlowComplete) {
@@ -63,7 +63,7 @@ export default function GuidedInspection() {
       return
     }
 
-    const required = ['trailerNumber', 'location', 'tractorNumber']
+    const required = ['trailerNumber', 'tractorNumber']
     const optional = []
 
     if (hasSeal) required.push('sealNumber')
