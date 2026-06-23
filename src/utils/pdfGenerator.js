@@ -466,7 +466,7 @@ export async function generateInspectionPDF({ unitInfo, points, sealPhoto, guard
     // The image is horizontal (wide), so we use full width and calculate proportional height
     const diagramWidth = pageWidth - margin * 2
     const diagramHeight = 200 // Increased height for better visibility
-    drawTruckDiagramPDF(doc, margin, diagramY, diagramWidth, diagramHeight, points, language, T, truckDiagramBase64, applicablePoints)
+    drawTruckDiagramPDF(doc, margin, diagramY, diagramWidth, diagramHeight, points, language, T, truckDiagramBase64, applicablePoints, inspectionType)
   }
 
   // ===== PAGE 3: SEAL PHOTO + SIGNATURES =====
@@ -665,7 +665,7 @@ function formatDate(value) {
 }
 
 // Draw truck diagram for PDF with real image and B/W friendly markers
-function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramBase64, applicablePoints = []) {
+function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramBase64, applicablePoints = [], inspectionType = 'LOADED') {
   // Draw the truck diagram image
   if (truckDiagramBase64) {
     try {
@@ -687,30 +687,77 @@ function drawTruckDiagramPDF(doc, x, y, w, h, points, language, T, truckDiagramB
 
       // Point positions matching the TruckDiagramVisual.jsx positions (in percentages)
       // These match the exact positions from the visual component
-      const pointPositions = [
-        // TRACTOR POINTS (1-10)
-        { id: 1, xPct: 13, yPct: 38 },      // Defensa - front of tractor
-        { id: 2, xPct: 28.5, yPct: 38 },    // Llantas - tractor section
-        { id: 3, xPct: 38, yPct: 47 },      // Piso - tractor cab
-        { id: 4, xPct: 42.5, yPct: 47 },    // Tanques Diesel
-        { id: 5, xPct: 26.5, yPct: 12 },    // Cabina - top of cab area
-        { id: 6, xPct: 40.2, yPct: 16 },    // Tanques Aire
-        { id: 7, xPct: 47, yPct: 27 },      // Quinta Rueda
-        { id: 8, xPct: 55, yPct: 45 },      // Ejes Trans.
-        { id: 9, xPct: 12, yPct: 13.5 },    // Escape
-        { id: 10, xPct: 12, yPct: 24.2 },   // Motor
-        // TRAILER POINTS (11-20)
-        { id: 11, xPct: 55.2, yPct: 26 },   // Base Remolque
-        { id: 12, xPct: 19.5, yPct: 87 },   // Puertas
-        { id: 13, xPct: 91, yPct: 89 },     // Pared Der.
-        { id: 14, xPct: 85.6, yPct: 8 },    // Techo
-        { id: 15, xPct: 86.2, yPct: 89 },   // Pared Frontal
-        { id: 16, xPct: 81.5, yPct: 89 },   // Pared Izq.
-        { id: 17, xPct: 85.5, yPct: 55 },   // Piso Interior
-        { id: 18, xPct: 55.5, yPct: 88 },   // Patín
-        { id: 19, xPct: 50, yPct: 10 },     // Refrigeración
-        { id: 20, xPct: 9.2, yPct: 87 },    // Limpieza
+
+      // Positions for BOBTAIL (Solo tractor) - Based on "Botado Trailer.jpg"
+      const pointPositionsBobtail = [
+        { id: 1, xPct: 35, yPct: 79.3 },      // Defensa - frente del tractor
+        { id: 2, xPct: 56, yPct: 81 },        // Llantas - REAR TANDEM
+        { id: 3, xPct: 7, yPct: 75.5 },       // Piso - PASSENGER SEAT area
+        { id: 4, xPct: 62, yPct: 70 },       // Tanques Diesel - lado del tractor
+        { id: 5, xPct: 10.4, yPct: 30 },     // Cabina - DASHBOARD PANEL
+        { id: 6, xPct: 67, yPct: 70 },       // Tanques Aire - CHASSIS-SECTION
+        { id: 7, xPct: 89.7, yPct: 90 },     // Quinta Rueda - FIFTH WHEEL COUPLER
+        { id: 8, xPct: 71, yPct: 70 },       // Ejes Trans. - CHASSIS-SECTION
+        { id: 9, xPct: 52, yPct: 11 },       // Escape - top of cab
+        { id: 10, xPct: 35, yPct: 39 },      // Motor - TRACTOR REAR VIEW
       ]
+
+      // Positions for FLATBED (Plataforma) - Based on "Plataforma vacia-cargada.jpg"
+      const pointPositionsFlatbed = [
+        // TRACTOR POINTS (1-10)
+        { id: 1, xPct: 20.8, yPct: 48 },     // Defensa - CAB-AREA frontal
+        { id: 2, xPct: 35, yPct: 52 },       // Llantas - FRONT AXLE area
+        { id: 3, xPct: 39, yPct: 52 },       // Piso - TRACTOR-SECTION
+        { id: 4, xPct: 44, yPct: 52 },       // Tanques Diesel - lado del tractor
+        { id: 5, xPct: 34, yPct: 15 },       // Cabina - CAB-AREA top
+        { id: 6, xPct: 47.5, yPct: 52 },     // Tanques Aire - CHASSIS-SECTION
+        { id: 7, xPct: 10, yPct: 90 },       // Quinta Rueda - conexión tractor-plataforma
+        { id: 8, xPct: 46.2, yPct: 15 },     // Ejes Trans. - TRACTOR CAB rear
+        { id: 9, xPct: 13, yPct: 15 },       // Escape - chimeneas del tractor
+        { id: 10, xPct: 10, yPct: 34 },      // Motor - TRACTOR CAB
+        // PLATFORM POINTS (11, 12, 14, 17, 18)
+        { id: 11, xPct: 55, yPct: 90 },      // Chasis - CHASSIS-SECTION
+        { id: 12, xPct: 21.5, yPct: 90 },    // Parte Trasera - TRAILER-REAR view
+        { id: 14, xPct: 58.4, yPct: 60 },    // Plataforma - PLATFORM BODY superficie
+        { id: 17, xPct: 89.6, yPct: 25 },    // Piso Plat. - PLATFORM BODY piso
+        { id: 18, xPct: 51.3, yPct: 90 },    // Patín - LANDING GEAR
+      ]
+
+      // Positions for LOADED/EMPTY (Container/Box with trailer)
+      const pointPositionsLoaded = [
+        // TRACTOR POINTS (1-10)
+        { id: 1, xPct: 13, yPct: 38 },       // Defensa - front of tractor
+        { id: 2, xPct: 28.5, yPct: 38 },     // Llantas - tractor section
+        { id: 3, xPct: 38, yPct: 47 },       // Piso - tractor cab
+        { id: 4, xPct: 42.5, yPct: 47 },     // Tanques Diesel
+        { id: 5, xPct: 26.5, yPct: 12 },     // Cabina - top of cab area
+        { id: 6, xPct: 40.2, yPct: 16 },     // Tanques Aire
+        { id: 7, xPct: 47, yPct: 27 },       // Quinta Rueda
+        { id: 8, xPct: 55, yPct: 45 },       // Ejes Trans.
+        { id: 9, xPct: 12, yPct: 13.5 },     // Escape
+        { id: 10, xPct: 12, yPct: 24.2 },    // Motor
+        // TRAILER POINTS (11-20)
+        { id: 11, xPct: 55.2, yPct: 26 },    // Base Remolque
+        { id: 12, xPct: 19.5, yPct: 87 },    // Puertas
+        { id: 13, xPct: 91, yPct: 89 },      // Pared Der.
+        { id: 14, xPct: 85.6, yPct: 8 },     // Techo
+        { id: 15, xPct: 86.2, yPct: 89 },    // Pared Frontal
+        { id: 16, xPct: 81.5, yPct: 89 },    // Pared Izq.
+        { id: 17, xPct: 85.5, yPct: 55 },    // Piso Interior
+        { id: 18, xPct: 55.5, yPct: 88 },    // Patín
+        { id: 19, xPct: 50, yPct: 10 },      // Refrigeración
+        { id: 20, xPct: 9.2, yPct: 87 },     // Limpieza
+      ]
+
+      // Select the appropriate point positions based on inspection type
+      let pointPositions
+      if (inspectionType === 'BOBTAIL') {
+        pointPositions = pointPositionsBobtail
+      } else if (inspectionType === 'FLATBED') {
+        pointPositions = pointPositionsFlatbed
+      } else {
+        pointPositions = pointPositionsLoaded
+      }
 
       // Filter to only applicable points for this inspection type
       const applicableIds = applicablePoints.map(p => p.id)
