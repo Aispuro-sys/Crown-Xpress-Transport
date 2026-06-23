@@ -104,10 +104,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [hasContainer, setHasContainer] = useState(false)
   const [hasSeal, setHasSeal] = useState(false)
   const [hasLock, setHasLock] = useState(false)
-  // Flow control states - track if container/box number, seal/lock, and tractor number have been entered
+  // Flow control states - track if container/box number, seal/lock, tractor number, and operator have been entered
   const [containerNumberEntered, setContainerNumberEntered] = useState(!!unitInfo?.trailerNumber)
   const [sealLockEntered, setSealLockEntered] = useState(false)
   const [tractorNumberEntered, setTractorNumberEntered] = useState(!!unitInfo?.tractorNumber)
+  const [operatorSelected, setOperatorSelected] = useState(!!unitInfo?.driverName)
   // Keypad states
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [keypadField, setKeypadField] = useState(null) // 'trailerNumber', 'chassisNumber', 'sealNumber', 'lockNumber'
@@ -333,6 +334,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
         setOperatorFound(result.operator)
         updateUnitInfo('driverName', result.operator.fullName)
         updateUnitInfo('employeeNumber', result.operator.employeeNumber)
+        setOperatorSelected(true)
       }
     } catch (err) {
       console.error('Search operator error:', err)
@@ -370,6 +372,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('employeeNumber', operator.employeeNumber)
     setShowNameResults(false)
     setOperatorError(null)
+    setOperatorSelected(true)
   }
 
   // Handle manual entry
@@ -379,6 +382,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       updateUnitInfo('employeeNumber', 'MANUAL')
       setOperatorFound({ fullName: manualOperatorName.toUpperCase(), employeeNumber: 'MANUAL' })
       setOperatorError(null)
+      setOperatorSelected(true)
     }
   }
 
@@ -412,10 +416,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('equipmentNumber', nomenclatureMatch ? nomenclatureMatch[1] : '')
     
     // Establecer el operador como encontrado
-    setOperatorFound({ 
-      fullName: movementData.operator || 'Desconocido', 
-      employeeNumber: movementData.driverCode || 'TPR' 
+    setOperatorFound({
+      fullName: movementData.operator || 'Desconocido',
+      employeeNumber: movementData.driverCode || 'TPR'
     })
+    setOperatorSelected(true)
     
     if (isBotada) {
       // BOTADO: truckid es el tractor, eqpcode es '** Botada **'
@@ -432,11 +437,16 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       updateUnitInfo('tractorNumber', movementData.truckNumber || '')
       setTractorNumberEntered(!!movementData.truckNumber)
       
-      // Para LOADED, marcar que tiene sello
-      if (tprType === 'LOADED' && movementData.seal) {
-        setHasSeal(true)
-        setSealLockEntered(true)
-        if (onSealChange) onSealChange(true)
+      // Para LOADED, marcar que tiene sello si existe, si no marcar como no requerido
+      if (tprType === 'LOADED') {
+        if (movementData.seal) {
+          setHasSeal(true)
+          setSealLockEntered(true)
+          if (onSealChange) onSealChange(true)
+        } else {
+          // No seal in movement data, but LOADED requires seal/lock - don't auto-mark
+          setSealLockEntered(false)
+        }
       }
       
       // Determinar tipo de trailer basado en eqpcode
@@ -590,6 +600,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setNameSearchResults([])
     updateUnitInfo('driverName', '')
     updateUnitInfo('employeeNumber', '')
+    setOperatorSelected(false)
   }
 
   const update = (field, value) => {
@@ -1325,9 +1336,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     )
   }
 
-  // Step: Enter seal/lock for LOADED inspections (after container number) - NOT for FLATBED
-  // FLATBED (plataforma) does not require seal or lock
-  if (inspectionType === 'LOADED' && containerNumberEntered && !sealLockEntered && trailerType !== 'FLATBED') {
+  // Step: Enter seal/lock for LOADED inspections (after container number) - NOT for FLATBED or RABON
+  // FLATBED (plataforma) and RABON do not require seal or lock
+  if (inspectionType === 'LOADED' && containerNumberEntered && !sealLockEntered && trailerType !== 'FLATBED' && trailerType !== 'RABON') {
     return (
       <section className="card animate-slide-up">
         <div className="card-header flex items-center gap-3">
