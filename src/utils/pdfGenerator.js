@@ -9,7 +9,8 @@ const CTPAT_LOGO_URL = '/ctpat-logo.png'
 // Truck diagram images - different images for each inspection type
 import truckDiagramLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwvt.jpg'
 import truckDiagramEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
-import truckDiagramDropped from '../assets/Botado-Caja-Contenedor.jpg'
+import truckDiagramBobtail from '../assets/Botado Trailer.jpg'
+import truckDiagramFlatbed from '../assets/Plataforma vacia-cargada.jpg'
 
 const COLORS = {
   navy: [30, 91, 122],
@@ -83,13 +84,14 @@ async function loadTruckDiagramImage(inspectionType) {
     let truckDiagramImage
     switch (inspectionType) {
       case 'BOBTAIL':
-        truckDiagramImage = truckDiagramDropped
+      case 'DROPPED':
+        truckDiagramImage = truckDiagramBobtail
         break
       case 'EMPTY':
         truckDiagramImage = truckDiagramEmpty
         break
-      case 'DROPPED':
-        truckDiagramImage = truckDiagramDropped
+      case 'FLATBED':
+        truckDiagramImage = truckDiagramFlatbed
         break
       case 'LOADED':
       default:

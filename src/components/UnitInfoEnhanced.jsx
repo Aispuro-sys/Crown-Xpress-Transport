@@ -382,14 +382,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     const eqpCode = movementData.equipmentCode || ''
     const isBotada = tprType === 'BOBTAIL'
 
-    // Debug logging
-    console.log('handleSelectEmptyLoad - movementData:', {
-      truckNumber: movementData.truckNumber,
-      inspectionType: tprType,
-      equipmentCode: eqpCode,
-      isBotada
-    })
-
     // Determinar automáticamente tipo de inspección y pre-llenar datos
     handleInspectionTypeChange(tprType)
     
