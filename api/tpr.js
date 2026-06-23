@@ -89,14 +89,52 @@ export default async function handler(req, res) {
 
         // Ejecutar query usando Client.query() para queries dinamicas
         const result = await client.query(query)
-        const movements = result.rows
+        const allMovements = result.rows
 
         await client.end()
+
+        // Cross-filter: get already inspected trailer/seal numbers from local PostgreSQL
+        let inspectedSet = new Set()
+        try {
+          const localSql = getSql()
+          const inspected = await localSql`
+            SELECT DISTINCT
+              UPPER(TRIM(trailer_number)) AS trailer_number,
+              UPPER(TRIM(seal_number))    AS seal_number,
+              UPPER(TRIM(lock_number))    AS lock_number
+            FROM inspections
+            WHERE status NOT IN ('superseded')
+              AND created_at >= NOW() - INTERVAL '30 days'
+          `
+          for (const row of inspected) {
+            if (row.trailer_number) inspectedSet.add(row.trailer_number)
+            if (row.seal_number)    inspectedSet.add(row.seal_number)
+            if (row.lock_number)    inspectedSet.add(row.lock_number)
+          }
+        } catch (localErr) {
+          console.warn('Could not query local inspections for cross-filter:', localErr.message)
+        }
+
+        // Mark each movement: already_inspected = true if its BLNO, seal or truck_id was already inspected
+        const movements = allMovements.map(m => {
+          const blno  = m.bill_of_lading?.toString().trim().toUpperCase()
+          const seal  = m.seal?.toString().trim().toUpperCase()
+          const truck = m.truck_id?.toString().trim().toUpperCase()
+          const already = !!(blno && inspectedSet.has(blno)) ||
+                          !!(seal  && inspectedSet.has(seal))  ||
+                          !!(truck && inspectedSet.has(truck))
+          return { ...m, already_inspected: already }
+        })
+
+        // Pending count = only non-inspected
+        const pendingCount = movements.filter(m => !m.already_inspected).length
 
         return res.status(200).json({
           success: true,
           data: movements,
-          count: movements.length
+          count: movements.length,
+          pending_count: pendingCount,
+          last_updated: new Date().toISOString()
         })
       } catch (dbError) {
         await client.end().catch(() => {})
