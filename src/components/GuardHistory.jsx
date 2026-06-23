@@ -64,10 +64,13 @@ export default function GuardHistory() {
     setError(null)
     try {
       const res = await listInspections({ limit: 200, yardCode: user?.location_name || '' })
-      // Only show inspections from current guard (case-insensitive comparison)
-      const mine = Array.isArray(res.data) ? res.data.filter(i =>
-        i.guard_name?.toLowerCase() === user?.full_name?.toLowerCase()
-      ) : []
+      // Only show inspections from current guard - more flexible matching
+      const userName = user?.full_name?.toLowerCase().trim()
+      const mine = Array.isArray(res.data) ? res.data.filter(i => {
+        const guardName = i.guard_name?.toLowerCase().trim()
+        // Exact match or contains (to handle variations)
+        return guardName && (guardName === userName || guardName.includes(userName) || userName.includes(guardName))
+      }) : []
       console.log('GuardHistory loaded:', res.data?.length, 'total,', mine.length, 'mine')
       setInspections(mine)
     } catch (err) {
