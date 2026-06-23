@@ -79,6 +79,15 @@ export default async function handler(req, res) {
         sealPhoto
       } = req.body
 
+      // Debug logging
+      console.log('POST /api/inspections - unitInfo:', {
+        tractorNumber: unitInfo?.tractorNumber,
+        trailerNumber: unitInfo?.trailerNumber,
+        inspectionType: unitInfo?.inspectionType,
+        trailerType: unitInfo?.trailerType,
+        workOrder: unitInfo?.workOrder
+      })
+
       // Insert inspection
       const [inspection] = await sql`
         INSERT INTO inspections (
