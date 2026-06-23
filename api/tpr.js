@@ -57,19 +57,20 @@ export default async function handler(req, res) {
       const localSql = getSql()
       const inspected = await localSql`
         SELECT DISTINCT
-          UPPER(TRIM(trailer_number)) AS trailer_number,
-          UPPER(TRIM(seal_number))    AS seal_number,
-          UPPER(TRIM(lock_number))    AS lock_number
+          UPPER(TRIM(trailer_number))  AS trailer_number,
+          UPPER(TRIM(seal_number))     AS seal_number,
+          UPPER(TRIM(lock_number))     AS lock_number,
+          UPPER(TRIM(tractor_number))  AS tractor_number
         FROM inspections
         WHERE status NOT IN ('superseded')
           AND created_at >= NOW() - INTERVAL '30 days'
       `
       for (const row of inspected) {
-        if (row.trailer_number) inspectedSet.add(row.trailer_number)
-        if (row.seal_number)    inspectedSet.add(row.seal_number)
-        if (row.lock_number)    inspectedSet.add(row.lock_number)
+        if (row.trailer_number)  inspectedSet.add(row.trailer_number)
+        if (row.seal_number)     inspectedSet.add(row.seal_number)
+        if (row.lock_number)     inspectedSet.add(row.lock_number)
+        if (row.tractor_number)  inspectedSet.add(row.tractor_number)
       }
-      console.log('InspectedSet sample (first 10):', [...inspectedSet].slice(0, 10))
     } catch (localErr) {
       console.warn('Cross-filter query failed (non-fatal):', localErr.message)
     }
@@ -79,15 +80,12 @@ export default async function handler(req, res) {
       const blno  = m.bill_of_lading?.toString().trim().toUpperCase()
       const seal  = m.seal?.toString().trim().toUpperCase()
       const truck = m.truck_id?.toString().trim().toUpperCase()
-      const already = !!(blno  && inspectedSet.has(blno))  ||
-                      !!(seal  && inspectedSet.has(seal))   ||
-                      !!(truck && inspectedSet.has(truck))
-      if (already) console.log('MATCHED already_inspected:', { blno, seal, truck })
+      // truck_id can be tractor (BOBTAIL) or general identifier — check all sets
+      const already = !!(blno  && blno  && inspectedSet.has(blno))  ||
+                      !!(seal  && seal  && inspectedSet.has(seal))   ||
+                      !!(truck && truck && inspectedSet.has(truck))
       return { ...m, already_inspected: already }
     })
-    // Log sample of TPR blno values to compare with inspectedSet
-    console.log('TPR bill_of_lading sample:', allMovements.slice(0, 5).map(m => m.bill_of_lading))
-    console.log('TPR truck_id sample:', allMovements.slice(0, 5).map(m => m.truck_id))
 
     const pendingCount = movements.filter(m => !m.already_inspected).length
 
