@@ -69,6 +69,7 @@ export default async function handler(req, res) {
         if (row.seal_number)    inspectedSet.add(row.seal_number)
         if (row.lock_number)    inspectedSet.add(row.lock_number)
       }
+      console.log('InspectedSet sample (first 10):', [...inspectedSet].slice(0, 10))
     } catch (localErr) {
       console.warn('Cross-filter query failed (non-fatal):', localErr.message)
     }
@@ -81,8 +82,12 @@ export default async function handler(req, res) {
       const already = !!(blno  && inspectedSet.has(blno))  ||
                       !!(seal  && inspectedSet.has(seal))   ||
                       !!(truck && inspectedSet.has(truck))
+      if (already) console.log('MATCHED already_inspected:', { blno, seal, truck })
       return { ...m, already_inspected: already }
     })
+    // Log sample of TPR blno values to compare with inspectedSet
+    console.log('TPR bill_of_lading sample:', allMovements.slice(0, 5).map(m => m.bill_of_lading))
+    console.log('TPR truck_id sample:', allMovements.slice(0, 5).map(m => m.truck_id))
 
     const pendingCount = movements.filter(m => !m.already_inspected).length
 
