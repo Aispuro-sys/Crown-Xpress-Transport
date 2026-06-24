@@ -452,16 +452,15 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       updateUnitInfo('tractorNumber', movementData.truckNumber || '')
       setTractorNumberEntered(!!movementData.truckNumber)
       
-      // Para LOADED, marcar que tiene sello si existe, si no marcar como no requerido
+      // Para LOADED, no auto-mark sealLockEntered - user must enter seal/lock manually
       if (tprType === 'LOADED') {
         if (movementData.seal) {
           setHasSeal(true)
-          setSealLockEntered(true)
-          if (onSealChange) onSealChange(true)
-        } else {
-          // No seal in movement data, but LOADED requires seal/lock - don't auto-mark
-          setSealLockEntered(false)
+          // Don't auto-mark sealLockEntered - user must enter it manually
+          // setSealLockEntered(true)
+          // if (onSealChange) onSealChange(true)
         }
+        setSealLockEntered(false)
       }
       
       // Determinar tipo de trailer basado en eqpcode
