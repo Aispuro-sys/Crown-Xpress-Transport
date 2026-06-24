@@ -308,7 +308,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     console.log('DEBUG sealLock:', { inspectionType, trailerType, sealLockRequired, sealLockEntered })
 
     // Auto-mark sealLockEntered as true for types that don't require seal/lock
-    if (!sealLockRequired && !sealLockEntered) {
+    // Only auto-mark when inspectionType is set (not null)
+    if (inspectionType && !sealLockRequired && !sealLockEntered) {
       console.log('DEBUG: Auto-marking sealLockEntered to true')
       setSealLockEntered(true)
     }
