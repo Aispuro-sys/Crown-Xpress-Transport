@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { listInspections, downloadPdf, signSupervisor } from '../utils/api'
 import AuditTrail from './AuditTrail'
+import SignatureCanvas from './SignatureCanvas'
 
 export default function SupervisorView() {
   const { t, language } = useLanguage()
@@ -14,6 +15,7 @@ export default function SupervisorView() {
   const [selectedId, setSelectedId] = useState(null)
   const [showSignatureModal, setShowSignatureModal] = useState(false)
   const [signingInspection, setSigningInspection] = useState(null)
+  const [signatureData, setSignatureData] = useState(null)
 
   // Filters
   const [filterYard, setFilterYard] = useState('')
@@ -109,12 +111,13 @@ export default function SupervisorView() {
     setShowSignatureModal(true)
   }
 
-  const handleSignatureSubmit = async (signatureData) => {
-    if (!signingInspection) return
+  const handleSignatureSubmit = async (signatureImage) => {
+    if (!signingInspection || !signatureImage) return
     
     try {
       await signSupervisor(signingInspection.id, {
         name: user?.full_name || 'Supervisor',
+        signature: signatureImage,
         signedAt: new Date().toISOString()
       })
       
@@ -124,6 +127,7 @@ export default function SupervisorView() {
       
       setShowSignatureModal(false)
       setSigningInspection(null)
+      setSignatureData(null)
       
       alert(language === 'es' ? 'Inspección firmada exitosamente' : 'Inspection signed successfully')
     } catch (err) {
@@ -133,8 +137,8 @@ export default function SupervisorView() {
 
   const stats = {
     total: filtered.length,
-    supervised: filtered.filter(i => i.status === 'supervised').length,
-    pending: filtered.filter(i => i.status === 'completed').length,
+    completed: filtered.filter(i => i.status === 'completed').length,
+    pending: filtered.filter(i => i.status === 'pending').length,
     failures: filtered.reduce((sum, i) => sum + (i.total_bad || 0), 0),
   }
 
@@ -168,8 +172,8 @@ export default function SupervisorView() {
           <div className="text-2xl font-bold text-slate-800">{stats.total}</div>
         </div>
         <div className="bg-white rounded-xl border border-emerald-200 p-4">
-          <div className="text-xs text-emerald-700 uppercase">{language === 'es' ? 'Supervisadas' : 'Supervised'}</div>
-          <div className="text-2xl font-bold text-emerald-700">{stats.supervised}</div>
+          <div className="text-xs text-emerald-700 uppercase">{language === 'es' ? 'Completadas' : 'Completed'}</div>
+          <div className="text-2xl font-bold text-emerald-700">{stats.completed}</div>
         </div>
         <div className="bg-white rounded-xl border border-blue-200 p-4">
           <div className="text-xs text-blue-700 uppercase">{language === 'es' ? 'Pendientes' : 'Pending'}</div>
@@ -362,13 +366,15 @@ export default function SupervisorView() {
                           </span>
                         )}
                         <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                          insp.status === 'supervised' ? 'bg-emerald-100 text-emerald-700' :
+                          insp.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
                           insp.status === 'reconfirmed' ? 'bg-amber-100 text-amber-700' :
                           'bg-blue-100 text-blue-700'
                         }`}>
-                          {insp.status === 'audited' ? (language === 'es' ? 'Supervisada' : 'Supervised') : insp.status}
+                          {insp.status === 'completed' ? (language === 'es' ? 'Completado' : 'Completed') :
+                           insp.status === 'pending' ? (language === 'es' ? 'Pendiente' : 'Pending') :
+                           insp.status}
                         </span>
-                        {(!insp.auditor_signature || insp.status === 'completed' || insp.status === 'audited') && (
+                        {(!insp.supervisor_signature) && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleSignSupervisor(insp) }}
                             className="p-1 rounded hover:bg-emerald-200"
@@ -445,40 +451,17 @@ export default function SupervisorView() {
       </section>
 
       {/* Supervisor Signature Modal */}
-      {showSignatureModal && signingInspection && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">
-              {language === 'es' ? 'Firmar como Supervisor' : 'Sign as Supervisor'}
-            </h3>
-            <div className="mb-4">
-              <p className="text-sm text-slate-600 mb-2">
-                {language === 'es' ? 'Inspección:' : 'Inspection:'} {signingInspection.trailer_number || signingInspection.container_number}
-              </p>
-              <p className="text-sm text-slate-600">
-                {language === 'es' ? '¿Desea firmar esta inspección como supervisor?' : 'Do you want to sign this inspection as supervisor?'}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowSignatureModal(false)
-                  setSigningInspection(null)
-                }}
-                className="flex-1 py-2 px-4 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50"
-              >
-                {language === 'es' ? 'Cancelar' : 'Cancel'}
-              </button>
-              <button
-                onClick={() => handleSignatureSubmit({})}
-                className="flex-1 py-2 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-              >
-                {language === 'es' ? 'Firmar' : 'Sign'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SignatureCanvas
+        open={showSignatureModal}
+        onClose={() => {
+          setShowSignatureModal(false)
+          setSigningInspection(null)
+          setSignatureData(null)
+        }}
+        onSave={handleSignatureSubmit}
+        title={language === 'es' ? 'Firmar como Supervisor' : 'Sign as Supervisor'}
+        signerName={user?.full_name || 'Supervisor'}
+      />
     </div>
   )
 }
