@@ -12,7 +12,11 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const sql = getSql()
-      const id = req.query.id || req.url.split('/')[3]
+      const id = req.query.id || (req.params && req.params.id)
+
+      if (!id) {
+        return res.status(400).json({ error: 'Inspection ID is required' })
+      }
 
       const [inspection] = await sql`
         SELECT pdf_filename, pdf_data
