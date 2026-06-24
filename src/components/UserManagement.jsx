@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle, RefreshCw, Key, EyeOff, Copy, UserX, MapPin } from 'lucide-react'
+import { Users, Plus, Edit2, Trash2, Save, X, Search, Shield, Eye, UserCheck, Crown, CheckCircle2, AlertTriangle, RefreshCw, Key, EyeOff, Copy, UserX, MapPin, User } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -12,6 +12,7 @@ const LOCATIONS = [
 ]
 
 const ROLES = [
+  { id: 'operator', label: { es: 'Operador', en: 'Operator' }, icon: User, color: 'bg-slate-500' },
   { id: 'guard', label: { es: 'Guardia', en: 'Guard' }, icon: Shield, color: 'bg-blue-500' },
   { id: 'inspector', label: { es: 'Inspector', en: 'Inspector' }, icon: Eye, color: 'bg-emerald-500' },
   { id: 'supervisor', label: { es: 'Supervisor', en: 'Supervisor' }, icon: UserCheck, color: 'bg-purple-500' },
@@ -161,6 +162,12 @@ export default function UserManagement() {
   }
 
   const handleEdit = (emp) => {
+    // Use yard_code to find matching yard IDs from the yards list
+    const assignedYardCodes = emp.yard_assignments?.map(ya => ya.yard_code).filter(Boolean) || []
+    const yardIds = yards
+      .filter(yard => assignedYardCodes.includes(yard.code))
+      .map(yard => Number(yard.id))
+    
     setFormData({
       username: emp.username,
       password: '',
@@ -168,7 +175,7 @@ export default function UserManagement() {
       role: emp.role,
       location_id: emp.location_id || null,
       location_name: emp.location_name || '',
-      yard_assignments: emp.yard_assignments?.map(ya => Number(ya.yard_id)).filter(id => !isNaN(id)) || [],
+      yard_assignments: yardIds,
       current_password: emp.password_hash || '',
       active: emp.active !== false,
       showPasswordReset: false

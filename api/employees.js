@@ -105,7 +105,7 @@ export default async function handler(req, res) {
 
         // Get all active yard assignments for this employee
         const yardAssignments = await sql`
-          SELECT ya.id as assignment_id, ya.yard_id, y.name as yard_name, y.code as yard_code, y.type as yard_type
+          SELECT ya.id as assignment_id, ya.yard_id as yard_id, y.name as yard_name, y.code as yard_code, y.type as yard_type
           FROM yard_assignments ya
           JOIN yards y ON ya.yard_id = y.id
           WHERE ya.employee_id = ${parseInt(req.query.id)} AND ya.is_active = true
