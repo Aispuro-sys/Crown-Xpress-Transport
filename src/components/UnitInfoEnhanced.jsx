@@ -1351,9 +1351,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     )
   }
 
-  // Step: Enter seal/lock for LOADED inspections (after container number) - NOT for FLATBED or RABON
+  // Step: Enter seal/lock for LOADED and EMPTY inspections (after container number) - NOT for FLATBED or RABON
   // FLATBED (plataforma) and RABON do not require seal or lock
-  if (inspectionType === 'LOADED' && containerNumberEntered && !sealLockEntered && trailerType !== 'FLATBED' && trailerType !== 'RABON') {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && containerNumberEntered && !sealLockEntered && trailerType !== 'FLATBED' && trailerType !== 'RABON') {
     return (
       <section className="card animate-slide-up">
         <div className="card-header flex items-center gap-3">
