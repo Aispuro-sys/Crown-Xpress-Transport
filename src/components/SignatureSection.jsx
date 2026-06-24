@@ -8,10 +8,11 @@ import SignatureCanvas from './SignatureCanvas'
 
 export default function SignatureSection() {
   const { t, language } = useLanguage()
-  const { guardSignature, supervisorSignature, setGuardSignature, setSupervisorSignature, unitInfo, points, completedCount } = useInspection()
+  const { guardSignature, supervisorSignature, operatorSignature, setGuardSignature, setSupervisorSignature, setOperatorSignature, unitInfo, points, completedCount } = useInspection()
   const { user } = useAuth()
   const [showGuardSignature, setShowGuardSignature] = useState(false)
   const [showSupervisorSignature, setShowSupervisorSignature] = useState(false)
+  const [showOperatorSignature, setShowOperatorSignature] = useState(false)
   const [enableSupervisor, setEnableSupervisor] = useState(false)
   
   // Check if all points are completed
@@ -38,6 +39,15 @@ export default function SignatureSection() {
       signedAt: new Date().toISOString()
     })
     setShowSupervisorSignature(false)
+  }
+
+  const handleOperatorSignatureSave = (signature) => {
+    setOperatorSignature({
+      name: unitInfo?.driverName?.toUpperCase() || '',
+      signature,
+      signedAt: new Date().toISOString()
+    })
+    setShowOperatorSignature(false)
   }
 
   return (
@@ -123,7 +133,63 @@ export default function SignatureSection() {
         </div>
         )}
 
-        {/* Auditor Signature - Optional with checkbox */}
+        {/* Operator Signature - Show when all points completed and driver name is available */}
+        {allPointsCompleted && unitInfo?.driverName && (
+        <div className="border border-slate-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <User className="w-4 h-4 text-crown-navy" />
+            <h3 className="font-semibold text-slate-700">
+              {language === 'es' ? 'Firma del Operador' : 'Operator Signature'}
+            </h3>
+          </div>
+
+          {/* Show operator name */}
+          <div className="bg-slate-50 rounded-lg px-3 py-2 mb-3">
+            <p className="text-xs text-slate-500 mb-1">
+              {language === 'es' ? 'Operador:' : 'Operator:'}
+            </p>
+            <p className="font-semibold text-crown-navy">{unitInfo?.driverName?.toUpperCase() || '—'}</p>
+          </div>
+
+          {operatorSignature?.signature ? (
+            <div className="space-y-3">
+              <div className="border border-slate-200 rounded p-2 bg-white">
+                <img
+                  src={operatorSignature.signature}
+                  alt="Operator signature"
+                  className="h-20 object-contain"
+                />
+              </div>
+              <div className="text-sm text-slate-600">
+                <p><strong>{language === 'es' ? 'Nombre:' : 'Name:'}</strong> {operatorSignature?.name || '—'}</p>
+                <p><strong>{language === 'es' ? 'Fecha:' : 'Date:'}</strong> {operatorSignature?.signedAt ? new Date(operatorSignature.signedAt).toLocaleString(language === 'es' ? 'es-MX' : 'en-US') : '—'}</p>
+              </div>
+              <button
+                onClick={() => setShowOperatorSignature(true)}
+                className="btn-secondary text-sm"
+              >
+                <PenTool className="w-4 h-4" />
+                {language === 'es' ? 'Cambiar firma' : 'Change signature'}
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-slate-600 mb-3">
+                {language === 'es' ? 'Se requiere firma del operador' : 'Operator signature required'}
+              </p>
+              <button
+                onClick={() => setShowOperatorSignature(true)}
+                className="btn-gold"
+              >
+                <PenTool className="w-4 h-4" />
+                {language === 'es' ? 'Firmar como Operador' : 'Sign as Operator'}
+              </button>
+            </div>
+          )}
+        </div>
+        )}
+
+        {/* Supervisor Signature - Optional with checkbox */}
         {allPointsCompleted && (
         <div className="border border-slate-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
@@ -217,6 +283,14 @@ export default function SignatureSection() {
         onSave={handleSupervisorSignatureSave}
         title={language === 'es' ? 'Firma del Supervisor' : 'Supervisor Signature'}
         signerName={supervisorSignature?.name || ''}
+      />
+
+      <SignatureCanvas
+        open={showOperatorSignature}
+        onClose={() => setShowOperatorSignature(false)}
+        onSave={handleOperatorSignatureSave}
+        title={language === 'es' ? 'Firma del Operador' : 'Operator Signature'}
+        signerName={unitInfo?.driverName?.toUpperCase() || ''}
       />
     </section>
   )

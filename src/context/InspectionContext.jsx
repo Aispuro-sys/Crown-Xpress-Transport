@@ -125,7 +125,7 @@ export function InspectionProvider({ children }) {
     operatorSigned: !!(operatorSignature?.signature && operatorSignature?.name?.trim()),
   }
 
-  const canSubmit = validation.allPointsEvaluated && validation.failuresHaveIssue && validation.failuresHavePhoto && validation.guardSigned && validation.sealPhotoValid
+  const canSubmit = validation.allPointsEvaluated && validation.failuresHaveIssue && validation.failuresHavePhoto && validation.guardSigned && validation.sealPhotoValid && (!unitInfo?.driverName || validation.operatorSigned)
 
   return (
     <InspectionContext.Provider value={{
