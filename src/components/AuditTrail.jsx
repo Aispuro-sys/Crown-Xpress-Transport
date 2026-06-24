@@ -62,7 +62,7 @@ export default function AuditTrail({ inspectionId, className = '' }) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-2 text-center">
+      <div className="grid grid-cols-2 gap-2 text-center">
         <div className="bg-emerald-50 rounded-lg p-2">
           <div className="text-lg font-bold text-emerald-700">{inspection.total_good}</div>
           <div className="text-xs text-emerald-600">{t('good')}</div>
@@ -70,10 +70,6 @@ export default function AuditTrail({ inspectionId, className = '' }) {
         <div className="bg-rose-50 rounded-lg p-2">
           <div className="text-lg font-bold text-rose-700">{inspection.total_bad}</div>
           <div className="text-xs text-rose-600">{t('bad')}</div>
-        </div>
-        <div className="bg-slate-100 rounded-lg p-2">
-          <div className="text-lg font-bold text-slate-700">{inspection.total_pending}</div>
-          <div className="text-xs text-slate-600">{t('pending')}</div>
         </div>
       </div>
 
