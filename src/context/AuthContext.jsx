@@ -193,12 +193,12 @@ export function AuthProvider({ children }) {
   }, [user?.id])
 
   const canEdit = () => {
-    const result = user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
+    const result = user?.role === 'guard' || user?.role === 'supervisor' || user?.role === 'admin'
     console.log('canEdit check:', { userRole: user?.role, result })
     return result
   }
   const canViewAll = () => user?.role === 'supervisor' || user?.role === 'admin'
-  const canReconfirm = () => user?.role === 'guard' || user?.role === 'inspector' || user?.role === 'admin'
+  const canReconfirm = () => user?.role === 'guard' || user?.role === 'supervisor' || user?.role === 'admin'
 
   return (
     <AuthContext.Provider value={{ user, login, logout, refreshUser, loading, canEdit, canViewAll, canReconfirm }}>
