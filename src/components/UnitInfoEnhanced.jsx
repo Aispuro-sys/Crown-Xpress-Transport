@@ -134,15 +134,17 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     setEquipmentOwner(unitInfo?.equipmentOwner || null)
     setCrownFleet(unitInfo?.crownFleet || null)
     setCustomerPrefix(unitInfo?.customerPrefix || null)
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet, unitInfo?.customerPrefix])
 
-    // Clear operator when inspection type changes to ensure correct flow order
+  // Clear operator when inspection type changes to ensure correct flow order
+  useEffect(() => {
     if (unitInfo?.inspectionType) {
       updateUnitInfo('driverName', '')
       updateUnitInfo('employeeNumber', '')
       setOperatorFound(null)
       setOperatorStepCompleted(false)
     }
-  }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet, unitInfo?.customerPrefix])
+  }, [unitInfo?.inspectionType])
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {
@@ -282,6 +284,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     // Guard name is auto-assigned from logged in user
     updateUnitInfo('guardName', user?.full_name || '')
     updateUnitInfo('location', user?.location_name || '')
+    // Clear operator on mount to ensure correct flow order
+    updateUnitInfo('driverName', '')
+    updateUnitInfo('employeeNumber', '')
+    setOperatorFound(null)
+    setOperatorStepCompleted(false)
   }, [user, updateUnitInfo])
 
   // Load all operators when list mode is selected
