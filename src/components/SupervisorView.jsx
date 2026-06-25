@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Filter, MapPin, User, Truck, Download, FileText, Search, ChevronRight, X, PenTool, Eye } from 'lucide-react'
+import { Filter, MapPin, User, Truck, Download, FileText, Search, ChevronRight, X, PenTool, Eye, CheckCircle } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { listInspections, downloadPdf, signSupervisor, getInspection } from '../utils/api'
@@ -55,6 +55,7 @@ export default function SupervisorView() {
   const [filterDateFrom, setFilterDateFrom] = useState('')
   const [filterDateTo, setFilterDateTo] = useState('')
   const [groupBy, setGroupBy] = useState('yard') // yard, guard, trailer, none
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   useEffect(() => {
     load()
@@ -350,7 +351,7 @@ export default function SupervisorView() {
       setSigningInspection(null)
       setSignatureData(null)
 
-      alert(language === 'es' ? 'Inspección firmada exitosamente' : 'Inspection signed successfully')
+      setShowSuccessModal(true)
     } catch (err) {
       alert(language === 'es' ? `Error firmando inspección: ${err.message}` : `Error signing inspection: ${err.message}`)
     }
@@ -691,6 +692,33 @@ export default function SupervisorView() {
         title={language === 'es' ? 'Firmar como Supervisor' : 'Sign as Supervisor'}
         signerName={user?.full_name || 'Supervisor'}
       />
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                {language === 'es' ? '¡Firmado Exitosamente!' : 'Successfully Signed!'}
+              </h3>
+              <p className="text-slate-600 mb-6">
+                {language === 'es'
+                  ? 'La inspección ha sido firmada y el PDF ha sido actualizado.'
+                  : 'The inspection has been signed and the PDF has been updated.'}
+              </p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="btn-gold w-full"
+              >
+                {language === 'es' ? 'Aceptar' : 'OK'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
