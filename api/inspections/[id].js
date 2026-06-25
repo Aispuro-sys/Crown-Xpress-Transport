@@ -29,17 +29,13 @@ export default async function handler(req, res) {
       }
 
       const [inspection] = await sql`
-        SELECT pdf_filename, pdf_data, trailer_number, seal_number, lock_number, driver_name, location, inspection_date, inspection_type, trailer_type, guard_name, guard_signature, guard_signed_at, supervisor_name, supervisor_signature, supervisor_signed_at, operator_name, operator_signature, language, tractor_number, container_number, equipment_nomenclature, customer_prefix, odometer, high_security_seal, seal_affixed, wono
+        SELECT pdf_filename, encode(pdf_data, 'hex') as pdf_data_hex, trailer_number, seal_number, lock_number, driver_name, location, inspection_date, inspection_type, trailer_type, guard_name, guard_signature, guard_signed_at, supervisor_name, supervisor_signature, supervisor_signed_at, operator_name, operator_signature, language, tractor_number, container_number, equipment_nomenclature, customer_prefix, odometer, high_security_seal, seal_affixed, wono
         FROM inspections
         WHERE id = ${inspectionId}
       `.then(rows => {
-        // Try to decode pdf_data if it's a hex string
-        if (rows[0]?.pdf_data && typeof rows[0].pdf_data === 'string') {
-          const pdfData = rows[0].pdf_data
-          // Check if it's hex encoded
-          if (pdfData.match(/^[0-9a-fA-F]+$/)) {
-            rows[0].pdf_data = Buffer.from(pdfData, 'hex')
-          }
+        if (rows[0]?.pdf_data_hex) {
+          rows[0].pdf_data = Buffer.from(rows[0].pdf_data_hex, 'hex')
+          delete rows[0].pdf_data_hex
         }
         return rows
       })
