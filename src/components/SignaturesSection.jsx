@@ -37,19 +37,26 @@ export default function SignaturesSection() {
   // Load supervisors for current yard
   useEffect(() => {
     const loadSupervisors = async () => {
-      const yardCode = unitInfo?.location || user?.location_name
+      // Use yard_assignments from user to determine yard code
+      const userYards = user?.yard_assignments || []
+      const yardCode = unitInfo?.location || (userYards.length > 0 ? userYards[0].yard_code : user?.location_name)
       if (!yardCode) return
-      
+
       setLoadingSupervisors(true)
       try {
         const sups = await getSupervisorsByYard(yardCode)
         setSupervisors(sups)
-        
+
         // If only one supervisor, enable supervisor and auto-select name
         // Only if user hasn't explicitly disabled supervisor signature
         if (sups.length === 1 && !supervisorSignature?.name && !supervisorSignature?.signature) {
           setEnableSupervisor(true)
           setSupervisorSignature(prev => ({ ...prev, name: sups[0].full_name.toUpperCase(), signature: null, signedAt: null }))
+        }
+        // If multiple supervisors, enable supervisor but don't auto-select (user must choose)
+        else if (sups.length > 1 && !supervisorSignature?.name && !supervisorSignature?.signature) {
+          setEnableSupervisor(true)
+          setSupervisorSignature(prev => ({ ...prev, name: '', signature: null, signedAt: null }))
         }
       } catch (err) {
         console.error('Error loading supervisors:', err)
@@ -57,9 +64,9 @@ export default function SignaturesSection() {
         setLoadingSupervisors(false)
       }
     }
-    
+
     loadSupervisors()
-  }, [unitInfo?.location, user?.location_name])
+  }, [unitInfo?.location, user?.yard_assignments, user?.location_name])
 
   // Hide entire signatures section until all points are completed
   if (!allPointsCompleted) {

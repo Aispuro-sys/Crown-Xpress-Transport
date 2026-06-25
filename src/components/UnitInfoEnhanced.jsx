@@ -283,7 +283,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('inspectionDate', today)
     // Guard name is auto-assigned from logged in user
     updateUnitInfo('guardName', user?.full_name || '')
-    updateUnitInfo('location', user?.location_name || '')
+    // Use yard_assignments to determine location
+    // If user has multiple yards, use the first one (could be enhanced to let user select)
+    const userYards = user?.yard_assignments || []
+    const primaryYard = userYards.length > 0 ? userYards[0].yard_code : user?.location_name || ''
+    updateUnitInfo('location', primaryYard)
     // Clear operator on mount to ensure correct flow order
     // Only clear if not already set from NBCW and operatorStepCompleted is false
     if (!operatorFound && !operatorStepCompleted) {
