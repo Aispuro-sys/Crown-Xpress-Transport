@@ -30,8 +30,8 @@ export async function createInspection(req, res) {
     const ip = getClientIp(req)
     const ua = req.headers['user-agent'] || null
 
-    // Strip data:... prefix
-    const pdfDataB64 = String(pdfBase64).replace(/^data:application\/pdf;base64,/, '')
+    // Strip data:... prefix (handle both with and without filename)
+    const pdfDataB64 = String(pdfBase64).replace(/^data:application\/pdf(;[^,]*)?;base64,/, '')
     const pdfBuffer = Buffer.from(pdfDataB64, 'base64')
 
     const inspectionDate = unitInfo.inspectionDate ? new Date(unitInfo.inspectionDate) : new Date()
