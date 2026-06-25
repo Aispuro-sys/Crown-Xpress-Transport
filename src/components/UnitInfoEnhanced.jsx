@@ -416,9 +416,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     // Determinar automáticamente tipo de inspección y pre-llenar datos
     handleInspectionTypeChange(tprType)
 
-    // Datos básicos del operador - NO establecer automáticamente, se capturará en paso de búsqueda de operador
-    // updateUnitInfo('driverName', movementData.operator || '')
-    // updateUnitInfo('employeeNumber', movementData.driverCode || '')
+    // Datos básicos del operador - Usar código de conductor de NBCW como driver_name
+    updateUnitInfo('driverName', movementData.driverCode || movementData.operator || '')
+    updateUnitInfo('employeeNumber', movementData.driverCode || '')
     updateUnitInfo('workOrder', movementData.workOrder || '')
     updateUnitInfo('origin', movementData.origin || {})
     updateUnitInfo('destination', movementData.destination || {})
@@ -436,12 +436,12 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     const nomenclatureMatch = eqpCode.match(/[A-Z]+-?(\d+)/i)
     updateUnitInfo('equipmentNumber', nomenclatureMatch ? nomenclatureMatch[1] : '')
     
-    // NO establecer el operador automáticamente - se capturará en paso de búsqueda de operador
-    // setOperatorFound({
-    //   fullName: movementData.operator || 'Desconocido',
-    //   employeeNumber: movementData.driverCode || 'TPR'
-    // })
-    // setOperatorStepCompleted(true)
+    // Establecer el operador automáticamente desde NBCW - saltar modal de búsqueda
+    setOperatorFound({
+      fullName: movementData.driverCode || movementData.operator || 'Desconocido',
+      employeeNumber: movementData.driverCode || 'TPR'
+    })
+    setOperatorStepCompleted(true)
     
     if (isBotada) {
       // BOTADO: truckid es el tractor, eqpcode es '** Botada **'
