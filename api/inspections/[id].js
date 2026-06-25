@@ -34,6 +34,10 @@ export default async function handler(req, res) {
         WHERE id = ${inspectionId}
       `
 
+      console.log('Inspection found:', !!inspection, 'Has PDF data:', !!(inspection?.pdf_data))
+      console.log('PDF data type:', typeof inspection?.pdf_data, 'Length:', inspection?.pdf_data?.length || 0)
+      console.log('PDF data is Buffer:', Buffer.isBuffer(inspection?.pdf_data))
+
       if (!inspection) {
         return res.status(404).json({ error: 'Inspection not found' })
       }
@@ -41,23 +45,32 @@ export default async function handler(req, res) {
       if (inspection.pdf_data) {
         // Return stored PDF as binary buffer
         let pdfData = inspection.pdf_data
+        console.log('pdfData before processing - type:', typeof pdfData, 'isBuffer:', Buffer.isBuffer(pdfData))
+        console.log('pdfData length:', pdfData?.length || 0)
         let pdfBuffer
         if (Buffer.isBuffer(pdfData)) {
           pdfBuffer = pdfData
+          console.log('Using Buffer directly')
         } else if (typeof pdfData === 'string') {
           // Try to detect if it's base64 or hex
           if (pdfData.startsWith('data:application/pdf')) {
+            console.log('Removing data URI prefix from string PDF')
             pdfData = pdfData.replace(/^data:application\/pdf(;[^,]*)?;base64,/, '')
             pdfBuffer = Buffer.from(pdfData, 'base64')
+            console.log('Decoded as base64 after removing prefix')
           } else if (pdfData.match(/^[0-9a-fA-F]+$/)) {
+            console.log('Decoding as hex string')
             pdfBuffer = Buffer.from(pdfData, 'hex')
           } else {
+            console.log('Decoding as base64 string')
             pdfBuffer = Buffer.from(pdfData, 'base64')
           }
         } else {
+          console.log('Unknown type, trying to convert to buffer')
           pdfBuffer = Buffer.from(pdfData)
         }
 
+        console.log('PDF buffer length:', pdfBuffer.length, 'First 20 bytes:', pdfBuffer.slice(0, 20).toString('hex'))
         res.setHeader('Content-Type', 'application/pdf')
         res.setHeader('Content-Disposition', `inline; filename="${inspection.pdf_filename || `inspection-${id}.pdf`}"`)
         res.setHeader('Content-Length', pdfBuffer.length)
