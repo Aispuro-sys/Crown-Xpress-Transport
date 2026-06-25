@@ -557,7 +557,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
           // Extraer numero de rabon del eqpcode (R###)
           const rabonNumber = eqpUpper.match(/^R(\d{3})/)?.[1] || ''
-          updateUnitInfo('trailerNumber', rabonNumber)
+          // Guardar la nomenclatura completa (R###) en trailerNumber
+          const rabonNomenclature = eqpUpper.match(/^R(\d{3})/)?.[0] || ''
+          updateUnitInfo('trailerNumber', rabonNomenclature)
           setContainerNumberEntered(!!rabonNumber)
 
           // Rabones son de CROWN
