@@ -46,18 +46,7 @@ export default function SignaturesSection() {
       try {
         const sups = await getSupervisorsByYard(yardCode)
         setSupervisors(sups)
-
-        // If only one supervisor, enable supervisor and auto-select name
-        // Only if user hasn't explicitly disabled supervisor signature
-        if (sups.length === 1 && !supervisorSignature?.name && !supervisorSignature?.signature) {
-          setEnableSupervisor(true)
-          setSupervisorSignature(prev => ({ ...prev, name: sups[0].full_name.toUpperCase(), signature: null, signedAt: null }))
-        }
-        // If multiple supervisors, enable supervisor but don't auto-select (user must choose)
-        else if (sups.length > 1 && !supervisorSignature?.name && !supervisorSignature?.signature) {
-          setEnableSupervisor(true)
-          setSupervisorSignature(prev => ({ ...prev, name: '', signature: null, signedAt: null }))
-        }
+        // No longer auto-enable supervisor - user must manually enable it
       } catch (err) {
         console.error('Error loading supervisors:', err)
       } finally {
