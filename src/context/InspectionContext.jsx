@@ -33,6 +33,7 @@ export function InspectionProvider({ children }) {
     sealNumber: '',
     lockNumber: '',
     driverName: '',
+    employeeNumber: '',
     inspectionDate: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Tijuana' }),
     guardName: '',
     highSecuritySeal: 'yes',
@@ -81,7 +82,9 @@ export function InspectionProvider({ children }) {
     setUnitInfo({
       trailerNumber: '',
       sealNumber: '',
+      lockNumber: '',
       driverName: '',
+      employeeNumber: '',
       inspectionDate: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Tijuana' }),
       guardName: '',
       highSecuritySeal: 'yes',

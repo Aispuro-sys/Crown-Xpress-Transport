@@ -285,15 +285,15 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('guardName', user?.full_name || '')
     updateUnitInfo('location', user?.location_name || '')
     // Clear operator on mount to ensure correct flow order
-    // Only clear if not already set from NBCW
-    if (!operatorFound) {
+    // Only clear if not already set from NBCW and operatorStepCompleted is false
+    if (!operatorFound && !operatorStepCompleted) {
       updateUnitInfo('driverName', '')
       updateUnitInfo('employeeNumber', '')
       setOperatorStepCompleted(false)
     }
     console.log('DEBUG: On mount, setting sealLockEntered to false')
     setSealLockEntered(false)
-  }, [user, updateUnitInfo])
+  }, [user, updateUnitInfo, operatorFound, operatorStepCompleted])
 
   // Load all operators when list mode is selected
   useEffect(() => {
