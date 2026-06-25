@@ -37,6 +37,14 @@ export async function createInspection(req, res) {
     // Support both old camelCase (trailerNumber) and new snake_case (trailer_number)
     const ui = unitInfo
     const trailer_number = ui.trailer_number || ui.trailerNumber || null
+
+    console.log('Create inspection unitInfo:', {
+      equipmentNomenclature: ui.equipmentNomenclature || ui.equipment_nomenclature,
+      customerPrefix: ui.customerPrefix || ui.customer_prefix,
+      crownFleet: ui.crownFleet || ui.crown_fleet,
+      trailerNumber: trailer_number,
+      tractorNumber: ui.tractorNumber || ui.tractor_number
+    })
     const seal_number = ui.seal_number || ui.sealNumber || null
     const lock_number = ui.lock_number || ui.lockNumber || null
     const driver_name = ui.driver_name || ui.driverName || null
@@ -55,7 +63,7 @@ export async function createInspection(req, res) {
         status, total_good, total_bad, total_pending,
         pdf_filename, pdf_data, pdf_size_bytes,
         created_ip, created_user_agent,
-        equipment_nomenclature, tractor_number, container_number, customer_prefix
+        equipment_nomenclature, tractor_number, container_number, customer_prefix, crown_fleet
       ) VALUES (
         ${trailer_number},
         ${seal_number},
@@ -78,7 +86,7 @@ export async function createInspection(req, res) {
         ${supervisorSignature?.signedAt ? new Date(supervisorSignature.signedAt) : null},
         ${auditorSignature.name || null},
         ${auditorSignature.signedAt ? new Date(auditorSignature.signedAt) : null},
-        ${auditorSignature.signature ? 'audited' : (supervisorSignature?.signature ? 'completed' : 'pending')},
+        ${auditorSignature.signature && guardSignature?.signature ? 'audited' : (supervisorSignature?.signature && guardSignature?.signature ? 'completed' : 'pending')},
         ${counts.good || 0},
         ${counts.bad || 0},
         0,
@@ -90,7 +98,8 @@ export async function createInspection(req, res) {
         ${ui.equipmentNomenclature || ui.equipment_nomenclature || null},
         ${ui.tractorNumber || ui.tractor_number || null},
         ${ui.containerNumber || ui.container_number || null},
-        ${ui.customerPrefix || ui.customer_prefix || null}
+        ${ui.customerPrefix || ui.customer_prefix || null},
+        ${ui.crownFleet || ui.crown_fleet || null}
       )
       RETURNING id, inspection_uuid, created_at
     `

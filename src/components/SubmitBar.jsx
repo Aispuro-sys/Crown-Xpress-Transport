@@ -75,6 +75,8 @@ export default function SubmitBar({ onSuccess }) {
         supervisorSignature: payload.supervisorSignature,
         status: payload.supervisorSignature?.signature ? 'completed' : 'pending',
         equipmentNomenclature: payload.unitInfo?.equipmentNomenclature,
+        customerPrefix: payload.unitInfo?.customerPrefix,
+        crownFleet: payload.unitInfo?.crownFleet,
         trailerNumber: payload.unitInfo?.trailerNumber
       })
       const uploadResult = await createInspection(payload)

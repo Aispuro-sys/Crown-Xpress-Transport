@@ -7,6 +7,23 @@ import { generateInspectionPDF } from '../utils/pdfGenerator'
 import AuditTrail from './AuditTrail'
 import SignatureCanvas from './SignatureCanvas'
 
+// Format equipment display combining prefix/fleet + nomenclature/number
+const formatEquipment = (insp) => {
+  let prefix = insp.customer_prefix || insp.crown_fleet || ''
+  let nomenclature = insp.equipment_nomenclature || insp.trailer_number || insp.tractor_number || ''
+  // Fallback: extract prefix from nomenclature if not stored separately (e.g. "CXT-12345")
+  if (!prefix && nomenclature && nomenclature.includes('-')) {
+    const parts = nomenclature.split('-')
+    if (parts.length >= 2 && /^[A-Z]+$/i.test(parts[0])) {
+      prefix = parts[0].toUpperCase()
+    }
+  }
+  if (prefix && nomenclature) {
+    return `${prefix}-${nomenclature}`
+  }
+  return nomenclature || `#${insp.id}`
+}
+
 export default function SupervisorView() {
   const { t, language } = useLanguage()
   const { user } = useAuth()
@@ -486,9 +503,7 @@ export default function SupervisorView() {
                         }`} />
                         <div className="text-left min-w-0">
                           <div className="font-semibold text-sm text-slate-800 truncate">
-                            {(insp.customer_prefix && insp.equipment_nomenclature
-                              ? `${insp.customer_prefix}-${insp.equipment_nomenclature}`
-                              : insp.equipment_nomenclature) || (insp.inspection_type === 'BOBTAIL' ? (insp.tractor_number || '—') : (insp.trailer_number || '—'))}
+                            {formatEquipment(insp)}
                           </div>
                           <div className="text-xs text-slate-500 truncate">
                             {new Date(insp.created_at).toLocaleString()} · {insp.guard_name}
@@ -556,11 +571,7 @@ export default function SupervisorView() {
                         <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                           <div>
                             <span className="text-slate-500">{language === 'es' ? 'Equipo:' : 'Equipment:'}</span>
-                            <span className="font-semibold text-slate-700 ml-1">
-                              {(insp.customer_prefix && insp.equipment_nomenclature
-                                ? `${insp.customer_prefix}-${insp.equipment_nomenclature}`
-                                : insp.equipment_nomenclature) || insp.trailer_number || insp.tractor_number || '—'}
-                            </span>
+                            <span className="font-semibold text-slate-700 ml-1">{formatEquipment(insp)}</span>
                           </div>
                           <div>
                             <span className="text-slate-500">{language === 'es' ? 'Sello:' : 'Seal:'}</span>

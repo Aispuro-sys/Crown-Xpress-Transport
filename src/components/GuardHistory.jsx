@@ -32,6 +32,23 @@ const trailerTypeLabel = (code, lang) => {
   return cfg ? cfg[lang] : code
 }
 
+// Format equipment display combining prefix/fleet + nomenclature/number
+const formatEquipment = (insp) => {
+  let prefix = insp.customer_prefix || insp.crown_fleet || ''
+  let nomenclature = insp.equipment_nomenclature || insp.trailer_number || insp.tractor_number || ''
+  // Fallback: extract prefix from nomenclature if not stored separately (e.g. "CXT-12345")
+  if (!prefix && nomenclature && nomenclature.includes('-')) {
+    const parts = nomenclature.split('-')
+    if (parts.length >= 2 && /^[A-Z]+$/i.test(parts[0])) {
+      prefix = parts[0].toUpperCase()
+    }
+  }
+  if (prefix && nomenclature) {
+    return `${prefix}-${nomenclature}`
+  }
+  return nomenclature || `#${insp.id}`
+}
+
 /**
  * GuardHistory: read-only history of inspections done by the current guard.
  * Guard cannot edit/delete. Can only create reconfirmations linked to original.
@@ -560,9 +577,7 @@ export default function GuardHistory() {
                       {expanded[group.original.id] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
                       <div className="min-w-0">
                         <div className="font-semibold text-slate-800 truncate">
-                          {(group.original.customer_prefix && group.original.equipment_nomenclature
-                            ? `${group.original.customer_prefix}-${group.original.equipment_nomenclature}`
-                            : group.original.equipment_nomenclature) || group.original.trailer_number || group.original.tractor_number || `#${group.original.id}`} · {group.original.guard_name || group.original.driver_name}
+                          {formatEquipment(group.original)} · {group.original.guard_name || group.original.driver_name}
                         </div>
                         <div className="text-xs text-slate-500 truncate">
                           {new Date(group.original.created_at).toLocaleString()} · {group.original.location}
@@ -613,11 +628,7 @@ export default function GuardHistory() {
                       <div className="px-4 py-3 grid grid-cols-2 gap-2 text-xs border-b">
                         <div>
                           <span className="text-slate-500">{language === 'es' ? 'Equipo:' : 'Equipment:'}</span>
-                          <span className="font-semibold text-slate-700 ml-1">
-                            {(group.original.customer_prefix && group.original.equipment_nomenclature
-                              ? `${group.original.customer_prefix}-${group.original.equipment_nomenclature}`
-                              : group.original.equipment_nomenclature) || group.original.trailer_number || group.original.tractor_number || '—'}
-                          </span>
+                          <span className="font-semibold text-slate-700 ml-1">{formatEquipment(group.original)}</span>
                         </div>
                         <div>
                           <span className="text-slate-500">{language === 'es' ? 'Tractor/Camión:' : 'Tractor/Truck:'}</span>
