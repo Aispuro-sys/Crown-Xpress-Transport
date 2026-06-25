@@ -1,6 +1,13 @@
 import sql from 'mssql'
 import { Client } from '@neondatabase/serverless'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+// Cargar .env desde la carpeta donde esta este script
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+dotenv.config({ path: join(__dirname, '.env') })
 
 // ============================================================
 // Script de sincronizacion NBCW (SQL Server) -> Neon (PostgreSQL)
