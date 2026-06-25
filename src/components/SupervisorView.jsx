@@ -328,6 +328,7 @@ export default function SupervisorView() {
 
       const pdfBase64 = pdfResult.doc.output('datauristring')
       const pdfFilename = pdfResult.filename
+      console.log('PDF generated for supervisor signature:', { filename: pdfFilename, length: pdfBase64.length })
 
       // Sign supervisor with PDF regeneration
       await signSupervisor(signingInspection.id, {
