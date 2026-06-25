@@ -66,15 +66,21 @@ export async function downloadPdf(id) {
   const res = await fetch(`${API_BASE}/inspections/${id}?pdf=true`)
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`Failed to download PDF: ${res.status} ${text}`)
+    const error = `Failed to download PDF: ${res.status} ${text}`
+    alert(error)
+    throw new Error(error)
   }
   const contentType = res.headers.get('content-type') || ''
   if (!contentType.includes('application/pdf')) {
-    throw new Error(`Unexpected content type: ${contentType}`)
+    const error = `Unexpected content type: ${contentType}`
+    alert(error)
+    throw new Error(error)
   }
   const blob = await res.blob()
   if (!blob || blob.size === 0) {
-    throw new Error('PDF empty')
+    const error = 'PDF empty'
+    alert(error)
+    throw new Error(error)
   }
   return blob
 }
