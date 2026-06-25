@@ -139,13 +139,17 @@ export default async function handler(req, res) {
       const inspectionId = parseInt(cleanId)
 
       // Prepare PDF update if provided
-      let pdfUpdate = ''
+      let pdfUpdate = {}
       let pdfBuffer = null
       if (pdfBase64) {
         const pdfDataB64 = String(pdfBase64).replace(/^data:application\/pdf;base64,/, '')
         pdfBuffer = Buffer.from(pdfDataB64, 'base64')
         console.log('PDF buffer length:', pdfBuffer.length)
-        pdfUpdate = `, pdf_filename = ${pdfFilename || 'inspection.pdf'}, pdf_data = ${pdfBuffer}, pdf_size_bytes = ${pdfBuffer.length}`
+        pdfUpdate = {
+          pdf_filename: pdfFilename || 'inspection.pdf',
+          pdf_data: pdfBuffer,
+          pdf_size_bytes: pdfBuffer.length
+        }
       }
 
       // Update inspection with supervisor signature and mark as completed
@@ -156,7 +160,7 @@ export default async function handler(req, res) {
             supervisor_signed_at = ${signedAt},
             status = 'completed',
             updated_at = NOW()
-            ${sql.unsafe(pdfUpdate)}
+            ${pdfBase64 ? sql`, pdf_filename = ${pdfUpdate.pdf_filename}, pdf_data = ${pdfUpdate.pdf_data}, pdf_size_bytes = ${pdfUpdate.pdf_size_bytes}` : sql``}
         WHERE id = ${inspectionId}
         RETURNING *
       `
