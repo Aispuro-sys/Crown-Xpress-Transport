@@ -46,8 +46,9 @@ export default function SignaturesSection() {
         setSupervisors(sups)
         
         // If only one supervisor and no name selected, auto-select
+        // Only set name, not signature - signature must be manually added
         if (sups.length === 1 && !supervisorSignature?.name) {
-          setSupervisorSignature(prev => ({ ...prev, name: sups[0].full_name.toUpperCase() }))
+          setSupervisorSignature(prev => ({ ...prev, name: sups[0].full_name.toUpperCase(), signature: null, signedAt: null }))
         }
       } catch (err) {
         console.error('Error loading supervisors:', err)
