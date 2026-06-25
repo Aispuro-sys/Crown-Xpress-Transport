@@ -1,5 +1,6 @@
 -- Verificar si los PDFs están guardados en la base de datos
 SELECT id, trailer_number, inspection_type, pdf_filename,
+       equipment_nomenclature, customer_prefix, crown_fleet,
        CASE
          WHEN pdf_data IS NOT NULL THEN 'YES'
          ELSE 'NO'
