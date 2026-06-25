@@ -44,6 +44,10 @@ const formatEquipment = (insp) => {
     }
   }
   if (prefix && nomenclature) {
+    // Avoid duplicating prefix if nomenclature already starts with it
+    if (nomenclature.toUpperCase().startsWith(`${prefix.toUpperCase()}-`)) {
+      return nomenclature
+    }
     return `${prefix}-${nomenclature}`
   }
   return nomenclature || `#${insp.id}`
