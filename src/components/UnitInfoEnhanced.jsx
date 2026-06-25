@@ -580,6 +580,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
           if (eqpUpper.startsWith('CXT')) {
             const match = eqpCode.match(/CXT[-\s]?(\d+)/i)
             boxNumber = match ? match[1] : ''
+            console.log('CXT box extraction:', { eqpCode, match, boxNumber })
           } else if (eqpUpper.startsWith('RBX')) {
             const match = eqpCode.match(/RBX[-\s]?(\d+)/i)
             boxNumber = match ? match[1] : ''
@@ -594,6 +595,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
           } else if (/^D\d{5}/.test(eqpUpper)) {
             boxNumber = eqpUpper.match(/^D(\d{5})/)?.[1] || ''
           }
+          console.log('Box number extracted:', boxNumber)
           updateUnitInfo('trailerNumber', boxNumber)
           setContainerNumberEntered(!!boxNumber)
 
