@@ -142,7 +142,11 @@ export default async function handler(req, res) {
       let pdfUpdate = {}
       let pdfBuffer = null
       if (pdfBase64) {
+        console.log('pdfBase64 starts with data:application/pdf?', pdfBase64.startsWith('data:application/pdf'))
+        console.log('pdfBase64 first 100 chars:', pdfBase64.substring(0, 100))
         const pdfDataB64 = String(pdfBase64).replace(/^data:application\/pdf;base64,/, '')
+        console.log('pdfDataB64 length after removing prefix:', pdfDataB64.length)
+        console.log('pdfDataB64 first 100 chars:', pdfDataB64.substring(0, 100))
         pdfBuffer = Buffer.from(pdfDataB64, 'base64')
         console.log('PDF buffer length:', pdfBuffer.length)
         pdfUpdate = {
