@@ -85,8 +85,15 @@ async function syncTprToNeon() {
     sqlPool = await sql.connect(SQLSERVER_CONFIG)
     console.log('Conectado a SQL Server NBCW')
 
-    // 2. Leer datos de tpr (ultimos 7 dias)
-    // FECHA y DELDATE son varchar(12) en SQL Server, no DATE
+    // Verificar servidor y base de datos actual
+    const serverInfo = await sqlPool.request().query(`SELECT @@SERVERNAME AS server_name, DB_NAME() AS database_name`)
+    console.log(`Servidor: ${serverInfo.recordset[0].server_name}, Base de datos: ${serverInfo.recordset[0].database_name}`)
+
+    const countResult = await sqlPool.request().query(`SELECT COUNT(*) AS total FROM tpr`)
+    console.log(`Total registros en tpr: ${countResult.recordset[0].total}`)
+
+    // 2. Leer todos los datos de tpr
+    // El filtro de fecha se hace en Node.js porque SQL Server es version antigua (sin TRY_CONVERT)
     const result = await sqlPool.request().query(`
       SELECT
         RTRIM(DRVCODE)   AS driver_code,
@@ -116,7 +123,6 @@ async function syncTprToNeon() {
         RTRIM(TABLECODE) AS table_code,
         RTRIM(TRXCODE)   AS trx_code
       FROM tpr
-      WHERE FECHA >= CONVERT(varchar(10), DATEADD(day, -7, GETDATE()), 101)
       ORDER BY FECHA DESC, TIMEARRV DESC
     `)
 
@@ -183,36 +189,53 @@ async function syncTprToNeon() {
       CREATE INDEX IF NOT EXISTS idx_tpr_synced_at ON tpr(synced_at);
     `)
 
-    // 6. Limpiar registros antiguos de mas de 30 dias
-    await neonClient.query(`
-      DELETE FROM tpr
-      WHERE date < CURRENT_DATE - INTERVAL '30 days'
-    `)
+    // 6. Filtrar registros en Node.js por fecha (SQL Server es antiguo y no tiene TRY_CONVERT)
+    const syncDays = parseInt(process.env.TPR_SYNC_DAYS) || 30
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - syncDays)
+    const cutoffStr = cutoffDate.toISOString().split('T')[0]
+    console.log(`Filtrando registros desde ${cutoffStr} (ultimos ${syncDays} dias)`)
+
+    const filteredRows = rows.filter(row => {
+      const rowDate = parseSqlDate(row.fecha_raw)
+      return rowDate && rowDate >= cutoffStr
+    })
+    console.log(`${filteredRows.length} registros dentro del rango de sincronizacion`)
+
+    if (filteredRows.length === 0) {
+      console.log('No hay registros dentro del rango para sincronizar')
+      return
+    }
 
     // 7. Limpiar e insertar todos los registros (sin duplicados, sin clave natural en tpr SQL Server)
     // Usamos DELETE en lugar de TRUNCATE para poder hacer rollback en caso de error
     await neonClient.query('BEGIN')
     await neonClient.query('DELETE FROM tpr')
 
+    // 8. Bulk insert en lotes de 1000 para mejor rendimiento
+    const columns = [
+      'driver_code', 'work_order', 'bill_of_lading', 'fecha_raw', 'date', 'from_code', 'from_city', 'from_state',
+      'to_code', 'to_city', 'to_state', 'movement_type', 'status', 'equipment_type', 'equipment_code',
+      'deldate_raw', 'delivery_date', 'customer', 'arrival_time', 'departure_time', 'operator', 'truck_id', 'seal',
+      'instructions_1', 'instructions_2', 'amount', 'table_code', 'trx_code', 'synced_at'
+    ].join(', ')
+
+    const batchSize = 1000
     let inserted = 0
 
-    for (const row of rows) {
-      const safeDate = parseSqlDate(row.fecha_raw)
-      const safeDeliveryDate = parseSqlDate(row.deldate_raw)
+    for (let i = 0; i < filteredRows.length; i += batchSize) {
+      const batch = filteredRows.slice(i, i + batchSize)
+      const values = []
+      const params = []
+      let paramIndex = 1
 
-      await neonClient.query(
-        `
-        INSERT INTO tpr (
-          driver_code, work_order, bill_of_lading, fecha_raw, date, from_code, from_city, from_state,
-          to_code, to_city, to_state, movement_type, status, equipment_type, equipment_code,
-          deldate_raw, delivery_date, customer, arrival_time, departure_time, operator, truck_id, seal,
-          instructions_1, instructions_2, amount, table_code, trx_code, synced_at
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, NOW()
-        )
-        `,
-        [
+      for (const row of batch) {
+        const safeDate = parseSqlDate(row.fecha_raw)
+        const safeDeliveryDate = parseSqlDate(row.deldate_raw)
+        const placeholders = Array.from({ length: 28 }, (_, j) => `$${paramIndex + j}`).join(', ')
+        values.push(`(${placeholders}, NOW())`)
+
+        params.push(
           row.driver_code || null,
           row.work_order || null,
           row.bill_of_lading || null,
@@ -241,9 +264,14 @@ async function syncTprToNeon() {
           row.amount || null,
           row.table_code || null,
           row.trx_code || null
-        ]
-      )
-      inserted++
+        )
+        paramIndex += 28
+      }
+
+      const query = `INSERT INTO tpr (${columns}) VALUES ${values.join(', ')}`
+      await neonClient.query(query, params)
+      inserted += batch.length
+      console.log(`Insertados ${inserted} de ${filteredRows.length} registros...`)
     }
 
     await neonClient.query('COMMIT')
