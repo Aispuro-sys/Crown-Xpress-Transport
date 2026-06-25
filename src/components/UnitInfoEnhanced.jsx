@@ -92,7 +92,7 @@ const CUSTOMER_CONTAINER_PREFIXES = {
 
 export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLockChange, onInspectionTypeChange, onFlowComplete }) {
   const { t, language } = useLanguage()
-  const { unitInfo, updateUnitInfo } = useInspection()
+  const { unitInfo, updateUnitInfo, operatorFound, setOperatorFound, operatorStepCompleted, setOperatorStepCompleted } = useInspection()
   const { user } = useAuth()
   // Sync local state with context - use context value as source of truth
   const [inspectionType, setInspectionType] = useState(unitInfo?.inspectionType || null)
@@ -108,7 +108,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [containerNumberEntered, setContainerNumberEntered] = useState(!!unitInfo?.trailerNumber)
   const [sealLockEntered, setSealLockEntered] = useState(false)
   const [tractorNumberEntered, setTractorNumberEntered] = useState(!!unitInfo?.tractorNumber)
-  const [operatorStepCompleted, setOperatorStepCompleted] = useState(false) // Always start as false
   // Keypad states
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [keypadField, setKeypadField] = useState(null) // 'trailerNumber', 'chassisNumber', 'sealNumber', 'lockNumber'
@@ -117,7 +116,6 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const [employeeNumber, setEmployeeNumber] = useState('')
   const [operatorName, setOperatorName] = useState('')
   const [operatorSearching, setOperatorSearching] = useState(false)
-  const [operatorFound, setOperatorFound] = useState(null)
   const [operatorError, setOperatorError] = useState(null)
   const [manualOperatorName, setManualOperatorName] = useState('')
   const [showEmptyLoads, setShowEmptyLoads] = useState(false)
@@ -137,14 +135,15 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }, [unitInfo?.inspectionType, unitInfo?.trailerType, unitInfo?.trailerSize, unitInfo?.equipmentOwner, unitInfo?.crownFleet, unitInfo?.customerPrefix])
 
   // Clear operator when inspection type changes to ensure correct flow order
+  // BUT don't clear if operator was already set from NBCW
   useEffect(() => {
-    if (unitInfo?.inspectionType) {
+    if (unitInfo?.inspectionType && !operatorFound && !operatorStepCompleted) {
       updateUnitInfo('driverName', '')
       updateUnitInfo('employeeNumber', '')
       setOperatorFound(null)
       setOperatorStepCompleted(false)
     }
-  }, [unitInfo?.inspectionType])
+  }, [unitInfo?.inspectionType, operatorFound, operatorStepCompleted])
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {

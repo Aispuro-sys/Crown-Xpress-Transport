@@ -47,6 +47,10 @@ export function InspectionProvider({ children }) {
   // Seal photo
   const [sealPhoto, setSealPhoto] = useState(null)
 
+  // Operator selection state
+  const [operatorFound, setOperatorFound] = useState(null)
+  const [operatorStepCompleted, setOperatorStepCompleted] = useState(false)
+
   // Signatures
   const [guardSignature, setGuardSignature] = useState({ name: '', signature: null, signedAt: null })
   const [supervisorSignature, setSupervisorSignature] = useState({ name: '', signature: null, signedAt: null })
@@ -96,6 +100,8 @@ export function InspectionProvider({ children }) {
     setGuardSignature({ name: '', signature: null, signedAt: null })
     setSupervisorSignature({ name: '', signature: null, signedAt: null })
     setOperatorSignature({ name: '', signature: null, signedAt: null })
+    setOperatorFound(null)
+    setOperatorStepCompleted(false)
   }, [])
 
   // Applicable points based on inspection type
@@ -139,6 +145,8 @@ export function InspectionProvider({ children }) {
       supervisorSignature, setSupervisorSignature,
       operatorSignature, setOperatorSignature,
       auditorSignature, setAuditorSignature,
+      operatorFound, setOperatorFound,
+      operatorStepCompleted, setOperatorStepCompleted,
       resetInspection,
       completedCount, failedCount, goodCount, progressPercent,
       validation, canSubmit,
