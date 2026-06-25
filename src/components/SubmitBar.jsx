@@ -142,6 +142,7 @@ export default function SubmitBar({ onSuccess }) {
         })
         const pdfBase64 = pdfResult.doc.output('datauristring')
         const pdfFilename = pdfResult.filename
+        alert(`PDF generado (handleSignAndGenerate): ${pdfBase64.length} bytes`)
 
         // 2. Upload to backend (with compressed images) - pass captured operator signature
         const payload = await buildPayload({ ...ctx, operatorSignature: capturedOperatorSignature }, pdfBase64, pdfFilename)
