@@ -32,7 +32,8 @@ export default async function handler(req, res) {
             guard_name, guard_signed_at,
             auditor_name, auditor_signed_at,
             total_good, total_bad, total_pending,
-            status, language, created_at, original_inspection_id, wono, inspection_type, trailer_type
+            status, language, created_at, original_inspection_id, wono, inspection_type, trailer_type,
+            equipment_nomenclature, customer_prefix, crown_fleet
           FROM inspections
           WHERE location = ${yardCode}
           ORDER BY created_at DESC
@@ -48,7 +49,8 @@ export default async function handler(req, res) {
             guard_name, guard_signed_at,
             auditor_name, auditor_signed_at,
             total_good, total_bad, total_pending,
-            status, language, created_at, original_inspection_id, wono, inspection_type, trailer_type
+            status, language, created_at, original_inspection_id, wono, inspection_type, trailer_type,
+            equipment_nomenclature, customer_prefix, crown_fleet
           FROM inspections
           ORDER BY created_at DESC
           LIMIT ${limit} OFFSET ${offset}
