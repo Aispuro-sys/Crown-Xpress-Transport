@@ -536,7 +536,11 @@ export default function SupervisorView() {
                         {/* Inspection Details */}
                         <div className="grid grid-cols-2 gap-2 mb-3">
                           <div className="bg-blue-50 rounded-lg py-2 px-3 text-center">
-                            <div className="text-sm font-bold text-blue-600">{insp.inspection_type || '—'}</div>
+                            <div className="text-sm font-bold text-blue-600">
+                              {insp.inspection_type === 'BOBTAIL' 
+                                ? (language === 'es' ? 'BOTADO' : 'BOBTAIL')
+                                : (insp.inspection_type || '—')}
+                            </div>
                             <div className="text-xs text-blue-700">{language === 'es' ? 'Tipo Inspección' : 'Inspection Type'}</div>
                           </div>
                           <div className="bg-purple-50 rounded-lg py-2 px-3 text-center">
