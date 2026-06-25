@@ -48,6 +48,11 @@ export async function createInspection(req, res) {
       tractorNumber: ui.tractorNumber || ui.tractor_number
     })
     console.log('Counts received:', counts)
+    console.log('Supervisor signature received:', {
+      name: supervisorSignature?.name,
+      hasSignature: !!supervisorSignature?.signature,
+      signedAt: supervisorSignature?.signedAt
+    })
     const seal_number = ui.seal_number || ui.sealNumber || null
     const lock_number = ui.lock_number || ui.lockNumber || null
     const driver_name = ui.driver_name || ui.driverName || null
