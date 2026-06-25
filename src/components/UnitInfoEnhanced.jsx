@@ -285,10 +285,12 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('guardName', user?.full_name || '')
     updateUnitInfo('location', user?.location_name || '')
     // Clear operator on mount to ensure correct flow order
-    updateUnitInfo('driverName', '')
-    updateUnitInfo('employeeNumber', '')
-    setOperatorFound(null)
-    setOperatorStepCompleted(false)
+    // Only clear if not already set from NBCW
+    if (!operatorFound) {
+      updateUnitInfo('driverName', '')
+      updateUnitInfo('employeeNumber', '')
+      setOperatorStepCompleted(false)
+    }
     console.log('DEBUG: On mount, setting sealLockEntered to false')
     setSealLockEntered(false)
   }, [user, updateUnitInfo])
@@ -416,7 +418,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     // Determinar automáticamente tipo de inspección y pre-llenar datos
     handleInspectionTypeChange(tprType)
 
-    // Datos básicos del operador - Usar código de conductor de NBCW como driver_name
+    // Datos básicos del operador - Usar código de conductor de NBCW como driver_name para TODOS los tipos
     updateUnitInfo('driverName', movementData.driverCode || movementData.operator || '')
     updateUnitInfo('employeeNumber', movementData.driverCode || '')
     updateUnitInfo('workOrder', movementData.workOrder || '')
@@ -436,7 +438,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     const nomenclatureMatch = eqpCode.match(/[A-Z]+-?(\d+)/i)
     updateUnitInfo('equipmentNumber', nomenclatureMatch ? nomenclatureMatch[1] : '')
     
-    // Establecer el operador automáticamente desde NBCW - saltar modal de búsqueda
+    // Establecer el operador automáticamente desde NBCW para TODOS los tipos - saltar modal de búsqueda
     setOperatorFound({
       fullName: movementData.driverCode || movementData.operator || 'Desconocido',
       employeeNumber: movementData.driverCode || 'TPR'
