@@ -118,7 +118,6 @@ export async function createInspection(req, res) {
       await sql`
         INSERT INTO inspection_points (inspection_id, point_id, status, issue_id, issue_text, photo)
         VALUES (${inspection.id}, ${pt.id}, ${pt.status}, ${pt.issueId}, ${pt.issueText}, ${pt.photo})
-        ON CONFLICT (inspection_id, point_id) DO NOTHING
       `
     }
 
