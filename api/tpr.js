@@ -98,7 +98,7 @@ export default async function handler(req, res) {
       ORDER BY date DESC, arrival_time DESC
     `
 
-    const allMovements = await sql(query, params)
+    const allMovements = await sql.query(query, params)
 
     // ============================================================
     // 2. Cross-filter: marcar los ya inspeccionados
