@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       conditions.push(sqlFragment)
     }
 
-    // Filtro por tipo de movimiento
+    // Filtro por tipo de movimiento (opcional - si no se especifica, mostrar todos)
     if (effectiveType === 'pending') {
       addCondition(`TRIM(status) = 'OPEN'`)
     } else if (effectiveType === 'empty') {
@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     } else if (effectiveType === 'bobtail') {
       addCondition(`(eqpcode ILIKE '%Botada%' OR TRIM(tablecode) = 'BOTADA')`)
     }
+    // Si effectiveType no coincide con ninguno, no se aplica filtro de tipo
 
     // Filtro por yarda (soporta multiples codigos separados por coma)
     if (yardCode) {
