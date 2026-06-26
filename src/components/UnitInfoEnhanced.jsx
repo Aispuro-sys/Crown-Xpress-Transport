@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapPin, User, Tag, Lock, Package, Search, CheckCircle, XCircle, Loader2, Truck, Box, PackageX, Keyboard, Droplet } from 'lucide-react'
+import { MapPin, User, Tag, Lock, Package, Search, CheckCircle, XCircle, Loader2, Truck, Box, PackageX, Keyboard } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useInspection } from '../context/InspectionContext'
 import { useAuth } from '../context/AuthContext'
@@ -148,10 +148,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
   // Handle inspection type selection
   const handleInspectionTypeChange = (type) => {
-    console.log('handleInspectionTypeChange called with type:', type)
     setInspectionType(type)
     updateUnitInfo('inspectionType', type)
-
+    
     // Reset trailer type, size, equipment owner, fleet and customer prefix when changing inspection type
     setTrailerType(null)
     setTrailerSize(null)
@@ -163,9 +162,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('equipmentOwner', null)
     updateUnitInfo('crownFleet', null)
     updateUnitInfo('customerPrefix', null)
-
+    
     const typeConfig = INSPECTION_TYPES[type]
-
+    
     // Reset fields based on type
     if (type === 'BOBTAIL') {
       // Bobtail: No trailer, no container, no seal, no lock - skip trailer selection
@@ -176,8 +175,12 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       updateUnitInfo('sealNumber', '')
       updateUnitInfo('lockNumber', '')
       updateUnitInfo('trailerType', 'BOBTAIL')
+      updateUnitInfo('trailerSize', 'N/A')
       setTrailerType('BOBTAIL')
-      console.log('Set BOBTAIL trailerType')
+      setTrailerSize('N/A')
+      if (onContainerChange) onContainerChange(false)
+      if (onSealChange) onSealChange(false)
+      if (onLockChange) onLockChange(false)
     } else if (type === 'EMPTY') {
       // Empty: Has container option, no seal, no lock
       setHasContainer(false)
@@ -205,13 +208,10 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('trailerType', type)
     updateUnitInfo('trailerSize', null)
 
-    // Set inspectionType to FLATBED or RABON when selected as trailer type
+    // Set inspectionType to FLATBED when flatbed is selected
     if (type === 'FLATBED') {
       setInspectionType('FLATBED')
       updateUnitInfo('inspectionType', 'FLATBED')
-    } else if (type === 'RABON') {
-      setInspectionType('RABON')
-      updateUnitInfo('inspectionType', 'RABON')
     }
   }
 
@@ -811,9 +811,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     )
   }
 
-  // If LOADED or EMPTY selected but no trailer type, show trailer type selector
-  console.log('DEBUG: inspectionType=', inspectionType, 'trailerType=', trailerType)
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && !trailerType) {
+  // If LOADED, EMPTY, or FLATBED selected but no trailer type, show trailer type selector
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && !trailerType) {
     return (
       <section className="card animate-slide-up">
         <div className="card-header flex items-center gap-3">
@@ -850,31 +849,31 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('BOX')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                <Box className="w-8 h-8 text-slate-600" />
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <Box className="w-8 h-8 text-purple-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'CAJA' : 'BOX'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Contenedor estándar' : 'Standard container'}
+                {language === 'es' ? 'Caja seca estándar' : 'Standard dry box'}
               </span>
             </button>
 
-            {/* TANK / TANQUE */}
+            {/* CONTAINER / CONTENEDOR */}
             <button
               type="button"
-              onClick={() => handleTrailerTypeChange('TANK')}
+              onClick={() => handleTrailerTypeChange('CONTAINER')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                <Droplet className="w-8 h-8 text-slate-600" />
+              <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center group-hover:bg-cyan-200 transition-colors">
+                <Package className="w-8 h-8 text-cyan-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
-                {language === 'es' ? 'TANQUE' : 'TANK'}
+                {language === 'es' ? 'CONTENEDOR' : 'CONTAINER'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Tanque cisterna' : 'Tank trailer'}
+                {language === 'es' ? 'Contenedor intermodal' : 'Intermodal container'}
               </span>
             </button>
 
@@ -884,8 +883,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('FLATBED')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                <Truck className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <Truck className="w-8 h-8 text-orange-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'PLATAFORMA' : 'FLATBED'}
@@ -901,31 +900,31 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('RABON')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
-                <Truck className="w-8 h-8 text-teal-600" />
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                <Truck className="w-8 h-8 text-amber-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'RABÓN' : 'RABON'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Camión rígido' : 'Rigid truck'}
+                {language === 'es' ? 'Remolque rabón' : 'Rabon trailer'}
               </span>
             </button>
 
-            {/* CHASSIS */}
+            {/* OTHER / OTROS */}
             <button
               type="button"
-              onClick={() => handleTrailerTypeChange('CHASSIS')}
+              onClick={() => handleTrailerTypeChange('OTHER')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                <Truck className="w-8 h-8 text-slate-600" />
+                <PackageX className="w-8 h-8 text-slate-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
-                {language === 'es' ? 'CHASIS' : 'CHASSIS'}
+                {language === 'es' ? 'OTROS' : 'OTHER'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Chasis solo' : 'Chassis only'}
+                {language === 'es' ? 'Otro tipo de equipo' : 'Other equipment type'}
               </span>
             </button>
           </div>
@@ -935,8 +934,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If trailer type selected but no size, show size selector
-  // FLATBED and RABON don't need size selection, skip it
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType && !trailerSize && trailerType !== 'FLATBED' && trailerType !== 'RABON') {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && trailerType && !trailerSize) {
     const typeConfig = TRAILER_TYPES[trailerType]
     const availableSizes = typeConfig?.sizes || ['53', '40', '20']
     
@@ -992,7 +990,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If trailer size selected but no equipment owner, show owner selector
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType && trailerSize && !equipmentOwner) {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && trailerType && trailerSize && !equipmentOwner) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
@@ -1065,7 +1063,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If CROWN selected but no fleet, show fleet selector
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType && trailerSize && equipmentOwner === 'CROWN' && !crownFleet) {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && trailerType && trailerSize && equipmentOwner === 'CROWN' && !crownFleet) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
@@ -1180,7 +1178,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
   // If CUSTOMER selected with CONTAINER but no prefix, show prefix selector
   // Skip if prefix already set from NBCW or if operatorFound (indicates NBCW data)
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && trailerType === 'CONTAINER' && trailerSize && equipmentOwner === 'CUSTOMER' && !customerPrefix && !operatorFound) {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && trailerType === 'CONTAINER' && trailerSize && equipmentOwner === 'CUSTOMER' && !customerPrefix && !operatorFound) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
@@ -1288,7 +1286,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // Step: Enter container/box/flatbed number after prefix selection
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && isPrefixSelected() && !containerNumberEntered) {
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') && isPrefixSelected() && !containerNumberEntered) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
@@ -1537,7 +1535,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
 
   // Step: Enter tractor number (after seal/lock for LOADED, after container for EMPTY)
   // For FLATBED and RABON: skip seal/lock step entirely
-  const shouldShowTractorStep = (inspectionType === 'LOADED' || inspectionType === 'EMPTY') &&
+  const shouldShowTractorStep = (inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') &&
     containerNumberEntered &&
     (inspectionType === 'EMPTY' || sealLockEntered || trailerType === 'FLATBED' || trailerType === 'RABON') &&
     !tractorNumberEntered
@@ -1614,7 +1612,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   // For LOADED: require sealLockEntered (unless FLATBED/RABON which don't require seal/lock)
   // For EMPTY: no seal/lock required
   // Skip if operator already set from NBCW
-  const shouldShowOperatorStep = (inspectionType === 'LOADED' || inspectionType === 'EMPTY') &&
+  const shouldShowOperatorStep = (inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED') &&
     containerNumberEntered &&
     (inspectionType === 'EMPTY' || sealLockEntered || trailerType === 'FLATBED' || trailerType === 'RABON') &&
     tractorNumberEntered &&
