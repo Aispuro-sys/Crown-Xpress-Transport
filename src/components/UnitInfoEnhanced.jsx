@@ -1919,6 +1919,18 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
                   <div className="font-bold text-slate-800">{unitInfo.chassisNumber || '-'}</div>
                 </div>
               )}
+              {trailerType === 'FLATBED' && (
+                <div>
+                  <span className="text-slate-500 text-xs">{language === 'es' ? 'TIPO' : 'TYPE'}:</span>
+                  <div className="font-bold text-slate-800">{language === 'es' ? 'PLATAFORMA' : 'FLATBED'}</div>
+                </div>
+              )}
+              {trailerType === 'RABON' && (
+                <div>
+                  <span className="text-slate-500 text-xs">{language === 'es' ? 'TIPO' : 'TYPE'}:</span>
+                  <div className="font-bold text-slate-800">{language === 'es' ? 'RABÓN' : 'RABON'}</div>
+                </div>
+              )}
               {inspectionType === 'LOADED' && hasSeal && (
                 <div>
                   <span className="text-slate-500 text-xs">{language === 'es' ? 'SELLO' : 'SEAL'}:</span>
