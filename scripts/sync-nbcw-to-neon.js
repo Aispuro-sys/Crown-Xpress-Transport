@@ -3,11 +3,34 @@ import { Client } from '@neondatabase/serverless'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import { createWriteStream } from 'fs'
 
 // Cargar .env desde la carpeta donde esta este script
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 dotenv.config({ path: join(__dirname, '.env') })
+
+// Setup logging to file
+const logFile = join(__dirname, 'sync.log')
+const logStream = createWriteStream(logFile, { flags: 'a' })
+
+// Override console.log and console.error to write to file
+const originalLog = console.log
+const originalError = console.error
+
+console.log = (...args) => {
+  const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+  const timestamp = new Date().toISOString()
+  originalLog(`[${timestamp}] ${message}`)
+  logStream.write(`[${timestamp}] ${message}\n`)
+}
+
+console.error = (...args) => {
+  const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+  const timestamp = new Date().toISOString()
+  originalError(`[${timestamp}] ERROR: ${message}`)
+  logStream.write(`[${timestamp}] ERROR: ${message}\n`)
+}
 
 // ============================================================
 // Script de sincronizacion NBCW (SQL Server) -> Neon (PostgreSQL)
@@ -288,6 +311,7 @@ async function syncTprToNeon() {
     if (sqlPool) {
       await sqlPool.close().catch(() => {})
     }
+    logStream.end()
   }
 }
 
