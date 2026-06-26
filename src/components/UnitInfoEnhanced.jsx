@@ -887,6 +887,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If LOADED or EMPTY selected but no trailer type, show trailer type selector
+  // FLATBED and RABON skip this step since they set trailerType automatically
   if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && !trailerType) {
     return (
       <section className="card animate-slide-up">
@@ -1328,7 +1329,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   // Build badge text with trailer info
   const getBadgeText = () => {
     const typeLabel = INSPECTION_TYPES[inspectionType]?.[language] || inspectionType
-    if (inspectionType === 'BOBTAIL') return typeLabel
+    if (inspectionType === 'BOBTAIL' || inspectionType === 'FLATBED' || inspectionType === 'RABON') return typeLabel
     const trailerLabel = TRAILER_TYPES[trailerType]?.[language] || trailerType
     let ownerLabel = ''
     if (equipmentOwner === 'CROWN' && crownFleet) {
@@ -1346,12 +1347,13 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     if (trailerType === 'CONTAINER') return language === 'es' ? 'NÚMERO DE CONTENEDOR' : 'CONTAINER NUMBER'
     if (trailerType === 'BOX') return language === 'es' ? 'NÚMERO DE CAJA' : 'BOX NUMBER'
     if (trailerType === 'FLATBED') return language === 'es' ? 'NÚMERO DE PLATAFORMA' : 'FLATBED NUMBER'
+    if (trailerType === 'RABON') return language === 'es' ? 'NÚMERO DE RABÓN' : 'RABON NUMBER'
     return language === 'es' ? 'NÚMERO DE REMOLQUE' : 'TRAILER NUMBER'
   }
 
   // Check if prefix/fleet is selected (for flow control)
   const isPrefixSelected = () => {
-    if (inspectionType === 'BOBTAIL') return true
+    if (inspectionType === 'BOBTAIL' || inspectionType === 'FLATBED' || inspectionType === 'RABON') return true
     if (equipmentOwner === 'CROWN' && crownFleet) return true
     if (equipmentOwner === 'CUSTOMER') {
       if (trailerType === 'CONTAINER' && customerPrefix) return true
@@ -1361,7 +1363,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // Step: Enter container/box/flatbed number after prefix selection
-  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && isPrefixSelected() && !containerNumberEntered) {
+  // FLATBED and RABON also need trailer/tractor numbers
+  if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY' || inspectionType === 'FLATBED' || inspectionType === 'RABON') && isPrefixSelected() && !containerNumberEntered) {
     const typeConfig = TRAILER_TYPES[trailerType]
     
     return (
