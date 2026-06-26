@@ -31,3 +31,7 @@ dist-ssr
 # Vercel
 .vercel
 .env*
+
+# Scripts with credentials
+scripts/*.ps1
+scripts/tpr-data.json

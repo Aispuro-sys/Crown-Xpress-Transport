@@ -1,14 +1,14 @@
 # Script de sincronizacion NBCW (SQL Server) -> Neon (PostgreSQL)
 # Corre este script cada 5 minutos con Task Scheduler
 
-# Configuración
-$SQLServer = "192.168.5.13"
-$SQLInstance = "BKUPEXEC"
-$SQLDatabase = "GPSActivity"
-$SQLUser = "ccentral"
-$SQLPassword = "Roncen810#"
-$NeonConnectionString = "postgresql://neondb_owner:npg_hg6eq0tnsrpK@ep-shiny-grass-aq5qzmg9-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-$SyncDays = 9999
+# Configuración - Leer desde variables de entorno
+$SQLServer = $env:SQLSERVER_HOST
+$SQLInstance = $env:SQLSERVER_INSTANCE
+$SQLDatabase = $env:SQLSERVER_DATABASE
+$SQLUser = $env:SQLSERVER_USER
+$SQLPassword = $env:SQLSERVER_PASSWORD
+$NeonConnectionString = $env:DATABASE_URL
+$SyncDays = if ($env:TPR_SYNC_DAYS) { [int]$env:TPR_SYNC_DAYS } else { 9999 }
 
 # Logging
 $LogDir = Split-Path -Parent $MyInvocation.MyCommand.Path
