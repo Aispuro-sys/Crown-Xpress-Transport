@@ -150,7 +150,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   const handleInspectionTypeChange = (type) => {
     setInspectionType(type)
     updateUnitInfo('inspectionType', type)
-    
+
     // Reset trailer type, size, equipment owner, fleet and customer prefix when changing inspection type
     setTrailerType(null)
     setTrailerSize(null)
@@ -162,9 +162,9 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
     updateUnitInfo('equipmentOwner', null)
     updateUnitInfo('crownFleet', null)
     updateUnitInfo('customerPrefix', null)
-    
+
     const typeConfig = INSPECTION_TYPES[type]
-    
+
     // Reset fields based on type
     if (type === 'BOBTAIL') {
       // Bobtail: No trailer, no container, no seal, no lock - skip trailer selection
@@ -175,12 +175,27 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       updateUnitInfo('sealNumber', '')
       updateUnitInfo('lockNumber', '')
       updateUnitInfo('trailerType', 'BOBTAIL')
-      updateUnitInfo('trailerSize', 'N/A')
       setTrailerType('BOBTAIL')
-      setTrailerSize('N/A')
-      if (onContainerChange) onContainerChange(false)
-      if (onSealChange) onSealChange(false)
-      if (onLockChange) onLockChange(false)
+    } else if (type === 'FLATBED') {
+      // FLATBED: No container, no seal, no lock - set trailerType to FLATBED
+      setHasContainer(false)
+      setHasSeal(false)
+      setHasLock(false)
+      updateUnitInfo('containerNumber', '')
+      updateUnitInfo('sealNumber', '')
+      updateUnitInfo('lockNumber', '')
+      updateUnitInfo('trailerType', 'FLATBED')
+      setTrailerType('FLATBED')
+    } else if (type === 'RABON') {
+      // RABON: No container, no seal, no lock - set trailerType to RABON
+      setHasContainer(false)
+      setHasSeal(false)
+      setHasLock(false)
+      updateUnitInfo('containerNumber', '')
+      updateUnitInfo('sealNumber', '')
+      updateUnitInfo('lockNumber', '')
+      updateUnitInfo('trailerType', 'RABON')
+      setTrailerType('RABON')
     } else if (type === 'EMPTY') {
       // Empty: Has container option, no seal, no lock
       setHasContainer(false)
@@ -715,7 +730,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               ? 'Seleccione el tipo de inspección para continuar:' 
               : 'Select the inspection type to continue:'}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* LOADED */}
             <button
               type="button"
@@ -776,6 +791,46 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               <span className="text-xs font-semibold text-blue-600">10 {language === 'es' ? 'puntos' : 'points'}</span>
             </button>
 
+            {/* FLATBED */}
+            <button
+              type="button"
+              onClick={() => handleInspectionTypeChange('FLATBED')}
+              className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <Truck className="w-8 h-8 text-purple-600" />
+              </div>
+              <span className="font-bold text-lg text-slate-800">
+                {language === 'es' ? 'PLATAFORMA' : 'FLATBED'}
+              </span>
+              <span className="text-xs text-slate-500 text-center">
+                {language === 'es'
+                  ? 'Plataforma abierta sin paredes ni techo. 15 puntos (tractor + chasis + plataforma).'
+                  : 'Open flatbed with no walls or roof. 15 points (tractor + chassis + platform).'}
+              </span>
+              <span className="text-xs font-semibold text-purple-600">15 {language === 'es' ? 'puntos' : 'points'}</span>
+            </button>
+
+            {/* RABON */}
+            <button
+              type="button"
+              onClick={() => handleInspectionTypeChange('RABON')}
+              className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
+            >
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
+                <Truck className="w-8 h-8 text-teal-600" />
+              </div>
+              <span className="font-bold text-lg text-slate-800">
+                {language === 'es' ? 'RABÓN' : 'RABON'}
+              </span>
+              <span className="text-xs text-slate-500 text-center">
+                {language === 'es'
+                  ? 'Camión rígido con chasis integrado. 15 puntos (similar a plataforma).'
+                  : 'Rigid truck with integrated chassis. 15 points (similar to flatbed).'}
+              </span>
+              <span className="text-xs font-semibold text-teal-600">15 {language === 'es' ? 'puntos' : 'points'}</span>
+            </button>
+
             {/* NBCW OUTPUTS */}
             <button
               type="button"
@@ -815,6 +870,7 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
   }
 
   // If LOADED or EMPTY selected but no trailer type, show trailer type selector
+  // FLATBED and RABON set trailerType immediately, so they skip this step
   if ((inspectionType === 'LOADED' || inspectionType === 'EMPTY') && !trailerType) {
     return (
       <section className="card animate-slide-up">
@@ -852,31 +908,31 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('BOX')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                <Box className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                <Box className="w-8 h-8 text-slate-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'CAJA' : 'BOX'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Caja seca estándar' : 'Standard dry box'}
+                {language === 'es' ? 'Contenedor estándar' : 'Standard container'}
               </span>
             </button>
 
-            {/* CONTAINER / CONTENEDOR */}
+            {/* TANK / TANQUE */}
             <button
               type="button"
-              onClick={() => handleTrailerTypeChange('CONTAINER')}
+              onClick={() => handleTrailerTypeChange('TANK')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center group-hover:bg-cyan-200 transition-colors">
-                <Package className="w-8 h-8 text-cyan-600" />
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                <Droplet className="w-8 h-8 text-slate-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
-                {language === 'es' ? 'CONTENEDOR' : 'CONTAINER'}
+                {language === 'es' ? 'TANQUE' : 'TANK'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Contenedor intermodal' : 'Intermodal container'}
+                {language === 'es' ? 'Tanque cisterna' : 'Tank trailer'}
               </span>
             </button>
 
@@ -886,8 +942,8 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('FLATBED')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                <Truck className="w-8 h-8 text-orange-600" />
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                <Truck className="w-8 h-8 text-purple-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'PLATAFORMA' : 'FLATBED'}
@@ -903,35 +959,114 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               onClick={() => handleTrailerTypeChange('RABON')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center group-hover:bg-amber-200 transition-colors">
-                <Truck className="w-8 h-8 text-amber-600" />
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
+                <Truck className="w-8 h-8 text-teal-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
                 {language === 'es' ? 'RABÓN' : 'RABON'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Remolque rabón' : 'Rabon trailer'}
+                {language === 'es' ? 'Camión rígido' : 'Rigid truck'}
               </span>
             </button>
 
-            {/* OTHER / OTROS */}
+            {/* CHASSIS */}
             <button
               type="button"
-              onClick={() => handleTrailerTypeChange('OTHER')}
+              onClick={() => handleTrailerTypeChange('CHASSIS')}
               className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
             >
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-                <PackageX className="w-8 h-8 text-slate-600" />
+                <Truck className="w-8 h-8 text-slate-600" />
               </div>
               <span className="font-bold text-lg text-slate-800">
-                {language === 'es' ? 'OTROS' : 'OTHER'}
+                {language === 'es' ? 'CHASIS' : 'CHASSIS'}
               </span>
               <span className="text-xs text-slate-500 text-center">
-                {language === 'es' ? 'Otro tipo de equipo' : 'Other equipment type'}
+                {language === 'es' ? 'Chasis solo' : 'Chassis only'}
               </span>
             </button>
           </div>
         </div>
+      </section>
+    )
+  }
+
+  // For FLATBED and RABON: skip container/seal/lock, go directly to tractor/trailer number
+  if ((inspectionType === 'FLATBED' || inspectionType === 'RABON') && !tractorNumberEntered) {
+    return (
+      <section className="card animate-slide-up">
+        <div className="card-header flex items-center gap-3">
+          <Truck className="w-5 h-5 text-crown-gold" />
+          <h2 className="font-bold tracking-wide uppercase text-sm">
+            {inspectionType === 'RABON'
+              ? (language === 'es' ? 'NÚMERO DE RABÓN' : 'RABON NUMBER')
+              : (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER')}
+          </h2>
+          <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
+            inspectionType === 'FLATBED' ? 'bg-purple-100 text-purple-700' : 'bg-teal-100 text-teal-700'
+          }`}>
+            {INSPECTION_TYPES[inspectionType]?.[language] || inspectionType}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setInspectionType(null)
+              updateUnitInfo('inspectionType', null)
+            }}
+            className="text-xs text-white/80 hover:text-white underline"
+          >
+            {language === 'es' ? 'CAMBIAR' : 'CHANGE'}
+          </button>
+        </div>
+        <div className="card-body">
+          <p className="text-sm text-slate-600 mb-4">
+            {inspectionType === 'RABON'
+              ? (language === 'es' ? 'Ingrese el número de rabón:' : 'Enter the rabon number:')
+              : (language === 'es' ? 'Ingrese el número de tractor:' : 'Enter the tractor number:')}
+          </p>
+
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={unitInfo.tractorNumber || ''}
+              readOnly
+              onClick={() => openKeypad('tractorNumber', inspectionType === 'RABON' ? (language === 'es' ? 'NÚMERO DE RABÓN' : 'RABON NUMBER') : (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER'))}
+              className="flex-1 px-4 py-4 border-2 border-slate-300 rounded-xl text-2xl font-bold text-center uppercase cursor-pointer hover:border-crown-gold transition-colors"
+              placeholder={language === 'es' ? 'TOCA PARA INGRESAR' : 'TAP TO ENTER'}
+            />
+            <button
+              type="button"
+              onClick={() => openKeypad('tractorNumber', inspectionType === 'RABON' ? (language === 'es' ? 'NÚMERO DE RABÓN' : 'RABON NUMBER') : (language === 'es' ? 'NÚMERO DE TRACTOR' : 'TRACTOR NUMBER'))}
+              className="px-6 py-4 bg-crown-navy text-white rounded-xl hover:bg-crown-navy/90 transition-colors"
+            >
+              <Keyboard className="w-8 h-8" />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (unitInfo.tractorNumber && unitInfo.tractorNumber.trim()) {
+                setTractorNumberEntered(true)
+              } else {
+                alert(language === 'es' ? 'Ingrese el número' : 'Enter the number')
+              }
+            }}
+            className="mt-4 w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors text-lg"
+          >
+            {language === 'es' ? 'CONTINUAR' : 'CONTINUE'}
+          </button>
+        </div>
+
+        {/* Keypad */}
+        <NumericKeypad
+          isOpen={keypadOpen}
+          onClose={() => setKeypadOpen(false)}
+          onConfirm={handleKeypadConfirm}
+          title={keypadTitle}
+          initialValue=""
+        />
       </section>
     )
   }
