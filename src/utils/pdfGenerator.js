@@ -11,7 +11,7 @@ import truckDiagramLoaded from '../assets/Gemini_Generated_Image_nwvt4xnwvt4xnwv
 import truckDiagramEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
 import truckDiagramBobtail from '../assets/Botado Trailer.jpg'
 import truckDiagramFlatbed from '../assets/Plataforma vacia-cargada.jpg'
-import truckDiagramRabon from '../assets/Origen Rabon.png'
+import truckDiagramRabon from '../assets/Origen_Rabon.png'
 
 const COLORS = {
   navy: [30, 91, 122],
