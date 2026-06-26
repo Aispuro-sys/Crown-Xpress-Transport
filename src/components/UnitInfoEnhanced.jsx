@@ -778,6 +778,46 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
               <span className="text-xs font-semibold text-blue-600">10 {language === 'es' ? 'puntos' : 'points'}</span>
             </button>
 
+            {/* FLATBED */}
+            <button
+              type="button"
+              onClick={() => handleInspectionTypeChange('FLATBED')}
+              className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
+            >
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <Truck className="w-8 h-8 text-orange-600" />
+              </div>
+              <span className="font-bold text-lg text-slate-800">
+                {language === 'es' ? 'PLATAFORMA' : 'FLATBED'}
+              </span>
+              <span className="text-xs text-slate-500 text-center">
+                {language === 'es'
+                  ? 'Plataforma abierta. Requiere número de plataforma y tractor. 20 puntos de inspección.'
+                  : 'Open flatbed. Requires platform number and tractor. 20 inspection points.'}
+              </span>
+              <span className="text-xs font-semibold text-orange-600">20 {language === 'es' ? 'puntos' : 'points'}</span>
+            </button>
+
+            {/* RABON */}
+            <button
+              type="button"
+              onClick={() => handleInspectionTypeChange('RABON')}
+              className="p-6 border-2 border-slate-200 rounded-xl hover:border-crown-gold hover:bg-crown-gold/5 transition-all flex flex-col items-center gap-3 group"
+            >
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                <Truck className="w-8 h-8 text-amber-600" />
+              </div>
+              <span className="font-bold text-lg text-slate-800">
+                {language === 'es' ? 'RABÓN' : 'RABON'}
+              </span>
+              <span className="text-xs text-slate-500 text-center">
+                {language === 'es'
+                  ? 'Remolque rabón. Requiere número de rabón y tractor. 10 puntos de inspección.'
+                  : 'Rabon trailer. Requires rabon number and tractor. 10 inspection points.'}
+              </span>
+              <span className="text-xs font-semibold text-amber-600">10 {language === 'es' ? 'puntos' : 'points'}</span>
+            </button>
+
             {/* NBCW OUTPUTS */}
             <button
               type="button"
