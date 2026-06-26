@@ -7,6 +7,7 @@ import truckImageEmpty from '../assets/Vacio-Contenedor-Caja.jpg'
 import truckImageDropped from '../assets/Botado-Caja-Contenedor.jpg'
 import truckImageFlatbed from '../assets/Plataforma vacia-cargada.jpg'
 import truckImageBobtail from '../assets/Botado Trailer.jpg'
+import truckImageRabon from '../assets/Origen_Rabon.png'
 
 // Position definitions for each inspection point on the truck diagram
 // Positions are in percentages relative to the image container
@@ -112,18 +113,45 @@ const pointPositionsBobtail = [
   { id: 10, x: 35, y: 39, label: 'Motor' },              // Engine - TRACTOR REAR VIEW (right)
 ]
 
+// Positions for RABON (Camión rígido) - Based on "Origen_Rabon.png"
+// Layout: Similar to FLATBED but with integrated tractor and chassis
+const pointPositionsRabon = [
+  // TRACTOR POINTS (1-10)
+  { id: 1, x: 20, y: 50, label: 'Defensa' },              // Bumper - front of rigid truck
+  { id: 2, x: 35, y: 55, label: 'Llantas' },             // Tires - front axle
+  { id: 3, x: 40, y: 55, label: 'Piso' },                // Floor - cab area
+  { id: 4, x: 45, y: 55, label: 'Tanques Diesel' },      // Fuel tanks - side of chassis
+  { id: 5, x: 35, y: 15, label: 'Cabina' },               // Cab - top area
+  { id: 6, x: 50, y: 55, label: 'Tanques Aire' },        // Air tanks - chassis section
+  { id: 7, x: 15, y: 85, label: 'Chasis' },              // Chassis - integrated connection
+  { id: 8, x: 48, y: 15, label: 'Ejes Trans.' },         // Drive shafts - rear of cab
+  { id: 9, x: 15, y: 15, label: 'Escape' },              // Exhaust - side of cab
+  { id: 10, x: 15, y: 35, label: 'Motor' },              // Engine - cab area
+
+  // RABON POINTS (11, 12, 14, 17, 18) - Similar to FLATBED
+  { id: 11, x: 55, y: 85, label: 'Chasis' },             // Chassis section
+  { id: 12, x: 25, y: 85, label: 'Parte Trasera' },      // Rear of rigid truck
+  { id: 14, x: 60, y: 55, label: 'Caja/Plataforma' },    // Box/platform surface
+  { id: 17, x: 85, y: 30, label: 'Piso' },                // Floor of box/platform
+  { id: 18, x: 52, y: 85, label: 'Patín' },              // Landing gear/support
+]
+
 export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   const { language } = useLanguage()
   const { points, unitInfo } = useInspection()
   
   // Select the appropriate truck image based on inspection type and trailer type
   const truckImage = useMemo(() => {
-    // BOBTAIL/RABON use bobtail image
-    if (unitInfo?.inspectionType === 'BOBTAIL' || unitInfo?.inspectionType === 'RABON') {
+    // BOBTAIL uses its own image
+    if (unitInfo?.inspectionType === 'BOBTAIL') {
       return truckImageBobtail
     }
+    // RABON uses its own image
+    if (unitInfo?.trailerType === 'RABON') {
+      return truckImageRabon
+    }
     // FLATBED uses its own image
-    if (unitInfo?.trailerType === 'FLATBED' || unitInfo?.inspectionType === 'FLATBED') {
+    if (unitInfo?.trailerType === 'FLATBED') {
       return truckImageFlatbed
     }
     // Container/Box types
@@ -140,10 +168,13 @@ export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   
   // Select the appropriate point positions based on inspection type and trailer type
   const pointPositions = useMemo(() => {
-    if (unitInfo?.inspectionType === 'BOBTAIL' || unitInfo?.inspectionType === 'RABON') {
+    if (unitInfo?.inspectionType === 'BOBTAIL') {
       return pointPositionsBobtail
     }
-    if (unitInfo?.trailerType === 'FLATBED' || unitInfo?.inspectionType === 'FLATBED') {
+    if (unitInfo?.trailerType === 'RABON') {
+      return pointPositionsRabon
+    }
+    if (unitInfo?.trailerType === 'FLATBED') {
       return pointPositionsFlatbed
     }
     if (unitInfo?.inspectionType === 'EMPTY') {
