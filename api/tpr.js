@@ -36,12 +36,15 @@ export default async function handler(req, res) {
     } else if (effectiveType === 'empty') {
       addCondition(`(TRIM(el) = 'E' OR eqpcode ILIKE '%Botada%')`)
     } else if (effectiveType === 'loaded') {
-      addCondition(`TRIM(el) = 'L'`)
+      // Temporariamente deshabilitado para depurar
+      // addCondition(`TRIM(el) = 'L'`)
     } else if (effectiveType === 'bobtail') {
       addCondition(`(eqpcode ILIKE '%Botada%' OR TRIM(tablecode) = 'BOTADA')`)
     }
 
     // Filtro por yarda (soporta multiples codigos separados por coma)
+    // Temporariamente deshabilitado para depurar
+    /*
     if (yardCode) {
       const yardCodes = yardCode.split(',').map(c => c.trim().toUpperCase()).filter(Boolean)
       if (yardCodes.length > 0) {
@@ -50,6 +53,7 @@ export default async function handler(req, res) {
         addCondition(`TRIM(fromd) IN (${placeholders})`)
       }
     }
+    */
 
     // Filtro por fecha exacta
     if (date) {
@@ -58,7 +62,8 @@ export default async function handler(req, res) {
     }
 
     // Solo sincronizar registros recientes (ultimos 3 dias)
-    addCondition(`TO_DATE(fecha_raw, 'YYYY-MM-DD') >= CURRENT_DATE - INTERVAL '3 days'`)
+    // Temporariamente deshabilitado para depurar
+    // addCondition(`TO_DATE(fecha_raw, 'YYYY-MM-DD') >= CURRENT_DATE - INTERVAL '3 days'`)
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
