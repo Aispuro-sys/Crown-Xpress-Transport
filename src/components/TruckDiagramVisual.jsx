@@ -118,12 +118,12 @@ export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   
   // Select the appropriate truck image based on inspection type and trailer type
   const truckImage = useMemo(() => {
-    // BOBTAIL uses its own image
-    if (unitInfo?.inspectionType === 'BOBTAIL') {
+    // BOBTAIL/RABON use bobtail image
+    if (unitInfo?.inspectionType === 'BOBTAIL' || unitInfo?.inspectionType === 'RABON') {
       return truckImageBobtail
     }
     // FLATBED uses its own image
-    if (unitInfo?.trailerType === 'FLATBED') {
+    if (unitInfo?.trailerType === 'FLATBED' || unitInfo?.inspectionType === 'FLATBED') {
       return truckImageFlatbed
     }
     // Container/Box types
@@ -140,10 +140,10 @@ export default function TruckDiagramVisual({ onPointClick, compact = false }) {
   
   // Select the appropriate point positions based on inspection type and trailer type
   const pointPositions = useMemo(() => {
-    if (unitInfo?.inspectionType === 'BOBTAIL') {
+    if (unitInfo?.inspectionType === 'BOBTAIL' || unitInfo?.inspectionType === 'RABON') {
       return pointPositionsBobtail
     }
-    if (unitInfo?.trailerType === 'FLATBED') {
+    if (unitInfo?.trailerType === 'FLATBED' || unitInfo?.inspectionType === 'FLATBED') {
       return pointPositionsFlatbed
     }
     if (unitInfo?.inspectionType === 'EMPTY') {

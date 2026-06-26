@@ -213,6 +213,11 @@ export default function UnitInfoEnhanced({ onContainerChange, onSealChange, onLo
       setInspectionType('FLATBED')
       updateUnitInfo('inspectionType', 'FLATBED')
     }
+    // Set inspectionType to RABON when rabon is selected
+    if (type === 'RABON') {
+      setInspectionType('RABON')
+      updateUnitInfo('inspectionType', 'RABON')
+    }
   }
 
   // Handle trailer size selection
