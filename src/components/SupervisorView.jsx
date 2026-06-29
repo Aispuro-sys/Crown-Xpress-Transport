@@ -153,10 +153,7 @@ export default function SupervisorView() {
           highSecuritySeal: insp.high_security_seal === 'yes' ? 'yes' : 'no',
           sealAffixed: insp.seal_affixed === 'yes' ? 'yes' : 'no',
           inspectionType: insp.inspection_type || 'LOADED',
-          trailerType: insp.trailer_type || 
-            (insp.inspection_type === 'BOBTAIL' ? 'BOBTAIL' : 
-             insp.inspection_type === 'FLATBED' ? 'FLATBED' : 
-             insp.inspection_type === 'RABON' ? 'RABON' : null),
+          trailerType: insp.trailer_type || (insp.inspection_type === 'BOBTAIL' ? 'BOBTAIL' : null),
           workOrder: insp.wono
         }
 
@@ -235,10 +232,7 @@ export default function SupervisorView() {
           highSecuritySeal: insp.high_security_seal === 'yes' ? 'yes' : 'no',
           sealAffixed: insp.seal_affixed === 'yes' ? 'yes' : 'no',
           inspectionType: insp.inspection_type || 'LOADED',
-          trailerType: insp.trailer_type || 
-            (insp.inspection_type === 'BOBTAIL' ? 'BOBTAIL' : 
-             insp.inspection_type === 'FLATBED' ? 'FLATBED' : 
-             insp.inspection_type === 'RABON' ? 'RABON' : null),
+          trailerType: insp.trailer_type || (insp.inspection_type === 'BOBTAIL' ? 'BOBTAIL' : null),
           workOrder: insp.wono
         }
 

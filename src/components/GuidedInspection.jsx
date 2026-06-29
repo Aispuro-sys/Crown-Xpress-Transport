@@ -63,17 +63,6 @@ export default function GuidedInspection() {
       return
     }
 
-    // For RABON: need tractorNumber, and trailerNumber (rabon number) - driverName and location are optional
-    if (unitInfo?.inspectionType === 'RABON') {
-      const required = ['trailerNumber', 'tractorNumber']
-      const isValid = required.every(field => unitInfo[field] && unitInfo[field].trim() !== '')
-      setUnitInfoValid(isValid)
-      if (isValid && !unitInfoFlowComplete) {
-        setUnitInfoFlowComplete(true)
-      }
-      return
-    }
-
     const required = ['trailerNumber', 'tractorNumber']
     const optional = []
 
