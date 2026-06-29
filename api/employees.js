@@ -185,7 +185,7 @@ export default async function handler(req, res) {
 
     // POST - Create new employee
     if (req.method === 'POST') {
-      const { username, password, full_name, role, location_id, location_name } = req.body
+      const { username, password, full_name, role, location_id, location_name, profile_photo } = req.body
 
       if (!username || !password || !full_name || !role) {
         return res.status(400).json({ error: 'Missing required fields' })
