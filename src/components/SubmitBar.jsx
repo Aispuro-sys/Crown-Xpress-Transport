@@ -7,6 +7,7 @@ import { generateInspectionPDF } from '../utils/pdfGenerator'
 import { createInspection, buildPayload } from '../utils/api'
 import SignatureCanvas from 'react-signature-canvas'
 import { useRef } from 'react'
+import { getApplicablePoints } from '../data/inspectionPoints'
 
 export default function SubmitBar({ onSuccess }) {
   const { t, language } = useLanguage()
@@ -18,6 +19,10 @@ export default function SubmitBar({ onSuccess }) {
   const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [pdfUrl, setPdfUrl] = useState(null)
   const [pdfFilename, setPdfFilename] = useState('')
+
+  // Get total applicable points based on inspection type and trailer type
+  const applicablePoints = getApplicablePoints(unitInfo?.trailerType === 'RABON' ? 'RABON' : unitInfo?.inspectionType)
+  const totalPoints = applicablePoints.length
   const [hasOperatorSigned, setHasOperatorSigned] = useState(false)
   const sigRef = useRef(null)
 
@@ -211,7 +216,7 @@ export default function SubmitBar({ onSuccess }) {
                 </div>
                 <div>
                   <div className="font-bold text-slate-800 text-sm">
-                    {completedCount}/20 · {failedCount > 0 && (
+                    {completedCount}/{totalPoints} · {failedCount > 0 && (
                       <span className="text-rose-600">{failedCount} {t('bad')}</span>
                     )}
                     {failedCount === 0 && completedCount > 0 && (
