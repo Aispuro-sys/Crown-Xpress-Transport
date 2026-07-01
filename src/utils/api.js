@@ -186,25 +186,26 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   console.log('buildPayload received pdfBase64:', pdfBase64 ? pdfBase64.length : 'null')
   const { unitInfo, points, sealPhoto, guardSignature, supervisorSignature, operatorSignature, completedCount, failedCount, goodCount } = ctx
   const supervisorSig = supervisorSignature || { name: '', signature: null, signedAt: null }
-  
-  // Temporarily disable seal photo to avoid 413 error
-  const compressedSealPhoto = null
-  
-  // Map points to API shape WITHOUT photos (temporary fix for 413 error)
+
+  // Compress seal photo
+  const compressedSealPhoto = sealPhoto ? await compressImage(sealPhoto, 150, 0.15) : null
+
+  // Map points to API shape with compressed photos
   const pointsPayload = {}
   for (const [id, p] of Object.entries(points)) {
+    const compressedPhoto = p.photo ? await compressImage(p.photo, 150, 0.15) : null
     pointsPayload[id] = {
       status: p.status || 'pending',
       issueId: p.issueId || null,
       issueText: null,
-      photo: null, // Temporarily disabled to avoid 413 error
+      photo: compressedPhoto,
     }
   }
 
-  // Temporarily disable signatures to avoid 413 error
-  const compressedGuardSig = null
-  const compressedSupervisorSig = null
-  const compressedOperatorSig = null
+  // Compress signatures
+  const compressedGuardSig = guardSignature?.signature ? await compressImage(guardSignature.signature, 200, 0.7) : null
+  const compressedSupervisorSig = supervisorSignature?.signature ? await compressImage(supervisorSignature.signature, 200, 0.7) : null
+  const compressedOperatorSig = operatorSignature?.signature ? await compressImage(operatorSignature.signature, 200, 0.5) : null
 
   // Send the full PDF to backend for storage
   const payload = {
