@@ -206,7 +206,7 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   const compressedOperatorSig = null
 
   // Send the full PDF to backend for storage
-  return {
+  const payload = {
     unitInfo,
     points: pointsPayload,
     guardSignature: { ...guardSignature, signature: compressedGuardSig },
@@ -222,4 +222,12 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
       pending: Math.max(0, getApplicablePoints(unitInfo?.inspectionType).length - (completedCount || 0))
     },
   }
+
+  // Log payload size for debugging
+  const payloadSize = JSON.stringify(payload).length
+  console.log('Payload size:', payloadSize, 'bytes')
+  console.log('UnitInfo keys:', Object.keys(unitInfo))
+  console.log('Points count:', Object.keys(pointsPayload).length)
+
+  return payload
 }
