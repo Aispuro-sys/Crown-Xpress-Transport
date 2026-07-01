@@ -224,13 +224,19 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   }
 
   // Log payload size for debugging
+  const unitInfoSize = JSON.stringify(unitInfo).length
+  const pointsSize = JSON.stringify(pointsPayload).length
+  const guardSigSize = JSON.stringify(guardSignature).length
+  const supervisorSigSize = JSON.stringify(supervisorSignature).length
+  const operatorSigSize = JSON.stringify(operatorSignature).length
   const payloadSize = JSON.stringify(payload).length
-  console.log('Payload size:', payloadSize, 'bytes')
-  console.log('UnitInfo keys:', Object.keys(unitInfo))
-  console.log('Points count:', Object.keys(pointsPayload).length)
-  console.log('PointsPayload sample:', Object.entries(pointsPayload).slice(0, 2))
-  console.log('Point 1 data:', pointsPayload[1])
-  console.log('Original points 1 photo length:', points[1]?.photo?.length || 0)
+
+  console.log('UnitInfo size:', unitInfoSize, 'bytes')
+  console.log('Points size:', pointsSize, 'bytes')
+  console.log('Guard signature size:', guardSigSize, 'bytes')
+  console.log('Supervisor signature size:', supervisorSigSize, 'bytes')
+  console.log('Operator signature size:', operatorSigSize, 'bytes')
+  console.log('Total payload size:', payloadSize, 'bytes')
 
   return payload
 }
