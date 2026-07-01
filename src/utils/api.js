@@ -228,6 +228,7 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   console.log('Payload size:', payloadSize, 'bytes')
   console.log('UnitInfo keys:', Object.keys(unitInfo))
   console.log('Points count:', Object.keys(pointsPayload).length)
+  console.log('PointsPayload sample:', Object.entries(pointsPayload).slice(0, 2))
 
   return payload
 }
