@@ -102,6 +102,12 @@ export async function generateInspectionPDF(data) {
     yardCode = '',
   } = data
 
+  console.log('PDF Generator - trailerType:', unitInfo.trailerType)
+  console.log('PDF Generator - points keys:', Object.keys(points))
+  console.log('PDF Generator - guardSignature signature length:', guardSignature.signature?.length || 0)
+  console.log('PDF Generator - supervisorSignature signature length:', supervisorSignature.signature?.length || 0)
+  console.log('PDF Generator - operatorSignature signature length:', operatorSignature.signature?.length || 0)
+
   const doc = new jsPDF('p', 'mm', 'letter')
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
