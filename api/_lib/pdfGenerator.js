@@ -42,6 +42,20 @@ const INSPECTION_POINTS = {
   20: { es: 'Otros', en: 'Others' },
 }
 
+// Applicable points for each trailer type
+const APPLICABLE_POINTS = {
+  RABON: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  DEFAULT: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+}
+
+// Get applicable points based on trailer type
+function getApplicablePoints(trailerType) {
+  if (trailerType === 'RABON') {
+    return APPLICABLE_POINTS.RABON
+  }
+  return APPLICABLE_POINTS.DEFAULT
+}
+
 // Get truck diagram path based on inspection type
 function getTruckDiagramPath(inspectionType, trailerType) {
   const publicDir = path.join(__dirname, '../../public')
@@ -148,13 +162,16 @@ export async function generateInspectionPDF(data) {
     yPos += 65
   }
 
-  // Inspection points table
-  const tableData = Object.entries(points).map(([id, point]) => [
-    id,
-    INSPECTION_POINTS[id]?.[language] || INSPECTION_POINTS[id]?.es || `Point ${id}`,
-    point.status === 'good' ? (language === 'es' ? 'OK' : 'OK') : (language === 'es' ? 'FALLA' : 'FAIL'),
-    point.issueText || '-',
-  ])
+  // Inspection points table - filter by applicable points for trailer type
+  const applicablePointIds = getApplicablePoints(unitInfo.trailerType)
+  const tableData = Object.entries(points)
+    .filter(([id]) => applicablePointIds.includes(parseInt(id)))
+    .map(([id, point]) => [
+      id,
+      INSPECTION_POINTS[id]?.[language] || INSPECTION_POINTS[id]?.es || `Point ${id}`,
+      point.status === 'good' ? (language === 'es' ? 'OK' : 'OK') : (language === 'es' ? 'FALLA' : 'FAIL'),
+      point.issueText || '-',
+    ])
 
   autoTable(doc, {
     startY: yPos,
