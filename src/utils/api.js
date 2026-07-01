@@ -183,6 +183,7 @@ export async function compressImage(base64Image, maxWidth = 800, quality = 0.6, 
 
 /** Build payload for createInspection (with aggressive image compression) */
 export async function buildPayload(ctx, pdfBase64, pdfFilename) {
+  console.log('buildPayload received pdfBase64:', pdfBase64 ? pdfBase64.length : 'null')
   const { unitInfo, points, sealPhoto, guardSignature, supervisorSignature, operatorSignature, completedCount, failedCount, goodCount } = ctx
   const supervisorSig = supervisorSignature || { name: '', signature: null, signedAt: null }
   
