@@ -229,6 +229,8 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   const guardSigSize = JSON.stringify(guardSignature).length
   const supervisorSigSize = JSON.stringify(supervisorSignature).length
   const operatorSigSize = JSON.stringify(operatorSignature).length
+  const sealPhotoSize = JSON.stringify(sealPhoto).length
+  const pdfBase64Size = JSON.stringify(pdfBase64).length
   const payloadSize = JSON.stringify(payload).length
 
   console.log('UnitInfo size:', unitInfoSize, 'bytes')
@@ -236,6 +238,8 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   console.log('Guard signature size:', guardSigSize, 'bytes')
   console.log('Supervisor signature size:', supervisorSigSize, 'bytes')
   console.log('Operator signature size:', operatorSigSize, 'bytes')
+  console.log('Seal photo size:', sealPhotoSize, 'bytes')
+  console.log('PDF base64 size:', pdfBase64Size, 'bytes')
   console.log('Total payload size:', payloadSize, 'bytes')
 
   return payload
