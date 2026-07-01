@@ -186,13 +186,13 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
   const { unitInfo, points, sealPhoto, guardSignature, supervisorSignature, operatorSignature, completedCount, failedCount, goodCount } = ctx
   const supervisorSig = supervisorSignature || { name: '', signature: null, signedAt: null }
   
-  // Compress seal photo more aggressively (300px, 30% quality)
-  const compressedSealPhoto = sealPhoto ? await compressImage(sealPhoto, 300, 0.3) : null
+  // Compress seal photo more aggressively (200px, 20% quality)
+  const compressedSealPhoto = sealPhoto ? await compressImage(sealPhoto, 200, 0.2) : null
   
-  // Map points to API shape with compressed photos (300px, 30% quality)
+  // Map points to API shape with compressed photos (200px, 20% quality)
   const pointsPayload = {}
   for (const [id, p] of Object.entries(points)) {
-    const compressedPhoto = p.photo ? await compressImage(p.photo, 300, 0.3) : null
+    const compressedPhoto = p.photo ? await compressImage(p.photo, 200, 0.2) : null
     pointsPayload[id] = {
       status: p.status || 'pending',
       issueId: p.issueId || null,
@@ -201,16 +201,16 @@ export async function buildPayload(ctx, pdfBase64, pdfFilename) {
     }
   }
 
-  // Compress signatures (400px, 90% quality for guard/supervisor, 70% for operator)
+  // Compress signatures (300px, 80% quality for guard/supervisor, 60% for operator)
   // Keep as PNG to preserve transparency, don't convert to JPEG
   const compressedGuardSig = guardSignature?.signature
-    ? await compressImage(guardSignature.signature, 400, 0.9, 'image/png')
+    ? await compressImage(guardSignature.signature, 300, 0.8, 'image/png')
     : null
   const compressedSupervisorSig = supervisorSig?.signature
-    ? await compressImage(supervisorSig.signature, 400, 0.9, 'image/png')
+    ? await compressImage(supervisorSig.signature, 300, 0.8, 'image/png')
     : null
   const compressedOperatorSig = operatorSignature?.signature
-    ? await compressImage(operatorSignature.signature, 400, 0.7, 'image/png')
+    ? await compressImage(operatorSignature.signature, 300, 0.6, 'image/png')
     : null
 
   // Send the full PDF to backend for storage

@@ -11,10 +11,12 @@ export default function InspectionList() {
   const [showOnlyProblems, setShowOnlyProblems] = useState(false)
   const [showConfirmAllOk, setShowConfirmAllOk] = useState(false)
   
-  // Get applicable points based on inspection type
+  // Get applicable points based on inspection type and trailer type
+  // RABON is a trailerType, not an inspectionType, so we need to check both
   const applicablePoints = useMemo(() => {
-    return getApplicablePoints(unitInfo?.inspectionType)
-  }, [unitInfo?.inspectionType])
+    const typeToUse = unitInfo?.trailerType === 'RABON' ? 'RABON' : unitInfo?.inspectionType
+    return getApplicablePoints(typeToUse)
+  }, [unitInfo?.inspectionType, unitInfo?.trailerType])
   
   const pendingCount = applicablePoints.length - completedCount
 
